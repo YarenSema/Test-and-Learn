@@ -16,7 +16,7 @@ import datetime
 import pandas as pd
 import streamlit as st
 from dotenv import load_dotenv
-from google import genai
+import google.generativeai as genai
 from google.genai import types
 
 from metrics import compute_metrics, metrics_to_text
