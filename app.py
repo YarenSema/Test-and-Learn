@@ -7,6 +7,26 @@ inceleyebilmesi ve istenirse asistanin hafizasina (bilgi tabanina) ekleme.
 Yuklenen dosyalar files/ klasorunde, bilgileri files/_files.json icinde durur.
 Calistir:  python -m streamlit run app.py
 """
+import streamlit as st
+
+# Login kontrolü
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
+
+if not st.session_state.authenticated:
+    st.set_page_config(page_title="Login")
+    st.markdown("# 🔐 Digital Marketing Test & Learn")
+    
+    password = st.text_input("Şifre gir:", type="password", key="login_pass")
+    
+    if password == "digital123":  # BURAYA KENDİ ŞİFREN YAZ
+        st.session_state.authenticated = True
+        st.rerun()
+    elif password:
+        st.error("❌ Yanlış şifre!")
+    st.stop()
+
+
 
 import os
 import json
