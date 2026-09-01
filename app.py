@@ -17,8 +17,7 @@ import pandas as pd
 import streamlit as st
 from dotenv import load_dotenv
 import google.generativeai as genai
-from google.genai import types
-
+from google.generativeai import types
 from metrics import compute_metrics, metrics_to_text
 import test_havuzu as th
 
