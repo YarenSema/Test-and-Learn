@@ -23,6 +23,10 @@ from metrics import compute_metrics, metrics_to_text
 import test_havuzu as th
 
 load_dotenv()
+# Gemini API key'i Streamlit secrets'ten al (production) veya .env'den (lokal)
+api_key = st.secrets.get("gemini_api_key") or os.getenv("GEMINI_API_KEY")
+genai.configure(api_key=api_key)
+
 st.set_page_config(page_title="Digital Marketing Test & Learn",
                    page_icon="🧪", layout="wide")
 
