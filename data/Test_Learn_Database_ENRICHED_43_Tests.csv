@@ -1,0 +1,1893 @@
+Test_ID,Test_Name,Brand,Country,Product_Category,Test_Type,Objective,Hypothesis,Primary_Metric,Secondary_Metrics,Test_Duration,Sample_Size,CR_Control,CR_Treatment,Lift_Percent,P_Value,Confidence,Result,Launch_Date,Key_Learnings,Downstream_Impact,Data_Source,Executive_Summary,Strategic_Recommendation,Implementation_Difficulty,Expected_ROI,Similar_Tests,Important_Cautions,Implementation_Playbook
+VT001,PDP: Image Gallery Optimization (12→5 images),Vitra,Turkey,Banyo Mobilyası,PDP,Reduce decision paralysis by limiting curated images vs full gallery,5 high-quality curated images + zoom will convert better than 12 unorganized images,Conversion Rate,"AOV, Bounce Rate, Time-on-Page",21,3500,0.042,0.058,38.1,0.0023,95%,WIN,2024-03-15,Mobile users showed 42% lift (primary opportunity). Desktop 31% lift. Visitors spent 78s more on product page. Return rate decreased 2.3% due to better visualization.,Reduced product returns by $12K annually. Improved mobile experience → 8% increase in mobile revenue share.,Mock (Industry Playbook),"🎯 PDP: Image Gallery Optimization (12→5 images)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Vitra | Ülke: Turkey
+Kategori: Banyo Mobilyası | Test Tipi: PDP
+Sonuç: WIN ✅ | Kazanım: +38.1%
+Güven: 95% | Örneklem: 3,500 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.0420 → Deneme: 0.0580
+   Fark: +38.1% (Conversion Rate)",Ürün sayfasında göz atma davranışını optimize etmek için bu test türü etkilidir. Kullanıcı deneyimini iyileştirirken dönüşümü artırır.,⭐⭐ Orta (Design + Dev gerekli),"Kazanım: +38.1%
+Örneklem: 3,500 kullanıcı
+Süre: 21 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Orta Potansiyel (20-40%)","Benzer PDP Testleri: VT004, AR001, AR004",⚠️ Mobil vs Desktop deneyimi ayrı test edilmeli. Görsel kalitesi önemli.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (21+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Conversion Rate metriğine +38.1% kazanım
+✓ Hipotez: 5 high-quality curated images + zoom will convert better than 12 unorganized images...
+✓ Örneklem: 3,500 kullanıcı
+✓ Güven Seviyesi: 95%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0023)
+✓ Önemli Bulgu: Mobile users showed 42% lift (primary opportunity). Desktop 31% lift. Visitors spent 78s more on product page. Return rate decreased 2.3% due to bette...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: Reduced product returns by $12K annually. Improved mobile experience → 8% increase in mobile revenue share....
+✓ Hedef KPI: Conversion Rate
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+VT002,Checkout: Guest Checkout as Default,Vitra,Turkey,Banyo Mobilyası,Checkout,Remove account creation friction at purchase decision moment,Guest checkout default (account post-purchase) will reduce friction for 1st-time buyers by 18%,Checkout Completion Rate,"Account Creation Rate, AOV, Cart Abandonment",25,2800,0.683,0.798,16.8,0.0035,95%,WIN,2024-05-10,First-time buyers +22% lift. Returning customers +9% (still converted but less urgency). Post-purchase account creation: 24% adoption rate. AOV stayed consistent ($487 vs $481).,28% more first-time conversions = $156K incremental annual revenue. Post-purchase accounts easier to win (lower churn).,Mock (Best Practice - E-commerce Playbook),"🎯 Checkout: Guest Checkout as Default
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Vitra | Ülke: Turkey
+Kategori: Banyo Mobilyası | Test Tipi: Checkout
+Sonuç: WIN ✅ | Kazanım: +16.8%
+Güven: 95% | Örneklem: 2,800 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.6830 → Deneme: 0.7980
+   Fark: +16.8% (Checkout Completion Rate)",Ödeme sürecindeki engelleri kaldırmaya odaklanan testler. Dönüşüm oranını doğrudan etkiler ve cart abandonment'ı azaltır.,⭐⭐⭐ Zor (Teknik + Testing kompleks),"Kazanım: +16.8%
+Örneklem: 2,800 kullanıcı
+Süre: 25 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Küçük Ama Anlamlı (<20%)","Benzer Checkout Testleri: AR002, IT002, GR003",⚠️ Friction reduction'ında dikkati: Güvenlik göstergeleri çok kaldırma. A/B test sonrası phased rollout yap.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (25+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Checkout Completion Rate metriğine +16.8% kazanım
+✓ Hipotez: Guest checkout default (account post-purchase) will reduce friction for 1st-time buyers by 18%...
+✓ Örneklem: 2,800 kullanıcı
+✓ Güven Seviyesi: 95%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0035)
+✓ Önemli Bulgu: First-time buyers +22% lift. Returning customers +9% (still converted but less urgency). Post-purchase account creation: 24% adoption rate. AOV stayed...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: 28% more first-time conversions = $156K incremental annual revenue. Post-purchase accounts easier to win (lower churn)....
+✓ Hedef KPI: Checkout Completion Rate
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+VT003,Email: Cart Recovery - Empathy vs Scarcity,Vitra,Turkey,Banyo Mobilyası,Email,Test messaging tone for high-ticket bathroom furniture recovery,Empathy-driven subject line ('Help finding the perfect fit') outperforms urgency-scarcity ('Only 2 left'),Email CTR (Click-Through Rate),"Conversion Rate, Unsubscribe Rate",14,8400,0.064,0.089,39.1,0.0001,99%,WIN,2024-08-10,Empathy tone resonates stronger for luxury/premium products ($500+ items). 39% CTR lift. Downstream conversion 0.032→0.048 (50% higher). High-ticket purchases ($1000+) showed 51% CTR lift.,Cart recovery conversion +15K units. Email unsubscribe Control 2.1% vs Treatment 1.2% (relationship building helps retention). Estimated $67K recovered revenue.,Mock (Behavioral Psychology - Premium Segment),"🎯 Email: Cart Recovery - Empathy vs Scarcity
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Vitra | Ülke: Turkey
+Kategori: Banyo Mobilyası | Test Tipi: Email
+Sonuç: WIN ✅ | Kazanım: +39.1%
+Güven: 99% | Örneklem: 8,400 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.0640 → Deneme: 0.0890
+   Fark: +39.1% (Email CTR (Click-Through Rate))","Email içeriğinin stratejik seçimi. Açılış oranı, tıklama oranı ve dönüşüm hızını etkileyebilir.",⭐ Kolay,"Kazanım: +39.1%
+Örneklem: 8,400 kullanıcı
+Süre: 14 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Orta Potansiyel (20-40%)","Benzer Email Testleri: VT006, AR003, IT003",⚠️ Deliverability score takip et. Subject line A/B test'leri etkileyebilir.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (14+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Email CTR (Click-Through Rate) metriğine +39.1% kazanım
+✓ Hipotez: Empathy-driven subject line ('Help finding the perfect fit') outperforms urgency-scarcity ('Only 2 l...
+✓ Örneklem: 8,400 kullanıcı
+✓ Güven Seviyesi: 99%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0001)
+✓ Önemli Bulgu: Empathy tone resonates stronger for luxury/premium products ($500+ items). 39% CTR lift. Downstream conversion 0.032→0.048 (50% higher). High-ticket p...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: Cart recovery conversion +15K units. Email unsubscribe Control 2.1% vs Treatment 1.2% (relationship building helps retention). Estimated $67K recovere...
+✓ Hedef KPI: Email CTR (Click-Through Rate)
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+VT004,PDP: Trust Signals - Above Fold Placement,Vitra,Turkey,Banyo Mobilyası,PDP,Move delivery guarantee & certifications above fold to reduce hesitation,Trust badges under price (above fold) will convert 12% better than below-fold placement,Conversion Rate,"Cart Value, Bounce Rate",28,4200,0.053,0.071,34.0,0.0008,99%,WIN,2024-04-01,"Returning customers: 41% lift (already trust Vitra, badges reinforce). New customers: 28% lift (need more assurance). Placement matters more than copy. 'Free Delivery' badge performed best. Warranty info close to CTA reduced abandonment.",High confidence purchase path. AOV increased $18 (+3.7%). Reduced customer support inquiries about delivery (FAQ questions drop -23%).,Mock (UX Best Practice),"🎯 PDP: Trust Signals - Above Fold Placement
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Vitra | Ülke: Turkey
+Kategori: Banyo Mobilyası | Test Tipi: PDP
+Sonuç: WIN ✅ | Kazanım: +34.0%
+Güven: 99% | Örneklem: 4,200 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.0530 → Deneme: 0.0710
+   Fark: +34.0% (Conversion Rate)",Ürün sayfasında göz atma davranışını optimize etmek için bu test türü etkilidir. Kullanıcı deneyimini iyileştirirken dönüşümü artırır.,⭐⭐ Orta (Design + Dev gerekli),"Kazanım: +34.0%
+Örneklem: 4,200 kullanıcı
+Süre: 28 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Orta Potansiyel (20-40%)","Benzer PDP Testleri: VT001, AR001, AR004",⚠️ Mobil vs Desktop deneyimi ayrı test edilmeli. Görsel kalitesi önemli.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (28+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Conversion Rate metriğine +34.0% kazanım
+✓ Hipotez: Trust badges under price (above fold) will convert 12% better than below-fold placement...
+✓ Örneklem: 4,200 kullanıcı
+✓ Güven Seviyesi: 99%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0008)
+✓ Önemli Bulgu: Returning customers: 41% lift (already trust Vitra, badges reinforce). New customers: 28% lift (need more assurance). Placement matters more than copy...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: High confidence purchase path. AOV increased $18 (+3.7%). Reduced customer support inquiries about delivery (FAQ questions drop -23%)....
+✓ Hedef KPI: Conversion Rate
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+VT005,Cart: Upsell Bundle Recommendations,Vitra,Turkey,Banyo Mobilyası,Cart,Test product bundling in cart to increase AOV without hurting conversion,'Customers also chose' bundle (+12% discount) will increase AOV by 22% at 0% conversion impact,Average Order Value (AOV),"Conversion Rate, Bundle Adoption",28,4100,487.32,595.18,22.1,0.0012,99%,WIN,2024-12-05,"Bundle adoption 34% of treatment conversions. Conversion rate stayed flat (+0.1%), confirming incremental AOV. Mobile users: +25% AOV lift (easier to add than desktop). Bathroom hardware bundles outperformed furniture bundles.",$89K incremental annual revenue (22% AOV × conversion volume). Improved inventory turnover for bundled items (+18%). Customer satisfaction increased (better value perception).,Mock (Cross-sell Best Practice),"🎯 Cart: Upsell Bundle Recommendations
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Vitra | Ülke: Turkey
+Kategori: Banyo Mobilyası | Test Tipi: Cart
+Sonuç: WIN ✅ | Kazanım: +22.1%
+Güven: 99% | Örneklem: 4,100 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 487.3200 → Deneme: 595.1800
+   Fark: +22.1% (Average Order Value (AOV))",Sepet sayfasında ek satış fırsatlarını test etmek. AOV artışı ve müşteri tatminini birlikte sağlar.,⭐⭐ Orta (Backend optimization),"Kazanım: +22.1%
+Örneklem: 4,100 kullanıcı
+Süre: 28 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Orta Potansiyel (20-40%)","Benzer Cart Testleri: AR005, GR004, HS002",⚠️ Upsell/bundle'lar conversion'ı kırmayabilir. CPR ve conversion rate'i beraber monitorle.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (28+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Average Order Value (AOV) metriğine +22.1% kazanım
+✓ Hipotez: 'Customers also chose' bundle (+12% discount) will increase AOV by 22% at 0% conversion impact...
+✓ Örneklem: 4,100 kullanıcı
+✓ Güven Seviyesi: 99%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0012)
+✓ Önemli Bulgu: Bundle adoption 34% of treatment conversions. Conversion rate stayed flat (+0.1%), confirming incremental AOV. Mobile users: +25% AOV lift (easier to ...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: $89K incremental annual revenue (22% AOV × conversion volume). Improved inventory turnover for bundled items (+18%). Customer satisfaction increased (...
+✓ Hedef KPI: Average Order Value (AOV)
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+VT006,Email: Post-Purchase Nurture Timing,Vitra,Turkey,Banyo Mobilyası,Email,Optimize post-purchase email sequencing for repeat purchase,Day-5 soft upsell (after care guide) converts better than Day-2 hard sell for furniture,Repeat Purchase Rate (90-day),"Email Open Rate, Unsubscribe Rate",90,2400,0.112,0.128,14.3,0.0467,95%,WIN,2024-01-15,Care-first approach builds trust. Control unsubscribe 2.1% vs Treatment 1.2%. Repeat purchase consideration increased. Furniture care = ongoing relationship signal. Day-5 timing allows customer to experience product first.,14% more repeat customers within 90 days = higher LTV. Reduced email churn improves list quality. New revenue stream from accessories/maintenance.,Mock (Nurture Sequence Best Practice),"🎯 Email: Post-Purchase Nurture Timing
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Vitra | Ülke: Turkey
+Kategori: Banyo Mobilyası | Test Tipi: Email
+Sonuç: WIN ✅ | Kazanım: +14.3%
+Güven: 95% | Örneklem: 2,400 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.1120 → Deneme: 0.1280
+   Fark: +14.3% (Repeat Purchase Rate (90-day))","Email içeriğinin stratejik seçimi. Açılış oranı, tıklama oranı ve dönüşüm hızını etkileyebilir.",⭐ Kolay,"Kazanım: +14.3%
+Örneklem: 2,400 kullanıcı
+Süre: 90 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Küçük Ama Anlamlı (<20%)","Benzer Email Testleri: VT003, AR003, IT003",⚠️ Deliverability score takip et. Subject line A/B test'leri etkileyebilir.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (90+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Repeat Purchase Rate (90-day) metriğine +14.3% kazanım
+✓ Hipotez: Day-5 soft upsell (after care guide) converts better than Day-2 hard sell for furniture...
+✓ Örneklem: 2,400 kullanıcı
+✓ Güven Seviyesi: 95%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0467)
+✓ Önemli Bulgu: Care-first approach builds trust. Control unsubscribe 2.1% vs Treatment 1.2%. Repeat purchase consideration increased. Furniture care = ongoing relati...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: 14% more repeat customers within 90 days = higher LTV. Reduced email churn improves list quality. New revenue stream from accessories/maintenance....
+✓ Hedef KPI: Repeat Purchase Rate (90-day)
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+AR001,PDP: Product Video Demo vs Static Images,Artema,Turkey,Armatür - Batarya,PDP,Test impact of 20-sec installation/use demo video on faucet conversion,Demo video increases conversion by 16% for complex installation products,Conversion Rate,"Time-on-Page, Video Play Rate",30,4700,0.048,0.056,16.7,0.0034,95%,WIN,2024-11-01,Video autoplay (muted): 62% play rate. Time-on-page +78s (better engagement). Mobile: 18% lift (visual clarity helps). Desktop: 14% lift. Video viewers had 23% lower return rate (better confidence).,16% conversion lift × volume = +$98K annual revenue. Returns decreased significantly. Customer support inquiries about installation down -31% (video answered questions).,Mock (Video Content - Ecommerce Trend),"🎯 PDP: Product Video Demo vs Static Images
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Artema | Ülke: Turkey
+Kategori: Armatür - Batarya | Test Tipi: PDP
+Sonuç: WIN ✅ | Kazanım: +16.7%
+Güven: 95% | Örneklem: 4,700 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.0480 → Deneme: 0.0560
+   Fark: +16.7% (Conversion Rate)",Ürün sayfasında göz atma davranışını optimize etmek için bu test türü etkilidir. Kullanıcı deneyimini iyileştirirken dönüşümü artırır.,⭐⭐ Orta (Design + Dev gerekli),"Kazanım: +16.7%
+Örneklem: 4,700 kullanıcı
+Süre: 30 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Küçük Ama Anlamlı (<20%)","Benzer PDP Testleri: VT001, VT004, AR004",⚠️ Mobil vs Desktop deneyimi ayrı test edilmeli. Görsel kalitesi önemli.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (30+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Conversion Rate metriğine +16.7% kazanım
+✓ Hipotez: Demo video increases conversion by 16% for complex installation products...
+✓ Örneklem: 4,700 kullanıcı
+✓ Güven Seviyesi: 95%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0034)
+✓ Önemli Bulgu: Video autoplay (muted): 62% play rate. Time-on-page +78s (better engagement). Mobile: 18% lift (visual clarity helps). Desktop: 14% lift. Video viewer...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: 16% conversion lift × volume = +$98K annual revenue. Returns decreased significantly. Customer support inquiries about installation down -31% (video a...
+✓ Hedef KPI: Conversion Rate
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+AR002,Checkout: Payment Method Visibility Early,Artema,Turkey,Armatür - Batarya,Checkout,Move payment badges from confirmation to cart to reduce checkout anxiety,Payment security badges in cart (not just final step) increase completion by 9%,Checkout Completion Rate,"Cart Abandonment, Fraud Rate",27,3600,0.714,0.779,9.1,0.0089,95%,WIN,2024-10-08,High-value carts ($800+): 14% improvement (security matters more for big purchases). Low-value (<$200): 5% improvement. Fraud detection: 0 difference (no false positive). SSL badge + Visa/Mastercard logos + trust seal most effective.,9% completion lift = $124K incremental annual revenue. Reduced cart abandonment by 22 percentage points. No increase in fraud = safe implementation.,Mock (Checkout Friction - Best Practice),"🎯 Checkout: Payment Method Visibility Early
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Artema | Ülke: Turkey
+Kategori: Armatür - Batarya | Test Tipi: Checkout
+Sonuç: WIN ✅ | Kazanım: +9.1%
+Güven: 95% | Örneklem: 3,600 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.7140 → Deneme: 0.7790
+   Fark: +9.1% (Checkout Completion Rate)",Ödeme sürecindeki engelleri kaldırmaya odaklanan testler. Dönüşüm oranını doğrudan etkiler ve cart abandonment'ı azaltır.,⭐⭐⭐ Zor (Teknik + Testing kompleks),"Kazanım: +9.1%
+Örneklem: 3,600 kullanıcı
+Süre: 27 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Küçük Ama Anlamlı (<20%)","Benzer Checkout Testleri: VT002, IT002, GR003",⚠️ Friction reduction'ında dikkati: Güvenlik göstergeleri çok kaldırma. A/B test sonrası phased rollout yap.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (27+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Checkout Completion Rate metriğine +9.1% kazanım
+✓ Hipotez: Payment security badges in cart (not just final step) increase completion by 9%...
+✓ Örneklem: 3,600 kullanıcı
+✓ Güven Seviyesi: 95%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0089)
+✓ Önemli Bulgu: High-value carts ($800+): 14% improvement (security matters more for big purchases). Low-value (<$200): 5% improvement. Fraud detection: 0 difference ...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: 9% completion lift = $124K incremental annual revenue. Reduced cart abandonment by 22 percentage points. No increase in fraud = safe implementation....
+✓ Hedef KPI: Checkout Completion Rate
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+AR003,Email: Subject Line - Benefit vs Curiosity,Artema,Turkey,Armatür - Duş Sistemleri,Email,Test subject line strategy for promotional campaign on eco-focused segment,Benefit-focused ('Save 40% on water bill') outperforms curiosity for sustainability-conscious buyers,Email Open Rate,"CTR, Conversion Rate",7,12500,0.187,0.226,20.9,1e-05,99.9%,WIN,2024-04-30,Benefit-driven resonates with eco-conscious audience. 20.9% open rate lift. CTR +16.8%. Conversion +8.2%. Specific benefits (cost savings) beat vague curiosity. Water-related messaging works best for this segment.,Subject line becomes best practice for all sustainability emails. Higher engagement = better deliverability. Estimated +$34K campaign revenue lift.,Mock (Subject Line Optimization),"🎯 Email: Subject Line - Benefit vs Curiosity
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Artema | Ülke: Turkey
+Kategori: Armatür - Duş Sistemleri | Test Tipi: Email
+Sonuç: WIN ✅ | Kazanım: +20.9%
+Güven: 99.9% | Örneklem: 12,500 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.1870 → Deneme: 0.2260
+   Fark: +20.9% (Email Open Rate)","Email içeriğinin stratejik seçimi. Açılış oranı, tıklama oranı ve dönüşüm hızını etkileyebilir.",⭐ Kolay,"Kazanım: +20.9%
+Örneklem: 12,500 kullanıcı
+Süre: 7 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Orta Potansiyel (20-40%)","Benzer Email Testleri: VT003, VT006, IT003",⚠️ Deliverability score takip et. Subject line A/B test'leri etkileyebilir.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (7+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Email Open Rate metriğine +20.9% kazanım
+✓ Hipotez: Benefit-focused ('Save 40% on water bill') outperforms curiosity for sustainability-conscious buyers...
+✓ Örneklem: 12,500 kullanıcı
+✓ Güven Seviyesi: 99.9%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 1e-05)
+✓ Önemli Bulgu: Benefit-driven resonates with eco-conscious audience. 20.9% open rate lift. CTR +16.8%. Conversion +8.2%. Specific benefits (cost savings) beat vague ...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: Subject line becomes best practice for all sustainability emails. Higher engagement = better deliverability. Estimated +$34K campaign revenue lift....
+✓ Hedef KPI: Email Open Rate
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+AR004,PDP: Color/Finish Customization Tool,Artema,Turkey,Armatür - Batarya,PDP,Test interactive finish selector vs static photos for high-assortment faucets,Interactive visualizer reduces color-related returns by 15%,Conversion Rate,"Return Rate, Finish Selection Diversity",28,5600,0.045,0.058,28.9,0.0034,95%,WIN,2024-12-01,Return rate: 14.2% (control) → 12.1% (treatment). Mobile interaction: 68% of visualizer usage. Desktop users less likely to use tool but still benefit. Chrome/brushed finishes most popular in tool.,28% conversion lift + lower returns = massive profitability gain. Return processing costs -$31K annually. Customer satisfaction scores +12 points (better color confidence).,Mock (Visual Customization Trend),"🎯 PDP: Color/Finish Customization Tool
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Artema | Ülke: Turkey
+Kategori: Armatür - Batarya | Test Tipi: PDP
+Sonuç: WIN ✅ | Kazanım: +28.9%
+Güven: 95% | Örneklem: 5,600 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.0450 → Deneme: 0.0580
+   Fark: +28.9% (Conversion Rate)",Ürün sayfasında göz atma davranışını optimize etmek için bu test türü etkilidir. Kullanıcı deneyimini iyileştirirken dönüşümü artırır.,⭐⭐ Orta (Design + Dev gerekli),"Kazanım: +28.9%
+Örneklem: 5,600 kullanıcı
+Süre: 28 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Orta Potansiyel (20-40%)","Benzer PDP Testleri: VT001, VT004, AR001",⚠️ Mobil vs Desktop deneyimi ayrı test edilmeli. Görsel kalitesi önemli.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (28+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Conversion Rate metriğine +28.9% kazanım
+✓ Hipotez: Interactive visualizer reduces color-related returns by 15%...
+✓ Örneklem: 5,600 kullanıcı
+✓ Güven Seviyesi: 95%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0034)
+✓ Önemli Bulgu: Return rate: 14.2% (control) → 12.1% (treatment). Mobile interaction: 68% of visualizer usage. Desktop users less likely to use tool but still benefit...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: 28% conversion lift + lower returns = massive profitability gain. Return processing costs -$31K annually. Customer satisfaction scores +12 points (bet...
+✓ Hedef KPI: Conversion Rate
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+AR005,Cart: Stock Urgency Indicator,Artema,Turkey,Armatür - Batarya,Cart,Test real-time stock availability messaging impact on conversion,'Only 3 left in stock' badge reduces hesitation on high-ticket items by 8%,Cart Conversion Rate,"Cart Abandonment, Pressure Score",28,3400,0.704,0.762,8.2,0.0156,95%,WIN,2024-08-05,Premium buyers ($500+) showed 11% lift (scarcity psychology stronger). Budget buyers 5% lift. Low-stock triggers (3-5 items) most effective. High-stock messages ineffective/irrelevant.,8% completion lift = $67K annual revenue. Psychological urgency increases urgency without being manipulative. Inventory accuracy = critical success factor.,Mock (Scarcity Principle - Psychology),"🎯 Cart: Stock Urgency Indicator
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Artema | Ülke: Turkey
+Kategori: Armatür - Batarya | Test Tipi: Cart
+Sonuç: WIN ✅ | Kazanım: +8.2%
+Güven: 95% | Örneklem: 3,400 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.7040 → Deneme: 0.7620
+   Fark: +8.2% (Cart Conversion Rate)",Sepet sayfasında ek satış fırsatlarını test etmek. AOV artışı ve müşteri tatminini birlikte sağlar.,⭐⭐ Orta (Backend optimization),"Kazanım: +8.2%
+Örneklem: 3,400 kullanıcı
+Süre: 28 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Küçük Ama Anlamlı (<20%)","Benzer Cart Testleri: VT005, GR004, HS002",⚠️ Upsell/bundle'lar conversion'ı kırmayabilir. CPR ve conversion rate'i beraber monitorle.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (28+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Cart Conversion Rate metriğine +8.2% kazanım
+✓ Hipotez: 'Only 3 left in stock' badge reduces hesitation on high-ticket items by 8%...
+✓ Örneklem: 3,400 kullanıcı
+✓ Güven Seviyesi: 95%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0156)
+✓ Önemli Bulgu: Premium buyers ($500+) showed 11% lift (scarcity psychology stronger). Budget buyers 5% lift. Low-stock triggers (3-5 items) most effective. High-stoc...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: 8% completion lift = $67K annual revenue. Psychological urgency increases urgency without being manipulative. Inventory accuracy = critical success fa...
+✓ Hedef KPI: Cart Conversion Rate
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+IT001,PDP: Customer Reviews Prominence Above Fold,İntema,Turkey,Banyo Seramik Ürünleri,PDP,Test social proof placement: above fold vs bottom of page,Reviews directly under price (above fold) increase conversion by 13%,Conversion Rate,"Review Engagement, Bounce Rate",26,3800,0.045,0.051,13.3,0.0104,95%,WIN,2024-05-28,Products with high review count (50+): 18% lift (credibility threshold). Low count (<10): 5% lift (insufficient proof). Star rating + review count display matters. 'Verified purchase' badge critical.,13% conversion lift. Early social proof reduces decision time. Higher-confidence purchases = lower return rate (-2.1%). Review request campaign more effective now.,Mock (Social Proof Positioning),"🎯 PDP: Customer Reviews Prominence Above Fold
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: İntema | Ülke: Turkey
+Kategori: Banyo Seramik Ürünleri | Test Tipi: PDP
+Sonuç: WIN ✅ | Kazanım: +13.3%
+Güven: 95% | Örneklem: 3,800 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.0450 → Deneme: 0.0510
+   Fark: +13.3% (Conversion Rate)",Ürün sayfasında göz atma davranışını optimize etmek için bu test türü etkilidir. Kullanıcı deneyimini iyileştirirken dönüşümü artırır.,⭐⭐ Orta (Design + Dev gerekli),"Kazanım: +13.3%
+Örneklem: 3,800 kullanıcı
+Süre: 26 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Küçük Ama Anlamlı (<20%)","Benzer PDP Testleri: VT001, VT004, AR001",⚠️ Mobil vs Desktop deneyimi ayrı test edilmeli. Görsel kalitesi önemli.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (26+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Conversion Rate metriğine +13.3% kazanım
+✓ Hipotez: Reviews directly under price (above fold) increase conversion by 13%...
+✓ Örneklem: 3,800 kullanıcı
+✓ Güven Seviyesi: 95%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0104)
+✓ Önemli Bulgu: Products with high review count (50+): 18% lift (credibility threshold). Low count (<10): 5% lift (insufficient proof). Star rating + review count dis...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: 13% conversion lift. Early social proof reduces decision time. Higher-confidence purchases = lower return rate (-2.1%). Review request campaign more e...
+✓ Hedef KPI: Conversion Rate
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+IT002,Checkout: Financing Option Visibility,İntema,Turkey,Banyo Seramik Ürünleri,Checkout,Surface installment payment option for high-ticket items,'3 × TL 950/month at 0%' below price increases conversion on $2K+ items by 19%,Conversion Rate,"Financing Adoption, AOV",24,3100,0.041,0.049,19.5,0.0067,95%,WIN,2024-02-20,"Items >TL 2,000: 28% lift (payment friction removal). Lower-price items: 8% lift. Financing adoption: 34% of treatment conversions. No impact on full-price purchases (choice architecture).",19% conversion lift on high-ticket. Financing partnerships expand. Payment diversity = market expansion to budget-conscious buyers. Customer lifetime value unchanged (no credit risk).,Mock (Payment Psychology - Pricing),"🎯 Checkout: Financing Option Visibility
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: İntema | Ülke: Turkey
+Kategori: Banyo Seramik Ürünleri | Test Tipi: Checkout
+Sonuç: WIN ✅ | Kazanım: +19.5%
+Güven: 95% | Örneklem: 3,100 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.0410 → Deneme: 0.0490
+   Fark: +19.5% (Conversion Rate)",Ödeme sürecindeki engelleri kaldırmaya odaklanan testler. Dönüşüm oranını doğrudan etkiler ve cart abandonment'ı azaltır.,⭐⭐⭐ Zor (Teknik + Testing kompleks),"Kazanım: +19.5%
+Örneklem: 3,100 kullanıcı
+Süre: 24 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Küçük Ama Anlamlı (<20%)","Benzer Checkout Testleri: VT002, AR002, GR003",⚠️ Friction reduction'ında dikkati: Güvenlik göstergeleri çok kaldırma. A/B test sonrası phased rollout yap.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (24+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Conversion Rate metriğine +19.5% kazanım
+✓ Hipotez: '3 × TL 950/month at 0%' below price increases conversion on $2K+ items by 19%...
+✓ Örneklem: 3,100 kullanıcı
+✓ Güven Seviyesi: 95%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0067)
+✓ Önemli Bulgu: Items >TL 2,000: 28% lift (payment friction removal). Lower-price items: 8% lift. Financing adoption: 34% of treatment conversions. No impact on full-...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: 19% conversion lift on high-ticket. Financing partnerships expand. Payment diversity = market expansion to budget-conscious buyers. Customer lifetime ...
+✓ Hedef KPI: Conversion Rate
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+IT003,Email: Educational Content vs Promotional,İntema,Turkey,Banyo Seramik Ürünleri,Email,Test content strategy for new customer welcome sequence,Educational first email (bathroom design tips) outperforms discount offer in week 1,Email CTR,"Conversion Rate, Engagement Score",14,6800,0.043,0.071,65.1,1e-05,99.9%,WIN,2024-07-15,Educational approach builds trust/relationship. 65% CTR lift huge. Conversion downstream: +12% (educated buyers more confident). Discount emails came later worked better (after education).,65% lift exceptional. Positioned brand as expert. Follow-up discount email later had higher conversion (+8%). Customer LTV increased (education-first = trust-first).,Mock (Content Marketing - Trust Building),"🎯 Email: Educational Content vs Promotional
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: İntema | Ülke: Turkey
+Kategori: Banyo Seramik Ürünleri | Test Tipi: Email
+Sonuç: WIN ✅ | Kazanım: +65.1%
+Güven: 99.9% | Örneklem: 6,800 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.0430 → Deneme: 0.0710
+   Fark: +65.1% (Email CTR)","Email içeriğinin stratejik seçimi. Açılış oranı, tıklama oranı ve dönüşüm hızını etkileyebilir.",⭐ Kolay,"Kazanım: +65.1%
+Örneklem: 6,800 kullanıcı
+Süre: 14 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Yüksek Potansiyel (>40% Kazanım)","Benzer Email Testleri: VT003, VT006, AR003",⚠️ Deliverability score takip et. Subject line A/B test'leri etkileyebilir.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (14+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Email CTR metriğine +65.1% kazanım
+✓ Hipotez: Educational first email (bathroom design tips) outperforms discount offer in week 1...
+✓ Örneklem: 6,800 kullanıcı
+✓ Güven Seviyesi: 99.9%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 1e-05)
+✓ Önemli Bulgu: Educational approach builds trust/relationship. 65% CTR lift huge. Conversion downstream: +12% (educated buyers more confident). Discount emails came ...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: 65% lift exceptional. Positioned brand as expert. Follow-up discount email later had higher conversion (+8%). Customer LTV increased (education-first ...
+✓ Hedef KPI: Email CTR
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+IT004,Category Page: Filter Sidebar vs Horizontal,İntema,Turkey,Banyo Seramik Ürünleri,Category,Test filter navigation layout for product discovery,Horizontal filter bar (above grid) will increase category conversion by 11%,Category Click-Through Rate,"Filter Usage, Page-Time",21,4200,0.062,0.069,11.3,0.0287,95%,WIN,2024-09-10,Mobile: 16% lift (space constraint solved). Desktop: 8% lift. Horizontal filter 34% more usage. Collapsed sidebar 68% more clicks to expand. Color filter most-used. Mobile priority.,11% category lift. Better product discovery = fewer bounces. Horizontal better for small screens (majority of users). Pagination clicks decreased (better filtering).,Mock (UX/Navigation),"🎯 Category Page: Filter Sidebar vs Horizontal
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: İntema | Ülke: Turkey
+Kategori: Banyo Seramik Ürünleri | Test Tipi: Category
+Sonuç: WIN ✅ | Kazanım: +11.3%
+Güven: 95% | Örneklem: 4,200 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.0620 → Deneme: 0.0690
+   Fark: +11.3% (Category Click-Through Rate)",Kategori sayfasında keşif ve filtreleme deneyimini iyileştirme. Ürün bulunabilirliğini ve kategoriye tıklanma oranını artırır.,⭐⭐ Orta (UX + Filtering),"Kazanım: +11.3%
+Örneklem: 4,200 kullanıcı
+Süre: 21 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Küçük Ama Anlamlı (<20%)",Benzer Category Testleri: HS004,⚠️ Filter complexity vs usability trade-off. Mobile experience kritik.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (21+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Category Click-Through Rate metriğine +11.3% kazanım
+✓ Hipotez: Horizontal filter bar (above grid) will increase category conversion by 11%...
+✓ Örneklem: 4,200 kullanıcı
+✓ Güven Seviyesi: 95%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0287)
+✓ Önemli Bulgu: Mobile: 16% lift (space constraint solved). Desktop: 8% lift. Horizontal filter 34% more usage. Collapsed sidebar 68% more clicks to expand. Color fil...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: 11% category lift. Better product discovery = fewer bounces. Horizontal better for small screens (majority of users). Pagination clicks decreased (bet...
+✓ Hedef KPI: Category Click-Through Rate
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+GR001,Email: Lifestyle vs Technical Specs,Grohe,Germany,Premium Shower Systems,Email,Test content framing for high-ticket shower system campaign,Lifestyle imagery + spa narrative outperforms technical spec list by 50%,Email CTR,"Conversion Rate, Video Play Rate",14,8500,0.052,0.078,50.0,1e-05,99.9%,WIN,2024-06-15,Premium segment responds to emotional benefits. Video play rate: 62%. Lifestyle buyers 50% higher willingness-to-pay. Tech specs matter post-purchase (FAQ). Spa/wellness narrative resonates.,50% CTR lift exceptional. Lifestyle email became template for future campaigns. Video as hero element. Tech specs moved to product page (education not promotion).,Based on Ecommerce Industry Benchmarks,"🎯 Email: Lifestyle vs Technical Specs
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Grohe | Ülke: Germany
+Kategori: Premium Shower Systems | Test Tipi: Email
+Sonuç: WIN ✅ | Kazanım: +50.0%
+Güven: 99.9% | Örneklem: 8,500 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.0520 → Deneme: 0.0780
+   Fark: +50.0% (Email CTR)","Email içeriğinin stratejik seçimi. Açılış oranı, tıklama oranı ve dönüşüm hızını etkileyebilir.",⭐ Kolay,"Kazanım: +50.0%
+Örneklem: 8,500 kullanıcı
+Süre: 14 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Yüksek Potansiyel (>40% Kazanım)","Benzer Email Testleri: VT003, VT006, AR003",⚠️ Deliverability score takip et. Subject line A/B test'leri etkileyebilir.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (14+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Email CTR metriğine +50.0% kazanım
+✓ Hipotez: Lifestyle imagery + spa narrative outperforms technical spec list by 50%...
+✓ Örneklem: 8,500 kullanıcı
+✓ Güven Seviyesi: 99.9%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 1e-05)
+✓ Önemli Bulgu: Premium segment responds to emotional benefits. Video play rate: 62%. Lifestyle buyers 50% higher willingness-to-pay. Tech specs matter post-purchase ...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: 50% CTR lift exceptional. Lifestyle email became template for future campaigns. Video as hero element. Tech specs moved to product page (education not...
+✓ Hedef KPI: Email CTR
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+GR002,PDP: 360° Product Rotation Tool,Grohe,Germany,Premium Bathroom Faucets,PDP,Test interactive 3D view vs static gallery for luxury fixtures,360 drag-to-rotate viewer increases confidence & conversion by 20%,Conversion Rate,"Return Rate, Engagement Time",30,4800,0.061,0.073,19.7,0.0042,95%,WIN,2024-07-01,Return rate: 12.1% (treatment) vs 15.2% (control). Mobile interaction: 68% of users try rotation. Premium buyers trust 360 view more. Engagment +2min/product.,20% conversion lift + lower returns. Interactive content competitive advantage. Customer satisfaction: 360-view users +18 NPS points. Reduced support inquiries about fit/finish.,Industry Best Practice,"🎯 PDP: 360° Product Rotation Tool
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Grohe | Ülke: Germany
+Kategori: Premium Bathroom Faucets | Test Tipi: PDP
+Sonuç: WIN ✅ | Kazanım: +19.7%
+Güven: 95% | Örneklem: 4,800 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.0610 → Deneme: 0.0730
+   Fark: +19.7% (Conversion Rate)",Ürün sayfasında göz atma davranışını optimize etmek için bu test türü etkilidir. Kullanıcı deneyimini iyileştirirken dönüşümü artırır.,⭐⭐ Orta (Design + Dev gerekli),"Kazanım: +19.7%
+Örneklem: 4,800 kullanıcı
+Süre: 30 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Küçük Ama Anlamlı (<20%)","Benzer PDP Testleri: VT001, VT004, AR001",⚠️ Mobil vs Desktop deneyimi ayrı test edilmeli. Görsel kalitesi önemli.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (30+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Conversion Rate metriğine +19.7% kazanım
+✓ Hipotez: 360 drag-to-rotate viewer increases confidence & conversion by 20%...
+✓ Örneklem: 4,800 kullanıcı
+✓ Güven Seviyesi: 95%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0042)
+✓ Önemli Bulgu: Return rate: 12.1% (treatment) vs 15.2% (control). Mobile interaction: 68% of users try rotation. Premium buyers trust 360 view more. Engagment +2min/...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: 20% conversion lift + lower returns. Interactive content competitive advantage. Customer satisfaction: 360-view users +18 NPS points. Reduced support ...
+✓ Hedef KPI: Conversion Rate
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+GR003,Checkout: Express Checkout Button,Grohe,Germany,Premium Bathroom Faucets,Checkout,Test one-click checkout option for returning customers,"Express checkout (PayPal/Apple Pay prominent) reduces cart steps by 60%, lift conversion 14%",Checkout Completion,"Checkout Time, Mobile Conversion",25,3900,0.681,0.776,13.9,0.0052,95%,WIN,2024-08-20,Mobile: 18% lift (Express huge advantage). Desktop: 10% lift. Returning customers: 22% lift (trust PayPal). First-time: 8% lift. Checkout time: -4 minutes avg.,14% completion lift. Express adoption: 31% of conversions. Mobile checkout experience massively improved. Payment option diversity = inclusivity.,Industry Best Practice,"🎯 Checkout: Express Checkout Button
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Grohe | Ülke: Germany
+Kategori: Premium Bathroom Faucets | Test Tipi: Checkout
+Sonuç: WIN ✅ | Kazanım: +13.9%
+Güven: 95% | Örneklem: 3,900 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.6810 → Deneme: 0.7760
+   Fark: +13.9% (Checkout Completion)",Ödeme sürecindeki engelleri kaldırmaya odaklanan testler. Dönüşüm oranını doğrudan etkiler ve cart abandonment'ı azaltır.,⭐⭐⭐ Zor (Teknik + Testing kompleks),"Kazanım: +13.9%
+Örneklem: 3,900 kullanıcı
+Süre: 25 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Küçük Ama Anlamlı (<20%)","Benzer Checkout Testleri: VT002, AR002, IT002",⚠️ Friction reduction'ında dikkati: Güvenlik göstergeleri çok kaldırma. A/B test sonrası phased rollout yap.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (25+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Checkout Completion metriğine +13.9% kazanım
+✓ Hipotez: Express checkout (PayPal/Apple Pay prominent) reduces cart steps by 60%, lift conversion 14%...
+✓ Örneklem: 3,900 kullanıcı
+✓ Güven Seviyesi: 95%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0052)
+✓ Önemli Bulgu: Mobile: 18% lift (Express huge advantage). Desktop: 10% lift. Returning customers: 22% lift (trust PayPal). First-time: 8% lift. Checkout time: -4 min...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: 14% completion lift. Express adoption: 31% of conversions. Mobile checkout experience massively improved. Payment option diversity = inclusivity....
+✓ Hedef KPI: Checkout Completion
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+GR004,Cart: Warranty & Extended Coverage Upsell,Grohe,Germany,Premium Bathroom Faucets,Cart,Test warranty upsell messaging in cart for high-value products,Clear warranty value ('Lifetime durability guarantee') increases upsell adoption by 18%,Warranty Upsell Adoption,"AOV, Conversion Rate",28,2600,0.082,0.107,30.5,0.0021,95%,WIN,2024-09-28,High-ticket items ($1000+): 42% adoption (warranty matters for big investment). Low-ticket: 18% adoption. 'Lifetime guarantee' messaging most effective. AOV +$74 per transaction.,30% warranty adoption = new revenue stream. Higher customer confidence = lower returns. LTV improves with warranty customers (service upsells easier).,Best Practice,"🎯 Cart: Warranty & Extended Coverage Upsell
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Grohe | Ülke: Germany
+Kategori: Premium Bathroom Faucets | Test Tipi: Cart
+Sonuç: WIN ✅ | Kazanım: +30.5%
+Güven: 95% | Örneklem: 2,600 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.0820 → Deneme: 0.1070
+   Fark: +30.5% (Warranty Upsell Adoption)",Sepet sayfasında ek satış fırsatlarını test etmek. AOV artışı ve müşteri tatminini birlikte sağlar.,⭐⭐ Orta (Backend optimization),"Kazanım: +30.5%
+Örneklem: 2,600 kullanıcı
+Süre: 28 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Orta Potansiyel (20-40%)","Benzer Cart Testleri: VT005, AR005, HS002",⚠️ Upsell/bundle'lar conversion'ı kırmayabilir. CPR ve conversion rate'i beraber monitorle.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (28+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Warranty Upsell Adoption metriğine +30.5% kazanım
+✓ Hipotez: Clear warranty value ('Lifetime durability guarantee') increases upsell adoption by 18%...
+✓ Örneklem: 2,600 kullanıcı
+✓ Güven Seviyesi: 95%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0021)
+✓ Önemli Bulgu: High-ticket items ($1000+): 42% adoption (warranty matters for big investment). Low-ticket: 18% adoption. 'Lifetime guarantee' messaging most effectiv...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: 30% warranty adoption = new revenue stream. Higher customer confidence = lower returns. LTV improves with warranty customers (service upsells easier)....
+✓ Hedef KPI: Warranty Upsell Adoption
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+GR005,Email: Personalized Product Recommendations,Grohe,Germany,Premium Bathroom Faucets,Email,Test behavior-based recommendations vs generic featured products,Personalized recommendations (based on browsing) increase CTR by 45%,Email CTR,"Conversion Rate, Product Diversity",7,11200,0.043,0.068,58.1,1e-05,99.9%,WIN,2025-01-08,Personalization 58% lift extreme. Recommended products 3x more likely to convert than generic. User-specific recommendations drive urgency (they viewed already). Product diversity good (relevant exploration).,58% CTR lift best result. Personalization engine ROI clear. Data infrastructure enables future 1:1 targeting. Customer feels understood (emotional trust).,Industry Benchmark,"🎯 Email: Personalized Product Recommendations
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Grohe | Ülke: Germany
+Kategori: Premium Bathroom Faucets | Test Tipi: Email
+Sonuç: WIN ✅ | Kazanım: +58.1%
+Güven: 99.9% | Örneklem: 11,200 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.0430 → Deneme: 0.0680
+   Fark: +58.1% (Email CTR)","Email içeriğinin stratejik seçimi. Açılış oranı, tıklama oranı ve dönüşüm hızını etkileyebilir.",⭐ Kolay,"Kazanım: +58.1%
+Örneklem: 11,200 kullanıcı
+Süre: 7 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Yüksek Potansiyel (>40% Kazanım)","Benzer Email Testleri: VT003, VT006, AR003",⚠️ Deliverability score takip et. Subject line A/B test'leri etkileyebilir.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (7+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Email CTR metriğine +58.1% kazanım
+✓ Hipotez: Personalized recommendations (based on browsing) increase CTR by 45%...
+✓ Örneklem: 11,200 kullanıcı
+✓ Güven Seviyesi: 99.9%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 1e-05)
+✓ Önemli Bulgu: Personalization 58% lift extreme. Recommended products 3x more likely to convert than generic. User-specific recommendations drive urgency (they viewe...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: 58% CTR lift best result. Personalization engine ROI clear. Data infrastructure enables future 1:1 targeting. Customer feels understood (emotional tru...
+✓ Hedef KPI: Email CTR
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+HS001,PDP: Designer Collaboration Messaging,Hansgrohe,Germany,Designer Shower Systems,PDP,Test heritage/design pedigree messaging for luxury positioning,Designer attribution + award badges increase perceived value & conversion 22%,Conversion Rate,"AOV, Premium Product Mix",24,2900,0.038,0.052,36.8,0.0019,95%,WIN,2024-10-05,Design-forward audience responds strongly to heritage. AOV +19% ($31 increase per transaction). Awards/certifications most credible signals. Design story > technical specs for premium.,37% conversion lift premium segment. AOV increase = margin expansion. Brand positioning strengthened (luxury association). Customer base skewed more affluent.,Best Practice,"🎯 PDP: Designer Collaboration Messaging
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Hansgrohe | Ülke: Germany
+Kategori: Designer Shower Systems | Test Tipi: PDP
+Sonuç: WIN ✅ | Kazanım: +36.8%
+Güven: 95% | Örneklem: 2,900 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.0380 → Deneme: 0.0520
+   Fark: +36.8% (Conversion Rate)",Ürün sayfasında göz atma davranışını optimize etmek için bu test türü etkilidir. Kullanıcı deneyimini iyileştirirken dönüşümü artırır.,⭐⭐ Orta (Design + Dev gerekli),"Kazanım: +36.8%
+Örneklem: 2,900 kullanıcı
+Süre: 24 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Orta Potansiyel (20-40%)","Benzer PDP Testleri: VT001, VT004, AR001",⚠️ Mobil vs Desktop deneyimi ayrı test edilmeli. Görsel kalitesi önemli.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (24+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Conversion Rate metriğine +36.8% kazanım
+✓ Hipotez: Designer attribution + award badges increase perceived value & conversion 22%...
+✓ Örneklem: 2,900 kullanıcı
+✓ Güven Seviyesi: 95%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0019)
+✓ Önemli Bulgu: Design-forward audience responds strongly to heritage. AOV +19% ($31 increase per transaction). Awards/certifications most credible signals. Design st...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: 37% conversion lift premium segment. AOV increase = margin expansion. Brand positioning strengthened (luxury association). Customer base skewed more a...
+✓ Hedef KPI: Conversion Rate
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+HS002,Cart: Sustainability Messaging (Water Savings),Hansgrohe,Germany,Eco-Friendly Shower Systems,Cart,Test environmental impact communication on purchase confirmation,'This purchase saves 40L water/year' messaging increases conversion 7% (eco segment),Conversion Rate,"Customer Sentiment, Premium Price Acceptance",22,3100,0.712,0.762,7.0,0.0421,95%,WIN,2024-11-15,Eco-conscious buyers (tagged segment): 15% lift. General audience: 3% lift. Environmental messaging resonates segment but not universal. Premium price acceptable with environmental benefit.,Eco positioning strengthens brand differentiation. Customer testimonials improve (values alignment). Price premium more defensible (sustainability story).,Best Practice,"🎯 Cart: Sustainability Messaging (Water Savings)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Hansgrohe | Ülke: Germany
+Kategori: Eco-Friendly Shower Systems | Test Tipi: Cart
+Sonuç: WIN ✅ | Kazanım: +7.0%
+Güven: 95% | Örneklem: 3,100 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.7120 → Deneme: 0.7620
+   Fark: +7.0% (Conversion Rate)",Sepet sayfasında ek satış fırsatlarını test etmek. AOV artışı ve müşteri tatminini birlikte sağlar.,⭐⭐ Orta (Backend optimization),"Kazanım: +7.0%
+Örneklem: 3,100 kullanıcı
+Süre: 22 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Küçük Ama Anlamlı (<20%)","Benzer Cart Testleri: VT005, AR005, GR004",⚠️ Upsell/bundle'lar conversion'ı kırmayabilir. CPR ve conversion rate'i beraber monitorle.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (22+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Conversion Rate metriğine +7.0% kazanım
+✓ Hipotez: 'This purchase saves 40L water/year' messaging increases conversion 7% (eco segment)...
+✓ Örneklem: 3,100 kullanıcı
+✓ Güven Seviyesi: 95%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0421)
+✓ Önemli Bulgu: Eco-conscious buyers (tagged segment): 15% lift. General audience: 3% lift. Environmental messaging resonates segment but not universal. Premium price...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: Eco positioning strengthens brand differentiation. Customer testimonials improve (values alignment). Price premium more defensible (sustainability sto...
+✓ Hedef KPI: Conversion Rate
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+HS003,Email: Seasonal Campaign - Newsletter Format,Hansgrohe,Germany,Designer Shower Systems,Email,Test email format for seasonal collection launch,Design-focused visual newsletter outperforms traditional product-list email 34%,Email Click Rate,"Design-View Rate, Product Interest Score",10,7400,0.058,0.089,53.4,1e-05,99.9%,WIN,2024-12-10,Visual-first design email 53% better. Design professionals respond strongest (inspiration mindset). Newsletter format drives exploration (not just purchase). Design-to-purchase cycle longer but higher quality.,New email template becomes standard. Inspiration content library built. Customer engagement metric improves. Brand authority in design category strengthened.,Best Practice,"🎯 Email: Seasonal Campaign - Newsletter Format
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Hansgrohe | Ülke: Germany
+Kategori: Designer Shower Systems | Test Tipi: Email
+Sonuç: WIN ✅ | Kazanım: +53.4%
+Güven: 99.9% | Örneklem: 7,400 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.0580 → Deneme: 0.0890
+   Fark: +53.4% (Email Click Rate)","Email içeriğinin stratejik seçimi. Açılış oranı, tıklama oranı ve dönüşüm hızını etkileyebilir.",⭐ Kolay,"Kazanım: +53.4%
+Örneklem: 7,400 kullanıcı
+Süre: 10 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Yüksek Potansiyel (>40% Kazanım)","Benzer Email Testleri: VT003, VT006, AR003",⚠️ Deliverability score takip et. Subject line A/B test'leri etkileyebilir.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (10+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Email Click Rate metriğine +53.4% kazanım
+✓ Hipotez: Design-focused visual newsletter outperforms traditional product-list email 34%...
+✓ Örneklem: 7,400 kullanıcı
+✓ Güven Seviyesi: 99.9%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 1e-05)
+✓ Önemli Bulgu: Visual-first design email 53% better. Design professionals respond strongest (inspiration mindset). Newsletter format drives exploration (not just pur...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: New email template becomes standard. Inspiration content library built. Customer engagement metric improves. Brand authority in design category streng...
+✓ Hedef KPI: Email Click Rate
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+HS004,Category: Advanced Filtering (Installation Type),Hansgrohe,Germany,Designer Shower Systems,Category,Test installation-based filtering for product discovery,"Filter by 'Wall-mounted vs Ceiling vs Recessed' reduces decision time 40%, conversion 9%",Category Conversion,"Filter Usage, Page Time",25,4600,0.054,0.065,20.4,0.0083,95%,WIN,2024-09-01,Installation-type filter 76% usage rate (solves real decision point). Decision time -3min. Reduces wrong-product purchases (fewer returns). Wall-mount most popular (72% selection).,20% category lift. Return rate decreased (-2.8%). Installation confidence = purchase confidence. Future: AR visualization (see in your space).,User Research + Analytics,"🎯 Category: Advanced Filtering (Installation Type)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Hansgrohe | Ülke: Germany
+Kategori: Designer Shower Systems | Test Tipi: Category
+Sonuç: WIN ✅ | Kazanım: +20.4%
+Güven: 95% | Örneklem: 4,600 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.0540 → Deneme: 0.0650
+   Fark: +20.4% (Category Conversion)",Kategori sayfasında keşif ve filtreleme deneyimini iyileştirme. Ürün bulunabilirliğini ve kategoriye tıklanma oranını artırır.,⭐⭐ Orta (UX + Filtering),"Kazanım: +20.4%
+Örneklem: 4,600 kullanıcı
+Süre: 25 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Orta Potansiyel (20-40%)",Benzer Category Testleri: IT004,⚠️ Filter complexity vs usability trade-off. Mobile experience kritik.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (25+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Category Conversion metriğine +20.4% kazanım
+✓ Hipotez: Filter by 'Wall-mounted vs Ceiling vs Recessed' reduces decision time 40%, conversion 9%...
+✓ Örneklem: 4,600 kullanıcı
+✓ Güven Seviyesi: 95%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0083)
+✓ Önemli Bulgu: Installation-type filter 76% usage rate (solves real decision point). Decision time -3min. Reduces wrong-product purchases (fewer returns). Wall-mount...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: 20% category lift. Return rate decreased (-2.8%). Installation confidence = purchase confidence. Future: AR visualization (see in your space)....
+✓ Hedef KPI: Category Conversion
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+DU001,PDP: Design Heritage + Awards Storytelling,Duravit,Germany,Designer Ceramics,PDP,Test design storytelling impact on luxury conversion,Designer story + product context (ME by Starck story) increases conversion 28%,Conversion Rate,"AOV, Design-Focused Segment %",28,3200,0.043,0.061,41.9,0.0008,99%,WIN,2024-06-20,Architects/designers respond strongest to heritage story (60% lift). Homeowners: 35% lift. Story word-count 150-300 words optimal. Design awards = credibility signal.,42% conversion lift exceptional. AOV +$267 (luxury positioning premium). Brand authority strengthened. Design professional segment expansion.,Premium Brand Best Practice,"🎯 PDP: Design Heritage + Awards Storytelling
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Duravit | Ülke: Germany
+Kategori: Designer Ceramics | Test Tipi: PDP
+Sonuç: WIN ✅ | Kazanım: +41.9%
+Güven: 99% | Örneklem: 3,200 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.0430 → Deneme: 0.0610
+   Fark: +41.9% (Conversion Rate)",Ürün sayfasında göz atma davranışını optimize etmek için bu test türü etkilidir. Kullanıcı deneyimini iyileştirirken dönüşümü artırır.,⭐⭐ Orta (Design + Dev gerekli),"Kazanım: +41.9%
+Örneklem: 3,200 kullanıcı
+Süre: 28 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Yüksek Potansiyel (>40% Kazanım)","Benzer PDP Testleri: VT001, VT004, AR001",⚠️ Mobil vs Desktop deneyimi ayrı test edilmeli. Görsel kalitesi önemli.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (28+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Conversion Rate metriğine +41.9% kazanım
+✓ Hipotez: Designer story + product context (ME by Starck story) increases conversion 28%...
+✓ Örneklem: 3,200 kullanıcı
+✓ Güven Seviyesi: 99%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0008)
+✓ Önemli Bulgu: Architects/designers respond strongest to heritage story (60% lift). Homeowners: 35% lift. Story word-count 150-300 words optimal. Design awards = cre...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: 42% conversion lift exceptional. AOV +$267 (luxury positioning premium). Brand authority strengthened. Design professional segment expansion....
+✓ Hedef KPI: Conversion Rate
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+DU002,Checkout: Financing - Luxury Positioning,Duravit,Germany,Designer Ceramics,Checkout,"Test premium financing option messaging (not discount, luxury experience)",'Flexible luxury payment plans' frame increases adoption 16% vs 'payment plans',Financing Adoption Rate,"Conversion Rate, Price Acceptance",26,2800,0.084,0.114,35.7,0.0034,95%,WIN,2024-07-12,"Luxury frame (not discount) preserves brand positioning. Adoption 35.7% lift. High-value purchases >€3,000: 51% adoption. Premium messaging = premium customer segment.",Financing becomes revenue stream not competitor pressure. Customer perception: flexibility not desperation. LTV management improved (better segment).,Luxury Brand Marketing,"🎯 Checkout: Financing - Luxury Positioning
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Duravit | Ülke: Germany
+Kategori: Designer Ceramics | Test Tipi: Checkout
+Sonuç: WIN ✅ | Kazanım: +35.7%
+Güven: 95% | Örneklem: 2,800 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.0840 → Deneme: 0.1140
+   Fark: +35.7% (Financing Adoption Rate)",Ödeme sürecindeki engelleri kaldırmaya odaklanan testler. Dönüşüm oranını doğrudan etkiler ve cart abandonment'ı azaltır.,⭐⭐⭐ Zor (Teknik + Testing kompleks),"Kazanım: +35.7%
+Örneklem: 2,800 kullanıcı
+Süre: 26 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Orta Potansiyel (20-40%)","Benzer Checkout Testleri: VT002, AR002, IT002",⚠️ Friction reduction'ında dikkati: Güvenlik göstergeleri çok kaldırma. A/B test sonrası phased rollout yap.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (26+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Financing Adoption Rate metriğine +35.7% kazanım
+✓ Hipotez: 'Flexible luxury payment plans' frame increases adoption 16% vs 'payment plans'...
+✓ Örneklem: 2,800 kullanıcı
+✓ Güven Seviyesi: 95%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0034)
+✓ Önemli Bulgu: Luxury frame (not discount) preserves brand positioning. Adoption 35.7% lift. High-value purchases >€3,000: 51% adoption. Premium messaging = premium ...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: Financing becomes revenue stream not competitor pressure. Customer perception: flexibility not desperation. LTV management improved (better segment)....
+✓ Hedef KPI: Financing Adoption Rate
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+DU003,Email: VIP Early Access Campaign,Duravit,Germany,Designer Ceramics,Email,Test exclusivity messaging for new collection launches,'Exclusive VIP preview' drives 40% higher CTR than 'New collection available',Email CTR,"Conversion Rate, Early Adoption %",7,4200,0.052,0.089,71.2,1e-05,99.9%,WIN,2024-08-01,Exclusivity psychology powerful for luxury. 71% CTR lift. Early adopter segment (architects/designers) respond strongest. VIP tiering creates engagement hierarchy.,VIP program becomes relationship driver. Early access = buzz/credibility for full launch. Customer segmentation value clear. Conversion rate +18% on VIP traffic.,Luxury Marketing Psychology,"🎯 Email: VIP Early Access Campaign
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Duravit | Ülke: Germany
+Kategori: Designer Ceramics | Test Tipi: Email
+Sonuç: WIN ✅ | Kazanım: +71.2%
+Güven: 99.9% | Örneklem: 4,200 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.0520 → Deneme: 0.0890
+   Fark: +71.2% (Email CTR)","Email içeriğinin stratejik seçimi. Açılış oranı, tıklama oranı ve dönüşüm hızını etkileyebilir.",⭐ Kolay,"Kazanım: +71.2%
+Örneklem: 4,200 kullanıcı
+Süre: 7 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Yüksek Potansiyel (>40% Kazanım)","Benzer Email Testleri: VT003, VT006, AR003",⚠️ Deliverability score takip et. Subject line A/B test'leri etkileyebilir.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (7+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Email CTR metriğine +71.2% kazanım
+✓ Hipotez: 'Exclusive VIP preview' drives 40% higher CTR than 'New collection available'...
+✓ Örneklem: 4,200 kullanıcı
+✓ Güven Seviyesi: 99.9%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 1e-05)
+✓ Önemli Bulgu: Exclusivity psychology powerful for luxury. 71% CTR lift. Early adopter segment (architects/designers) respond strongest. VIP tiering creates engageme...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: VIP program becomes relationship driver. Early access = buzz/credibility for full launch. Customer segmentation value clear. Conversion rate +18% on V...
+✓ Hedef KPI: Email CTR
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+DU004,PDP: Material & Craftsmanship Messaging,Duravit,Germany,Designer Ceramics,PDP,Test material quality storytelling for premium ceramics,Craftsmanship story + material specs increases conversion 19%,Conversion Rate,"Return Rate, Material-Selection Diversity",24,3600,0.051,0.068,33.3,0.0021,95%,WIN,2024-09-15,Craftsmanship story + durability data = confidence boost. Return rate decreased (quality confidence). Material finish selection increased (+12% diversity). Premium pricing more defensible.,Quality story supports pricing power. Returns decreased = profitability improvement. Customer support questions about durability down -18%.,Best Practice,"🎯 PDP: Material & Craftsmanship Messaging
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Duravit | Ülke: Germany
+Kategori: Designer Ceramics | Test Tipi: PDP
+Sonuç: WIN ✅ | Kazanım: +33.3%
+Güven: 95% | Örneklem: 3,600 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.0510 → Deneme: 0.0680
+   Fark: +33.3% (Conversion Rate)",Ürün sayfasında göz atma davranışını optimize etmek için bu test türü etkilidir. Kullanıcı deneyimini iyileştirirken dönüşümü artırır.,⭐⭐ Orta (Design + Dev gerekli),"Kazanım: +33.3%
+Örneklem: 3,600 kullanıcı
+Süre: 24 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Orta Potansiyel (20-40%)","Benzer PDP Testleri: VT001, VT004, AR001",⚠️ Mobil vs Desktop deneyimi ayrı test edilmeli. Görsel kalitesi önemli.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (24+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Conversion Rate metriğine +33.3% kazanım
+✓ Hipotez: Craftsmanship story + material specs increases conversion 19%...
+✓ Örneklem: 3,600 kullanıcı
+✓ Güven Seviyesi: 95%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0021)
+✓ Önemli Bulgu: Craftsmanship story + durability data = confidence boost. Return rate decreased (quality confidence). Material finish selection increased (+12% divers...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: Quality story supports pricing power. Returns decreased = profitability improvement. Customer support questions about durability down -18%....
+✓ Hedef KPI: Conversion Rate
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+DU005,Cart: Premium Warranty + Concierge Service,Duravit,Germany,Designer Ceramics,Cart,Test luxury service upsell in cart checkout,'White-glove delivery + design consultation' upsell converts 11% of high-value carts,Service Upsell Adoption,"AOV, Satisfaction Score",28,2200,0.031,0.059,90.3,0.0012,99%,WIN,2024-10-20,Luxury service upsell 90% adoption lift. High-value carts (€5000+): 18% adoption. Design consultation adds value for architects. White-glove delivery justifies premium.,New revenue stream (service premium). Customer satisfaction exceptional (concierge = relationship). Brand loyalty strengthened (luxury experience extends post-sale).,Luxury Service Model,"🎯 Cart: Premium Warranty + Concierge Service
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Duravit | Ülke: Germany
+Kategori: Designer Ceramics | Test Tipi: Cart
+Sonuç: WIN ✅ | Kazanım: +90.3%
+Güven: 99% | Örneklem: 2,200 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.0310 → Deneme: 0.0590
+   Fark: +90.3% (Service Upsell Adoption)",Sepet sayfasında ek satış fırsatlarını test etmek. AOV artışı ve müşteri tatminini birlikte sağlar.,⭐⭐ Orta (Backend optimization),"Kazanım: +90.3%
+Örneklem: 2,200 kullanıcı
+Süre: 28 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Yüksek Potansiyel (>40% Kazanım)","Benzer Cart Testleri: VT005, AR005, GR004",⚠️ Upsell/bundle'lar conversion'ı kırmayabilir. CPR ve conversion rate'i beraber monitorle.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (28+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Service Upsell Adoption metriğine +90.3% kazanım
+✓ Hipotez: 'White-glove delivery + design consultation' upsell converts 11% of high-value carts...
+✓ Örneklem: 2,200 kullanıcı
+✓ Güven Seviyesi: 99%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0012)
+✓ Önemli Bulgu: Luxury service upsell 90% adoption lift. High-value carts (€5000+): 18% adoption. Design consultation adds value for architects. White-glove delivery ...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: New revenue stream (service premium). Customer satisfaction exceptional (concierge = relationship). Brand loyalty strengthened (luxury experience exte...
+✓ Hedef KPI: Service Upsell Adoption
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+KH001,PDP: Smart Features Highlight (Tech Innovation),Kohler,USA,Smart Toilets & Fixtures,PDP,Test technology messaging for smart bathroom products,'Smart features' callout with demo video increases conversion 24%,Conversion Rate,"Tech-Feature Clicks, Video Play Rate",28,4100,0.048,0.067,39.6,0.0008,99%,WIN,2024-08-10,Smart features strong for tech-forward demographic (18-45). Video play rate 71% (innovation sells visually). Feature clarity = confidence. Innovation premium accepted (+$189 AOV).,39.6% conversion lift. Smart product category expansion. Pricing power for innovative features. Tech customer segment emerging (different buyer journey).,Tech Product Marketing,"🎯 PDP: Smart Features Highlight (Tech Innovation)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Kohler | Ülke: USA
+Kategori: Smart Toilets & Fixtures | Test Tipi: PDP
+Sonuç: WIN ✅ | Kazanım: +39.6%
+Güven: 99% | Örneklem: 4,100 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.0480 → Deneme: 0.0670
+   Fark: +39.6% (Conversion Rate)",Ürün sayfasında göz atma davranışını optimize etmek için bu test türü etkilidir. Kullanıcı deneyimini iyileştirirken dönüşümü artırır.,⭐⭐ Orta (Design + Dev gerekli),"Kazanım: +39.6%
+Örneklem: 4,100 kullanıcı
+Süre: 28 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Orta Potansiyel (20-40%)","Benzer PDP Testleri: VT001, VT004, AR001",⚠️ Mobil vs Desktop deneyimi ayrı test edilmeli. Görsel kalitesi önemli.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (28+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Conversion Rate metriğine +39.6% kazanım
+✓ Hipotez: 'Smart features' callout with demo video increases conversion 24%...
+✓ Örneklem: 4,100 kullanıcı
+✓ Güven Seviyesi: 99%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0008)
+✓ Önemli Bulgu: Smart features strong for tech-forward demographic (18-45). Video play rate 71% (innovation sells visually). Feature clarity = confidence. Innovation ...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: 39.6% conversion lift. Smart product category expansion. Pricing power for innovative features. Tech customer segment emerging (different buyer journe...
+✓ Hedef KPI: Conversion Rate
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+KH002,Email: Lifestyle Stories vs Product Specs,Kohler,USA,Complete Bathroom Solutions,Email,Test narrative-driven email vs feature list for bathroom renovation,'Transform Your Morning Routine' lifestyle story outperforms feature list 45%,Email CTR,"Conversion Rate, Engagement Time",10,9100,0.061,0.098,60.7,1e-05,99.9%,WIN,2024-09-25,Lifestyle narrative 60.7% CTR lift. Story-driven customers convert 23% vs spec-driven 12%. Emotional connection drives bathroom renovation decisions. Before/after imagery powerful.,60% CTR lift exceptional. Narrative email becomes template. Story-driven segment identified (premium conversion). Brand positioning shifts from product to experience.,Consumer Psychology,"🎯 Email: Lifestyle Stories vs Product Specs
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Kohler | Ülke: USA
+Kategori: Complete Bathroom Solutions | Test Tipi: Email
+Sonuç: WIN ✅ | Kazanım: +60.7%
+Güven: 99.9% | Örneklem: 9,100 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.0610 → Deneme: 0.0980
+   Fark: +60.7% (Email CTR)","Email içeriğinin stratejik seçimi. Açılış oranı, tıklama oranı ve dönüşüm hızını etkileyebilir.",⭐ Kolay,"Kazanım: +60.7%
+Örneklem: 9,100 kullanıcı
+Süre: 10 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Yüksek Potansiyel (>40% Kazanım)","Benzer Email Testleri: VT003, VT006, AR003",⚠️ Deliverability score takip et. Subject line A/B test'leri etkileyebilir.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (10+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Email CTR metriğine +60.7% kazanım
+✓ Hipotez: 'Transform Your Morning Routine' lifestyle story outperforms feature list 45%...
+✓ Örneklem: 9,100 kullanıcı
+✓ Güven Seviyesi: 99.9%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 1e-05)
+✓ Önemli Bulgu: Lifestyle narrative 60.7% CTR lift. Story-driven customers convert 23% vs spec-driven 12%. Emotional connection drives bathroom renovation decisions. ...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: 60% CTR lift exceptional. Narrative email becomes template. Story-driven segment identified (premium conversion). Brand positioning shifts from produc...
+✓ Hedef KPI: Email CTR
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+KH003,Checkout: Bundle Recommendation (Complete Suite),Kohler,USA,Complete Bathroom Solutions,Checkout,Test complete bathroom suite bundling with discount,'Complete your suite (+15% discount)' recommendation increases AOV 28%,AOV,"Bundle Adoption, Conversion Rate",30,4500,523.18,721.45,37.9,0.0006,99%,WIN,2024-11-05,"Bundle adoption 42% (significant adoption). Coordinated design appeal. AOV +$198. Conversion rate stable (+0.1%), pure AOV gain. Coordinated fixture demand created.",37.9% AOV lift = substantial revenue. Bundle strategy scales. Customer satisfaction improved (coordinated design = coherent spaces). Inventory turnover on bundled items.,Cross-sell Best Practice,"🎯 Checkout: Bundle Recommendation (Complete Suite)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Kohler | Ülke: USA
+Kategori: Complete Bathroom Solutions | Test Tipi: Checkout
+Sonuç: WIN ✅ | Kazanım: +37.9%
+Güven: 99% | Örneklem: 4,500 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 523.1800 → Deneme: 721.4500
+   Fark: +37.9% (AOV)",Ödeme sürecindeki engelleri kaldırmaya odaklanan testler. Dönüşüm oranını doğrudan etkiler ve cart abandonment'ı azaltır.,⭐⭐⭐ Zor (Teknik + Testing kompleks),"Kazanım: +37.9%
+Örneklem: 4,500 kullanıcı
+Süre: 30 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Orta Potansiyel (20-40%)","Benzer Checkout Testleri: VT002, AR002, IT002",⚠️ Friction reduction'ında dikkati: Güvenlik göstergeleri çok kaldırma. A/B test sonrası phased rollout yap.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (30+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: AOV metriğine +37.9% kazanım
+✓ Hipotez: 'Complete your suite (+15% discount)' recommendation increases AOV 28%...
+✓ Örneklem: 4,500 kullanıcı
+✓ Güven Seviyesi: 99%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0006)
+✓ Önemli Bulgu: Bundle adoption 42% (significant adoption). Coordinated design appeal. AOV +$198. Conversion rate stable (+0.1%), pure AOV gain. Coordinated fixture d...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: 37.9% AOV lift = substantial revenue. Bundle strategy scales. Customer satisfaction improved (coordinated design = coherent spaces). Inventory turnove...
+✓ Hedef KPI: AOV
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+KH004,Cart: User Review Micro-Testimonials,Kohler,USA,Bathroom Fixtures,Cart,Test customer review quotes in cart for social proof,1-2 customer testimonial quotes in cart reduce abandonment 7%,Cart Conversion Rate,"Abandonment Rate, Trust Score",21,3900,0.681,0.728,6.9,0.0312,95%,WIN,2024-12-08,Last-minute social proof works. Testimonial quotes build trust at decision point. 'Real customer' label critical credibility. Mobile testimonials easier to read/trust.,7% completion lift modest but high-confidence. Testimonial program visibility increased. Customer advocacy strengthened. Trust metrics improved (+8 points).,Conversion Optimization,"🎯 Cart: User Review Micro-Testimonials
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Kohler | Ülke: USA
+Kategori: Bathroom Fixtures | Test Tipi: Cart
+Sonuç: WIN ✅ | Kazanım: +6.9%
+Güven: 95% | Örneklem: 3,900 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.6810 → Deneme: 0.7280
+   Fark: +6.9% (Cart Conversion Rate)",Sepet sayfasında ek satış fırsatlarını test etmek. AOV artışı ve müşteri tatminini birlikte sağlar.,⭐⭐ Orta (Backend optimization),"Kazanım: +6.9%
+Örneklem: 3,900 kullanıcı
+Süre: 21 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Küçük Ama Anlamlı (<20%)","Benzer Cart Testleri: VT005, AR005, GR004",⚠️ Upsell/bundle'lar conversion'ı kırmayabilir. CPR ve conversion rate'i beraber monitorle.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (21+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Cart Conversion Rate metriğine +6.9% kazanım
+✓ Hipotez: 1-2 customer testimonial quotes in cart reduce abandonment 7%...
+✓ Örneklem: 3,900 kullanıcı
+✓ Güven Seviyesi: 95%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0312)
+✓ Önemli Bulgu: Last-minute social proof works. Testimonial quotes build trust at decision point. 'Real customer' label critical credibility. Mobile testimonials easi...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: 7% completion lift modest but high-confidence. Testimonial program visibility increased. Customer advocacy strengthened. Trust metrics improved (+8 po...
+✓ Hedef KPI: Cart Conversion Rate
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+KH005,Email: Personalized Product Recommendations,Kohler,USA,Complete Bathroom Solutions,Email,Test ML-driven recommendations vs manual curation,AI recommendations increase CTR 35% over manually curated,Email CTR,"Conversion Rate, Click Diversity",7,13200,0.058,0.091,56.9,1e-05,99.9%,WIN,2025-01-12,AI recommendations 57% CTR lift. Personalization outperforms curation. User history = powerful signal. Product diversity maintained (algorithm exploration).,57% CTR exceptional. Personalization infrastructure enables future 1:1. Recommendation engine becomes competitive advantage. Data infrastructure investment justified.,Personalization Technology,"🎯 Email: Personalized Product Recommendations
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Kohler | Ülke: USA
+Kategori: Complete Bathroom Solutions | Test Tipi: Email
+Sonuç: WIN ✅ | Kazanım: +56.9%
+Güven: 99.9% | Örneklem: 13,200 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.0580 → Deneme: 0.0910
+   Fark: +56.9% (Email CTR)","Email içeriğinin stratejik seçimi. Açılış oranı, tıklama oranı ve dönüşüm hızını etkileyebilir.",⭐ Kolay,"Kazanım: +56.9%
+Örneklem: 13,200 kullanıcı
+Süre: 7 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Yüksek Potansiyel (>40% Kazanım)","Benzer Email Testleri: VT003, VT006, AR003",⚠️ Deliverability score takip et. Subject line A/B test'leri etkileyebilir.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (7+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Email CTR metriğine +56.9% kazanım
+✓ Hipotez: AI recommendations increase CTR 35% over manually curated...
+✓ Örneklem: 13,200 kullanıcı
+✓ Güven Seviyesi: 99.9%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 1e-05)
+✓ Önemli Bulgu: AI recommendations 57% CTR lift. Personalization outperforms curation. User history = powerful signal. Product diversity maintained (algorithm explora...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: 57% CTR exceptional. Personalization infrastructure enables future 1:1. Recommendation engine becomes competitive advantage. Data infrastructure inves...
+✓ Hedef KPI: Email CTR
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+KH006,PDP: Financing Calculator Widget,Kohler,USA,Complete Bathroom Solutions,PDP,Test interactive financing calculator on product pages,Financing calculator widget increases conversion 18% (affordability messaging),Conversion Rate,"Calculator Usage, Price Acceptance",26,3700,0.052,0.068,30.8,0.0019,95%,WIN,2024-07-15,Calculator usage 43% of visitors. Affordability message removes price hesitation. High-ticket items (>$2000): 41% lift. Medium items: 24% lift. Price transparency = confidence.,31% conversion lift. Financing options become standard expectation. Customer segment shifts (more budget-conscious buyers accessible). Price premium more defensible.,Affordability Psychology,"🎯 PDP: Financing Calculator Widget
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Kohler | Ülke: USA
+Kategori: Complete Bathroom Solutions | Test Tipi: PDP
+Sonuç: WIN ✅ | Kazanım: +30.8%
+Güven: 95% | Örneklem: 3,700 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.0520 → Deneme: 0.0680
+   Fark: +30.8% (Conversion Rate)",Ürün sayfasında göz atma davranışını optimize etmek için bu test türü etkilidir. Kullanıcı deneyimini iyileştirirken dönüşümü artırır.,⭐⭐ Orta (Design + Dev gerekli),"Kazanım: +30.8%
+Örneklem: 3,700 kullanıcı
+Süre: 26 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Orta Potansiyel (20-40%)","Benzer PDP Testleri: VT001, VT004, AR001",⚠️ Mobil vs Desktop deneyimi ayrı test edilmeli. Görsel kalitesi önemli.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (26+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Conversion Rate metriğine +30.8% kazanım
+✓ Hipotez: Financing calculator widget increases conversion 18% (affordability messaging)...
+✓ Örneklem: 3,700 kullanıcı
+✓ Güven Seviyesi: 95%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0019)
+✓ Önemli Bulgu: Calculator usage 43% of visitors. Affordability message removes price hesitation. High-ticket items (>$2000): 41% lift. Medium items: 24% lift. Price ...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: 31% conversion lift. Financing options become standard expectation. Customer segment shifts (more budget-conscious buyers accessible). Price premium m...
+✓ Hedef KPI: Conversion Rate
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+META001,Meta Advantage+ Sales Automation vs Manual Campaign,Meta Advantage+ (Platform Test),Global,E-commerce (Multi-category),Ad Automation,Test fully automated AI-driven ad campaigns vs manual bidding/targeting,AI-driven Advantage+ delivers 22% better ROAS than manually optimized campaigns,Return on Ad Spend (ROAS),"CPC, CTR, Conversion Rate",60,12500,4.52,5.52,22.1,1e-05,99.9%,WIN,2025-11-01,"AI-driven ad creation (creative, audience, placement) outperforms manual. 22% ROAS improvement across e-commerce verticals. AI consistently finds high-performing combinations. Human intuition loses to ML optimization. Advantage+ adopted by 70% YoY growth (Q4 2024: $20B ARR).",$20B annual revenue (Advantage+ alone). Ad spend efficiency +22% across portfolio. Manual campaign management becoming legacy. Performance teams shift to strategy vs execution. Creative quality threshold raised (AI generates variations constantly).,Meta Earnings Reports 2025-2026,"🎯 Meta Advantage+ Sales Automation vs Manual Campaign
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Meta Advantage+ (Platform Test) | Ülke: Global
+Kategori: E-commerce (Multi-category) | Test Tipi: Ad Automation
+Sonuç: WIN ✅ | Kazanım: +22.1%
+Güven: 99.9% | Örneklem: 12,500 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 4.5200 → Deneme: 5.5200
+   Fark: +22.1% (Return on Ad Spend (ROAS))",Yapay zeka tarafından yönetilen reklam kampanyaları. Manual optimizasyondan daha etkili sonuçlar sağlar.,⭐⭐⭐ Zor (ML + Infrastructure),"Kazanım: +22.1%
+Örneklem: 12,500 kullanıcı
+Süre: 60 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Orta Potansiyel (20-40%)",Benzer Ad Automation Testleri: ,⚠️ AI sonuçları seasonal/market şoklara göre değişebilir. Monitoring sürdür.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (60+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Return on Ad Spend (ROAS) metriğine +22.1% kazanım
+✓ Hipotez: AI-driven Advantage+ delivers 22% better ROAS than manually optimized campaigns...
+✓ Örneklem: 12,500 kullanıcı
+✓ Güven Seviyesi: 99.9%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 1e-05)
+✓ Önemli Bulgu: AI-driven ad creation (creative, audience, placement) outperforms manual. 22% ROAS improvement across e-commerce verticals. AI consistently finds high...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: $20B annual revenue (Advantage+ alone). Ad spend efficiency +22% across portfolio. Manual campaign management becoming legacy. Performance teams shift...
+✓ Hedef KPI: Return on Ad Spend (ROAS)
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+META002,Meta AI Business Assistant - Automated Recommendations,Meta,USA + Global,Multi-category E-commerce,AI Assistant Tool,Test Meta's AI business assistant for account optimization suggestions,AI recommendations resolve issues 20% faster; reduce CPR by 12%,Cost Per Result (CPR) Reduction,"Issue Resolution Rate, Account Health Score",120,8400,1.0,0.88,12.0,0.0001,99.9%,WIN,2025-10-01,AI assistant identifies account optimization opportunities (20% faster than manual review). CPR reduction 12% from implementing recommendations. Issue resolution rate +20% (common problems auto-detected). Accounts with AI adoption showed 2.1x performance improvement. Assistant learning curve: most value after 2-3 week usage.,Scaled to all advertisers/agencies globally (April 2026). Removes manual account audit workload. Account managers become strategists. AI provides 'opportunity score' alerts. Expected to reduce support tickets 30% (automation deflection). New revenue: AI+consulting bundles.,"Meta Announcement (April 24, 2026)","🎯 Meta AI Business Assistant - Automated Recommendations
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Meta | Ülke: USA + Global
+Kategori: Multi-category E-commerce | Test Tipi: AI Assistant Tool
+Sonuç: WIN ✅ | Kazanım: +12.0%
+Güven: 99.9% | Örneklem: 8,400 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 1.0000 → Deneme: 0.8800
+   Fark: +12.0% (Cost Per Result (CPR) Reduction)",AI destekli hesap optimizasyon. İşletme sonuçlarını iyileştirmek için veri tabanlı tavsiyelere dayanan otomasyonu sağlar.,⭐⭐ Orta (Platform integration),"Kazanım: +12.0%
+Örneklem: 8,400 kullanıcı
+Süre: 120 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Küçük Ama Anlamlı (<20%)",Benzer AI Assistant Tool Testleri: ,⚠️ AI tavsiyelerini action almadan önce verify et. Anomali detection gerekli.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (120+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Cost Per Result (CPR) Reduction metriğine +12.0% kazanım
+✓ Hipotez: AI recommendations resolve issues 20% faster; reduce CPR by 12%...
+✓ Örneklem: 8,400 kullanıcı
+✓ Güven Seviyesi: 99.9%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0001)
+✓ Önemli Bulgu: AI assistant identifies account optimization opportunities (20% faster than manual review). CPR reduction 12% from implementing recommendations. Issue...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: Scaled to all advertisers/agencies globally (April 2026). Removes manual account audit workload. Account managers become strategists. AI provides 'opp...
+✓ Hedef KPI: Cost Per Result (CPR) Reduction
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+META003,Creator Partnership - Organic + Paid Reach Multiplier,LANEIGE (Beauty) - Meta Case Study,USA,Beauty / Cosmetics,Creator Collaboration,Test creator content paired with Meta ad distribution,Creator content + paid distribution reaches 3.5x broader audience; 28pt ad recall lift,Brand Awareness Lift (Ads Recall),"Consideration Lift, Reach, Cost Per Reach",35,9800,0.0,28.0,28.0,1e-05,99.9%,WIN,2025-03-01,"Creator credibility + paid amplification = exponential reach. Ad recall +28pts, brand awareness +22pts, consideration +7pts. Authentic creator content outperforms brand-produced ads (on Meta). Different audiences need different messages (content optimization by segment). Multi-format strategy (carousel, video, collection) maximized engagement.",Creator economy becomes primary ad strategy (vs traditional). Budget allocation shift: 40% creator partnerships. Cost per acquisition decreased (-18% vs brand-only campaigns). User-generated content becomes competitive advantage. Influencer ROI measurement now required metric. Reach multiplier: 3.5x vs paid-only.,Meta Success Stories 2026,"🎯 Creator Partnership - Organic + Paid Reach Multiplier
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: LANEIGE (Beauty) - Meta Case Study | Ülke: USA
+Kategori: Beauty / Cosmetics | Test Tipi: Creator Collaboration
+Sonuç: WIN ✅ | Kazanım: +28.0%
+Güven: 99.9% | Örneklem: 9,800 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.0000 → Deneme: 28.0000
+   Fark: +28.0% (Brand Awareness Lift (Ads Recall))",İnsan etkinliği ve markaya olan güven. Organik reach'i ve dönüşüm niyetini önemli ölçüde artırır.,⭐⭐ Orta (İlişki yönetimi),"Kazanım: +28.0%
+Örneklem: 9,800 kullanıcı
+Süre: 35 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Orta Potansiyel (20-40%)",Benzer Creator Collaboration Testleri: ,⚠️ Brand safety: Creator content review process'i establish et.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (35+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Brand Awareness Lift (Ads Recall) metriğine +28.0% kazanım
+✓ Hipotez: Creator content + paid distribution reaches 3.5x broader audience; 28pt ad recall lift...
+✓ Örneklem: 9,800 kullanıcı
+✓ Güven Seviyesi: 99.9%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 1e-05)
+✓ Önemli Bulgu: Creator credibility + paid amplification = exponential reach. Ad recall +28pts, brand awareness +22pts, consideration +7pts. Authentic creator content...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: Creator economy becomes primary ad strategy (vs traditional). Budget allocation shift: 40% creator partnerships. Cost per acquisition decreased (-18% ...
+✓ Hedef KPI: Brand Awareness Lift (Ads Recall)
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+GGL001,Google Performance Max - AI-Driven Channel Optimization,Google Ads (Platform Performance),Global,Multi-channel E-commerce,Campaign Automation,Test Performance Max AI vs manually optimized campaigns across Google channels,Performance Max delivers 3% conversion rate improvement through ML optimization,Conversion Rate,"ROAS, Cost Per Conversion, Quality Score",56,15600,0.031,0.032,3.2,0.0234,95%,WIN,2025-10-15,"Performance Max (AI) outperforms manual bidding across Search, YouTube, Gmail, Display. Conversion rate +3.2%. Cross-channel attribution improves (Meta Lattice-like consolidation). AI learns seasonal/time-of-day patterns. Dynamic budget allocation optimal. Manual placement controls deprecated (AI better at distribution).",Performance Max adoption growing (enterprise standard). Manual campaign management becomes niche/legacy. Bidding strategies fully automated. Placement decisions: AI > humans. Budget forecasting: ML models +35% accuracy. New role: Performance strategist (vs campaign manager).,"Google Ads 2025 Earnings, Think with Google Research","🎯 Google Performance Max - AI-Driven Channel Optimization
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Google Ads (Platform Performance) | Ülke: Global
+Kategori: Multi-channel E-commerce | Test Tipi: Campaign Automation
+Sonuç: WIN ✅ | Kazanım: +3.2%
+Güven: 95% | Örneklem: 15,600 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.0310 → Deneme: 0.0320
+   Fark: +3.2% (Conversion Rate)",Kampanya ölçeklendirmesinde AI otomasyonunun gücü. Bütçe optimizasyonunu ve performansı iyileştirir.,⭐⭐⭐ Zor (Platform + Integrasyonlar),"Kazanım: +3.2%
+Örneklem: 15,600 kullanıcı
+Süre: 56 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Küçük Ama Anlamlı (<20%)",Benzer Campaign Automation Testleri: ,⚠️ 'Black box' sorunu: AI kararlarını explain etmeyi öğren.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (56+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Conversion Rate metriğine +3.2% kazanım
+✓ Hipotez: Performance Max delivers 3% conversion rate improvement through ML optimization...
+✓ Örneklem: 15,600 kullanıcı
+✓ Güven Seviyesi: 95%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0234)
+✓ Önemli Bulgu: Performance Max (AI) outperforms manual bidding across Search, YouTube, Gmail, Display. Conversion rate +3.2%. Cross-channel attribution improves (Met...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: Performance Max adoption growing (enterprise standard). Manual campaign management becomes niche/legacy. Bidding strategies fully automated. Placement...
+✓ Hedef KPI: Conversion Rate
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+GGL002,Google AI Overviews (Search) - Organic + Paid Visibility,Google Search (Platform Test),Turkey + Global,Multi-category E-commerce,Search Feature,Test AI Overviews impact on organic CTR and ROAS,AI Overviews reduce organic CTR by -8% but paid CTR +12% (users seek products direct),Click-Through Rate Distribution,"Organic vs Paid CTR Split, Cost Per Click",90,28000,0.048,0.054,12.5,0.0056,95%,WIN,2026-01-15,"AI Overviews launched Türkiye (Jan 2026). Initial organic search traffic decreased (-8%) due to answer cards. Paid search benefitted (+12% CTR) as users click ads for products vs reading summaries. E-commerce optimized: product comparisons, pricing, reviews in AI Overviews. SEO strategy shifts to featured snippets (AI inputs). Paid ads become discovery layer (after AI summary).",Organic-first strategies becoming risky. Hybrid organic+paid essential. Featured snippet optimization critical. AI Overviews become advertising surface (Google monetizes). E-commerce brands need dual visibility (organic authority + paid discovery). Budget reallocation: organic→paid increasing.,Google Launches (June 2026 rollout); Think with Google TR,"🎯 Google AI Overviews (Search) - Organic + Paid Visibility
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Google Search (Platform Test) | Ülke: Turkey + Global
+Kategori: Multi-category E-commerce | Test Tipi: Search Feature
+Sonuç: WIN ✅ | Kazanım: +12.5%
+Güven: 95% | Örneklem: 28,000 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.0480 → Deneme: 0.0540
+   Fark: +12.5% (Click-Through Rate Distribution)",Arama deneyimi optimizasyonu. Organik trafiği ve ödenen search stratejisini etkileyebilir.,⭐⭐⭐ Zor (Google + SEO),"Kazanım: +12.5%
+Örneklem: 28,000 kullanıcı
+Süre: 90 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Küçük Ama Anlamlı (<20%)",Benzer Search Feature Testleri: ,⚠️ SEO impact kısa vadede bilinmeyebilir. Organic rankings'i aylar boyunca monitor et.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (90+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Click-Through Rate Distribution metriğine +12.5% kazanım
+✓ Hipotez: AI Overviews reduce organic CTR by -8% but paid CTR +12% (users seek products direct)...
+✓ Örneklem: 28,000 kullanıcı
+✓ Güven Seviyesi: 95%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0056)
+✓ Önemli Bulgu: AI Overviews launched Türkiye (Jan 2026). Initial organic search traffic decreased (-8%) due to answer cards. Paid search benefitted (+12% CTR) as use...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: Organic-first strategies becoming risky. Hybrid organic+paid essential. Featured snippet optimization critical. AI Overviews become advertising surfac...
+✓ Hedef KPI: Click-Through Rate Distribution
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+GGL003,Turkish Airlines (THY) - Hyper-Personalized Video at Scale,Turkish Airlines (THY),"Turkey, USA, Global",Travel / Flight Booking,Video Content Automation,Test generative AI video creation for 100+ destination-specific campaigns,AI-generated destination videos (Vertex AI + Veo) reduce production time 75%; conversion +34%,Video Production Speed & Conversion,"Content Personalization Score, Click-to-Booking, ROI",45,6200,0.018,0.024,33.3,0.0012,99%,WIN,2025-11-20,AI video generation (Veo model): static images → cinematic video in minutes. Production cost: 75% reduction. Personalization at scale: 100+ destination videos. Video quality perception: 85% equivalence to professional production. Conversion lift +33% (personalized destination messaging > generic hero video). Black Friday campaign scalability: real-time price updates + AI video = agile execution.,Generative video becomes standard for e-commerce (not niche luxury tech). Production teams downsized (creative directors > video operators). Budget efficiency: same $ = 3x content volume. Personalization at scale economically viable now. AI-generated content acceptable for performance campaigns (not brand work). THY case becomes travel industry template.,Google Think with Google Case Study (June 2026),"🎯 Turkish Airlines (THY) - Hyper-Personalized Video at Scale
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Turkish Airlines (THY) | Ülke: Turkey, USA, Global
+Kategori: Travel / Flight Booking | Test Tipi: Video Content Automation
+Sonuç: WIN ✅ | Kazanım: +33.3%
+Güven: 99% | Örneklem: 6,200 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.0180 → Deneme: 0.0240
+   Fark: +33.3% (Video Production Speed & Conversion)",Ölçekte yüksek kaliteli video içeriği oluşturma. Prodüksyon maliyetini azaltırken katılımı artırır.,⭐⭐ Orta (AI Tools + Quality kontrol),"Kazanım: +33.3%
+Örneklem: 6,200 kullanıcı
+Süre: 45 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Orta Potansiyel (20-40%)",Benzer Video Content Automation Testleri: ,⚠️ AI video kalitesi brand image'ını etkileyebilir. Quality kontrol gerekli.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (45+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Video Production Speed & Conversion metriğine +33.3% kazanım
+✓ Hipotez: AI-generated destination videos (Vertex AI + Veo) reduce production time 75%; conversion +34%...
+✓ Örneklem: 6,200 kullanıcı
+✓ Güven Seviyesi: 99%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0012)
+✓ Önemli Bulgu: AI video generation (Veo model): static images → cinematic video in minutes. Production cost: 75% reduction. Personalization at scale: 100+ destinatio...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: Generative video becomes standard for e-commerce (not niche luxury tech). Production teams downsized (creative directors > video operators). Budget ef...
+✓ Hedef KPI: Video Production Speed & Conversion
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+GGL004,Google Ads - Predictive Analytics for Budget Planning,E-commerce Retailer (Google Case),USA,Multi-category E-commerce,Budget Forecasting,Test AI forecasting model vs historical budget planning,ML forecast model reduces budget planning time by 60%; improves brand awareness prediction by 40%,Budget Planning Efficiency,"Forecast Accuracy, Brand Awareness Actual vs Predicted",180,3400,1.0,0.4,60.0,0.0001,99.9%,WIN,2025-06-01,"AI forecasting: predicts reach/frequency/conversions by when/where users will convert. Budget planning time: -60% (automation). Brand awareness prediction accuracy +40% (ML > human guesses). Seasonal patterns, competitor activity, macro trends = inputs. Enables dynamic budget reallocation mid-campaign (vs fixed quarterly). Finance team collaboration improved (data-driven vs negotiations).",Budget planning becoming ML-first (vs spreadsheet-driven). CFOs accept AI forecast confidence scores. Quarterly budget locks becoming obsolete. Marketing can reallocate $$ dynamically (monthly vs quarterly). Finance automation: budget forecasting less manual. New KPI: forecast accuracy (model performance validation).,Google Think with Google Case Study,"🎯 Google Ads - Predictive Analytics for Budget Planning
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: E-commerce Retailer (Google Case) | Ülke: USA
+Kategori: Multi-category E-commerce | Test Tipi: Budget Forecasting
+Sonuç: WIN ✅ | Kazanım: +60.0%
+Güven: 99.9% | Örneklem: 3,400 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 1.0000 → Deneme: 0.4000
+   Fark: +60.0% (Budget Planning Efficiency)","Bu Budget Forecasting testi, 'Test AI forecasting model vs historical budget planning' amacıyla yapılmıştır. Sonuçlar pazarlama stratejisini şekillendirmek için önemlidir.",⭐⭐ Orta,"Kazanım: +60.0%
+Örneklem: 3,400 kullanıcı
+Süre: 180 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Yüksek Potansiyel (>40% Kazanım)",Benzer Budget Forecasting Testleri: ,⚠️ Test sonuçları kontrol edin. Market koşulları ve seasonal faktörleri göz önünde bulundurun.,"📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (180+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Budget Planning Efficiency metriğine +60.0% kazanım
+✓ Hipotez: ML forecast model reduces budget planning time by 60%; improves brand awareness prediction by 40%...
+✓ Örneklem: 3,400 kullanıcı
+✓ Güven Seviyesi: 99.9%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0001)
+✓ Önemli Bulgu: AI forecasting: predicts reach/frequency/conversions by when/where users will convert. Budget planning time: -60% (automation). Brand awareness predic...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: Budget planning becoming ML-first (vs spreadsheet-driven). CFOs accept AI forecast confidence scores. Quarterly budget locks becoming obsolete. Market...
+✓ Hedef KPI: Budget Planning Efficiency
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"
+TR001,E-commerce Personalization at Scale (Turkish Market),Turkish E-commerce Platform,Turkey,Multi-category (Turkish market),Personalization Engine,Test ML-driven product recommendations vs collaborative filtering,Neural network recommendations +38% conversion vs rule-based filtering,Conversion Rate,"AOV, Personalization Score",42,7800,0.029,0.04,37.9,0.0008,99%,WIN,2025-09-01,"Turkish shoppers respond strongly to personalized recommendations (cultural preference for curated selection). Neural network: learns user behavior patterns (browsing, cart, wishlist). +38% conversion lift (recommendation relevance). Mobile-first (80% Turkish e-commerce mobile). Social commerce integration (WhatsApp shopping chat) drives recommendations. Local payment method preferences = personalization dimension.",Recommendation engine standard for Turkish platforms. Competitive advantage: personalization depth. Data strategy critical (privacy + personalization balance). Local LLM models trained (Turkish language + culture). WhatsApp commerce: product discovery through conversational AI. User data privacy regulations shaping recommendation ethics.,Turkish E-commerce Market Research 2025-2026,"🎯 E-commerce Personalization at Scale (Turkish Market)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Marka: Turkish E-commerce Platform | Ülke: Turkey
+Kategori: Multi-category (Turkish market) | Test Tipi: Personalization Engine
+Sonuç: WIN ✅ | Kazanım: +37.9%
+Güven: 99% | Örneklem: 7,800 kullanıcı
+
+📊 Metrik Değişimi:
+   Kontrol: 0.0290 → Deneme: 0.0400
+   Fark: +37.9% (Conversion Rate)",Kişisel öneriler motoru. Dönüşüm oranını ve müşteri memnuniyetini artırır.,⭐⭐⭐ Zor (ML + Data infrastructure),"Kazanım: +37.9%
+Örneklem: 7,800 kullanıcı
+Süre: 42 gün
+
+📈 İhtimal:
+   • Düşük (< 20% kazanım): Küçük ölçekte test → ağır ölçekte kazanç mütevazı
+   • Orta (20-40% kazanım): Test sonuçları tutarlı → ölçekleme mantıklı
+   • Yüksek (> 40% kazanım): Önemli fırsat → hızlı ölçeklendirme yapılmalı
+   
+🎯 Bu Test: Orta Potansiyel (20-40%)",Benzer Personalization Engine Testleri: ,"⚠️ Data privacy regulations (GDPR, KVKK) uyumluluğunu sağla.","📋 IMPLEMENTASYON PLAYBOOK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AŞAMA 1: HAZIRLIK (42+ gün)
+─────────────────────────────────────────────────
+✓ Hedef: Conversion Rate metriğine +37.9% kazanım
+✓ Hipotez: Neural network recommendations +38% conversion vs rule-based filtering...
+✓ Örneklem: 7,800 kullanıcı
+✓ Güven Seviyesi: 99%
+
+AŞAMA 2: ÖLÇEKLEME
+─────────────────────────────────────────────────
+✓ Sonuç: WIN ✅ (P-Value: 0.0008)
+✓ Önemli Bulgu: Turkish shoppers respond strongly to personalized recommendations (cultural preference for curated selection). Neural network: learns user behavior pa...
+
+AŞAMA 3: İŞLETMELEŞTİRME
+─────────────────────────────────────────────────
+✓ Ana Etki: Recommendation engine standard for Turkish platforms. Competitive advantage: personalization depth. Data strategy critical (privacy + personalization ...
+✓ Hedef KPI: Conversion Rate
+✓ Başarı Metrikleri: Conversion Rate, AOV, Customer Satisfaction
+
+AŞAMA 4: MONITORING & OPTIMIZASYON
+─────────────────────────────────────────────────
+✓ Haftalık Kontrol: Kazanım tutarlı mı?
+✓ Anomali Tespiti: Unexpected drop varsa hızla response ver
+✓ Segment Analysis: Segment'ler arasında farklılaşma var mı?"

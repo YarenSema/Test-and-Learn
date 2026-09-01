@@ -1,0 +1,23 @@
+# --- Gizli bilgiler (ASLA GitHub'a gitmemeli) ---
+.env
+
+# --- Kisisel / oturuma ozel veriler ---
+# sohbet gecmisi (sirket ici konular icerir)
+chats.json
+# "Dosyalarim" bolumune yuklenen dosyalar
+files/
+
+# --- Python ---
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# --- app.py'nin eski yerel kopyalari ---
+eski örnek
+new new
+
+# --- Gecici dosyalar ---
+*.log
+.DS_Store
+Thumbs.db
