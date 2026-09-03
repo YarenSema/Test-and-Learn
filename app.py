@@ -57,6 +57,15 @@ else:
 #
 api_key = st.secrets.get("gemini_api_key") or os.getenv("GEMINI_API_KEY")
 genai.configure(api_key=api_key)
+#
+# Test API connection
+try:
+    model = genai.GenerativeModel("gemini-1.5-flash")
+    test_response = model.generate_content("Merhaba, çalışıyor musun?", max_output_tokens=10)
+    st.success("✅ Gemini API bağlantısı başarılı!")
+except Exception as e:
+    st.error(f"❌ Gemini API Hatası:\n{str(e)}")
+#
 
 st.set_page_config(page_title="Digital Marketing Test & Learn",
                    page_icon="🧪", layout="wide")
