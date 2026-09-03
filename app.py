@@ -27,7 +27,7 @@ if not st.session_state.authenticated:
     st.stop()
 
 
-
+from google.generativeai import GenerationConfig
 import os
 import json
 import time
@@ -61,7 +61,11 @@ genai.configure(api_key=api_key)
 # Test API connection
 try:
     model = genai.GenerativeModel("gemini-1.5-flash")
-    test_response = model.generate_content("Merhaba, çalışıyor musun?", max_output_tokens=10)
+    generation_config = GenerationConfig(max_output_tokens=10)
+test_response = model.generate_content(
+    "Merhaba, çalışıyor musun?",
+    generation_config=generation_config
+)
     st.success("✅ Gemini API bağlantısı başarılı!")
 except Exception as e:
     st.error(f"❌ Gemini API Hatası:\n{str(e)}")
