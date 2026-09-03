@@ -41,8 +41,20 @@ from google.generativeai import types
 from metrics import compute_metrics, metrics_to_text
 import test_havuzu as th
 
+#
 load_dotenv()
-# Gemini API key'i Streamlit secrets'ten al (production) veya .env'den (lokal)
+
+# DEBUG - BUNU HEMEN SONRA SİLECEĞİZ
+import streamlit as st
+st.write("🔍 DEBUG INFO:")
+st.write(f"Secrets var mı? {'gemini_api_key' in st.secrets}")
+if "gemini_api_key" in st.secrets:
+    key = st.secrets["gemini_api_key"]
+    st.write(f"✅ Key bulundu: {key[:20]}...")
+else:
+    st.write(f"❌ Secrets anahtarları: {list(st.secrets.keys())}")
+
+#
 api_key = st.secrets.get("gemini_api_key") or os.getenv("GEMINI_API_KEY")
 genai.configure(api_key=api_key)
 
