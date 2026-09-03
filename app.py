@@ -44,15 +44,15 @@ import test_havuzu as th
 #
 load_dotenv()
 
-# DEBUG - BUNU HEMEN SONRA SİLECEĞİZ
-import streamlit as st
-st.write("🔍 DEBUG INFO:")
-st.write(f"Secrets var mı? {'gemini_api_key' in st.secrets}")
+# DEBUG: API key'i kontrol et
 if "gemini_api_key" in st.secrets:
-    key = st.secrets["gemini_api_key"]
-    st.write(f"✅ Key bulundu: {key[:20]}...")
+    st.warning(f"✅ Secrets'ta key bulundu: {st.secrets['gemini_api_key'][:10]}...")
 else:
-    st.write(f"❌ Secrets anahtarları: {list(st.secrets.keys())}")
+    st.error("❌ Secrets'ta key bulunamadı!")
+    st.info(f"Available secrets: {list(st.secrets.keys())}")
+
+
+
 
 #
 api_key = st.secrets.get("gemini_api_key") or os.getenv("GEMINI_API_KEY")
