@@ -27,7 +27,7 @@ if not st.session_state.authenticated:
     st.stop()
 
 
-from google.generativeai import GenerationConfig
+
 import os
 import json
 import time
@@ -41,35 +41,10 @@ from google.generativeai import types
 from metrics import compute_metrics, metrics_to_text
 import test_havuzu as th
 
-#
 load_dotenv()
-
-# DEBUG: API key'i kontrol et
-if "gemini_api_key" in st.secrets:
-    st.warning(f"✅ Secrets'ta key bulundu: {st.secrets['gemini_api_key'][:10]}...")
-else:
-    st.error("❌ Secrets'ta key bulunamadı!")
-    st.info(f"Available secrets: {list(st.secrets.keys())}")
-
-
-
-
-#
+# Gemini API key'i Streamlit secrets'ten al (production) veya .env'den (lokal)
 api_key = st.secrets.get("gemini_api_key") or os.getenv("GEMINI_API_KEY")
 genai.configure(api_key=api_key)
-#
-# Test API connection
-try:
-    model = genai.GenerativeModel("gemini-1.5-flash")
-    generation_config = GenerationConfig(max_output_tokens=10)
-    test_response = model.generate_content(
-        "Merhaba, çalışıyor musun?",
-        generation_config=generation_config
-    )
-    st.success("✅ Gemini API bağlantısı başarılı!")
-
-except Exception as e:
-    st.error(f"❌ Gemini API Hatası:\n{str(e)}")
 
 st.set_page_config(page_title="Digital Marketing Test & Learn",
                    page_icon="🧪", layout="wide")
