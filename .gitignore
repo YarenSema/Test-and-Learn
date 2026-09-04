@@ -1,5 +1,6 @@
 # --- Gizli bilgiler (ASLA GitHub'a gitmemeli) ---
 .env
+.streamlit/
 
 # --- Kisisel / oturuma ozel veriler ---
 # sohbet gecmisi (sirket ici konular icerir)

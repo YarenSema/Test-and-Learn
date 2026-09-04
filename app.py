@@ -36,18 +36,47 @@ import datetime
 import pandas as pd
 import streamlit as st
 from dotenv import load_dotenv
-import google.generativeai as genai
-from google.generativeai import types
+from google import genai
+from google.genai import types
 from metrics import compute_metrics, metrics_to_text
 import test_havuzu as th
 
 load_dotenv()
-# Gemini API key'i Streamlit secrets'ten al (production) veya .env'den (lokal)
-api_key = st.secrets.get("gemini_api_key") or os.getenv("GEMINI_API_KEY")
-genai.configure(api_key=api_key)
+
+
+def _secret(*adlar):
+    """Streamlit secrets'ten deger okur; secrets dosyasi yoksa patlamaz."""
+    for ad in adlar:
+        try:
+            deger = st.secrets[ad]
+        except Exception:
+            continue
+        if deger:
+            return str(deger).strip()
+    return None
+
+
+@st.cache_resource(show_spinner=False)
+def _api_key_bul():
+    """
+    API anahtarini sirayla arar:
+      1) Streamlit secrets  (Streamlit Cloud -> Settings -> Secrets)
+      2) Ortam degiskeni / .env dosyasi  (lokal calistirma)
+    Kullaniciya asla sorulmaz.
+    """
+    return (
+        _secret("gemini_api_key", "GEMINI_API_KEY",
+                "google_api_key", "GOOGLE_API_KEY")
+        or (os.getenv("GEMINI_API_KEY") or "").strip()
+        or (os.getenv("GOOGLE_API_KEY") or "").strip()
+        or None
+    )
+
 
 st.set_page_config(page_title="Digital Marketing Test & Learn",
                    page_icon="🧪", layout="wide")
+
+API_KEY = _api_key_bul()
 
 CHATS_FILE = "chats.json"          # sohbetlerin kaydedildigi yerel dosya
 FILES_DIR = "files"                # yuklenen dosyalarin durdugu klasor
@@ -393,10 +422,7 @@ with st.sidebar:
 
     st.markdown("---")
     st.header("Ayarlar")
-    api_key = os.environ.get("GOOGLE_API_KEY") or st.text_input(
-        "Google API anahtarı", type="password",
-        help="aistudio.google.com/apikey adresinden ücretsiz alabilirsin"
-    )
+    # API anahtari secrets/.env'den otomatik gelir; kullaniciya sorulmaz.
     if kb_text:
         st.success(f"Bilgi tabanı: {kb_text.count(chr(10)) + 1} geçmiş deney")
     else:
@@ -822,6 +848,12 @@ def build_contents(chat):
     return contents
 
 
+@st.cache_resource(show_spinner=False)
+def get_client(api_key):
+    """Gemini istemcisini bir kez kurar, sonraki isteklerde tekrar kullanir."""
+    return genai.Client(api_key=api_key)
+
+
 def yanit_uret(chat, api_key):
     """
     Modelden yanit alir. Model mesgulse (503) bekleyip tekrar dener,
@@ -829,7 +861,7 @@ def yanit_uret(chat, api_key):
     """
     contents = build_contents(chat)
     try:
-        client = genai.Client(api_key=api_key)
+        client = get_client(api_key)
     except Exception as e:
         return None, "anahtar", str(e)
 
@@ -871,9 +903,9 @@ def hata_mesaji(tip):
         return ("🚦 Ücretsiz kullanım kotan (dakikalık/günlük limit) dolmuş "
                 "görünüyor. Biraz bekleyip **🔄 Tekrar dene**'ye basabilirsin.")
     if tip == "anahtar":
-        return ("🔑 API anahtarı geçersiz ya da yetkisiz. `.env` dosyasındaki "
-                "`GOOGLE_API_KEY` değerini kontrol et "
-                "(aistudio.google.com/apikey).")
+        return ("🔑 Servisin erişim yetkisinde bir sorun var. Uygulama "
+                "sahibinin anahtarı yenilemesi gerekiyor — sen bir şey "
+                "yapmana gerek yok.")
     return ("⚠️ Yanıt alınamadı. **🔄 Tekrar dene**'ye basabilir ya da soruyu "
             "biraz kısaltıp tekrar sorabilirsin.")
 
@@ -937,12 +969,12 @@ def render_chat():
     # (yanit alinamazsa soru gecmiste kalir; "Tekrar dene" ile yeniden denenir)
     if chat["messages"] and chat["messages"][-1]["role"] == "user":
         with st.chat_message("assistant"):
-            if not api_key:
-                st.warning("Önce .env dosyasına ya da kenar çubuğuna "
-                           "API anahtarını gir.")
+            if not API_KEY:
+                st.error("⚙️ Servis şu anda yapılandırılmamış. Uygulama "
+                         "sahibinin API anahtarını tanımlaması gerekiyor.")
             else:
                 with st.spinner("Geçmiş öğrenimlere bakıyor..."):
-                    answer, hata_tip, ham_hata = yanit_uret(chat, api_key)
+                    answer, hata_tip, ham_hata = yanit_uret(chat, API_KEY)
 
                 if answer:
                     st.markdown(answer)

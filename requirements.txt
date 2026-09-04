@@ -1,5 +1,5 @@
 streamlit>=1.28.0
-google-generativeai
+google-genai>=1.0.0
 pandas
 openpyxl
 python-dotenv
