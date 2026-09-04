@@ -400,6 +400,73 @@ def kb_text(detay=False, max_test=None):
     return "\n\n".join(parcalar)
 
 
+# --- Soruyla ilgili testleri secme (istegi kucultmek icin) ----------------
+# Havuzun tamami ~26.000 token; her soruda hepsini gondermek istegi
+# gereksiz sisiriyor ve Google'dan 503 (yogunluk) yemesine yol aciyor.
+# Asagidaki secici, soruyla eslesen testleri one alir.
+
+_ETKISIZ = {
+    "nasil", "nasıl", "icin", "için", "bir", "bu", "su", "şu", "ile", "daha",
+    "cok", "çok", "olan", "olarak", "gibi", "ama", "veya", "ve", "de", "da",
+    "mi", "mı", "mu", "mü", "ne", "neden", "hangi", "kadar", "sonra", "once",
+    "önce", "yapabilirim", "yapmaliyim", "yapmalıyım", "artirabilirim",
+    "arttirabilirim", "arttırabilirim", "artırabilirim", "onerir", "önerir",
+    "misin", "mısın", "lazim", "lazım", "gerek", "var", "yok", "en", "the",
+}
+
+
+def _sadelestir(metin):
+    """Turkce harfleri sadelestirip kucuk harfe cevirir."""
+    esle = str.maketrans("çğıöşüâîû", "cgiosuaiu")
+    return str(metin).lower().translate(esle)
+
+
+def _kelimeler(metin):
+    """Metinden anlamli kelime koklerini cikarir."""
+    sade = _sadelestir(metin)
+    ham = "".join(c if c.isalnum() else " " for c in sade).split()
+    return {k for k in ham if len(k) >= 4 and k not in _ETKISIZ}
+
+
+def ilgili_kb_text(soru, max_test=12, detay=False):
+    """
+    Soruyla ilgili testleri secip kisa bir hafiza metni uretir.
+
+    Puanlama: sorudaki her kelime kokunun test metninde gecmesi puan
+    kazandirir (kelime basi ilk 5 harf uzerinden, Turkce ekleri tolere
+    etmek icin). Hic eslesme cikmazsa havuzun bası kullanilir.
+    Basliklar ve marka/tip bazli ozetler her zaman korunur — kucuk ama
+    en degerli kisim orasi.
+    """
+    df = birlesik_havuz()
+    if df is None:
+        return None
+
+    satirlar = test_satirlari(df, detay=detay)
+    anahtarlar = _kelimeler(soru or "")
+
+    secilen = satirlar[:max_test]
+    if anahtarlar:
+        puanli = [(sum(1 for k in anahtarlar if k[:5] in _sadelestir(metin)),
+                   sira, metin)
+                  for sira, metin in enumerate(satirlar)]
+        eslesen = [p for p in puanli if p[0] > 0]
+        if eslesen:
+            # Once puana gore, esitlikte havuzdaki orijinal sirayla
+            eslesen.sort(key=lambda p: (-p[0], p[1]))
+            secilen = [metin for _, _, metin in eslesen[:max_test]]
+
+    tam = kb_text(detay=detay)
+    if tam is None:
+        return None
+    baslik = tam.split("-- TESTLER --")[0].rstrip()
+
+    return (baslik
+            + f"\n\n-- SORUYLA EN İLGİLİ {len(secilen)} TEST "
+              f"(havuzda toplam {len(satirlar)} test var) --\n\n"
+            + "\n\n".join(secilen))
+
+
 # --- Ekran icin yardimcilar ----------------------------------------------
 def filtre_kolonlari(df):
     """Bu tabloda gercekten bulunan filtre kolonlari (etiket -> kolon)."""

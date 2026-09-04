@@ -92,7 +92,8 @@ MODELLER = ["gemini-2.5-flash", "gemini-2.0-flash",
 DENEME_SAYISI = 4                  # tum modeller denendikten sonraki tur sayisi
 SURE_BUTCESI = 100                 # saniye: bu sureyi asarsa pes eder
 GECMIS_LIMIT = 12                  # modele gonderilen son mesaj adedi
-HAFIF_TEST_SAYISI = 15             # "hafif tur"da havuzdan alinan test adedi
+ILGILI_TEST_SAYISI = 12            # soruyla en ilgili kac test gonderilsin
+HAFIF_TEST_SAYISI = 5              # yogunlukta son care: cok daha kucuk istek
 
 
 # --- Sohbet kaydetme/yukleme (kalicilik) ----------------------------------
@@ -502,20 +503,30 @@ def _prompt_kur(havuz_bolumu):
     )
 
 
-SYSTEM_PROMPT = _prompt_kur(havuz_text)
-
-
-def hafif_system_prompt():
+def system_prompt_kur(soru, test_sayisi=ILGILI_TEST_SAYISI):
     """
-    Google yogunluk (503) verdiginde kullanilan kucultulmus surum.
-    Havuzdan sadece ilk HAFIF_TEST_SAYISI test alinir; havuz bolumu
-    ~26.900 tokendan ~6.800 tokena duser (olculdu), kabul sansi artar.
+    Soruya gore hafiza kurar: havuzun TAMAMI degil, soruyla en ilgili
+    testler gonderilir. Olculen etki: ~26.900 token -> ~5.600-7.800 token
+    (%71-80 kucuk). Istek kuculdukce Google'in 503 (yogunluk) ile geri
+    cevirme ihtimali belirgin dusuyor ve yanit hizlaniyor.
     """
+    if havuz_hafiza == "Kapalı":
+        return _prompt_kur(None)
     try:
-        kisa_havuz = th.kb_text(detay=False, max_test=HAFIF_TEST_SAYISI)
+        havuz = th.ilgili_kb_text(
+            soru, max_test=test_sayisi,
+            detay=havuz_hafiza.startswith("Tam"))
     except Exception:
-        kisa_havuz = havuz_text
-    return _prompt_kur(kisa_havuz)
+        havuz = havuz_text          # secim basarisiz olursa eski davranis
+    return _prompt_kur(havuz or havuz_text)
+
+
+def son_soru(chat):
+    """Sohbetteki en son kullanici sorusunu doner."""
+    for m in reversed(chat["messages"]):
+        if m["role"] == "user":
+            return m["content"]
+    return ""
 
 
 # --- Dosya sayfalari -------------------------------------------------------
@@ -933,14 +944,20 @@ def yanit_uret(chat, api_key, ilerleme=None):
         return None, "anahtar", str(e)
 
     baslangic = time.time()
+    soru = son_soru(chat)
     tam_icerik = build_contents(chat)
+    normal_prompt = system_prompt_kur(soru, ILGILI_TEST_SAYISI)
     son_hata, son_tip = "", "diger"
 
     for tur in range(DENEME_SAYISI):
-        # Son iki turda kucultulmus istek kullan
+        # Son iki turda istegi iyice kucult (son care)
         hafif = tur >= DENEME_SAYISI - 2
-        sys_prompt = hafif_system_prompt() if hafif else SYSTEM_PROMPT
-        icerik = build_contents(chat, limit=4) if hafif else tam_icerik
+        if hafif:
+            sys_prompt = system_prompt_kur(soru, HAFIF_TEST_SAYISI)
+            icerik = build_contents(chat, limit=4)
+        else:
+            sys_prompt = normal_prompt
+            icerik = tam_icerik
 
         for model_adi in MODELLER:
             if time.time() - baslangic > SURE_BUTCESI:
