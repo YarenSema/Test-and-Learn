@@ -32,6 +32,7 @@ import os
 import json
 import time
 import uuid
+import random
 import datetime
 import pandas as pd
 import streamlit as st
@@ -83,10 +84,15 @@ FILES_DIR = "files"                # yuklenen dosyalarin durdugu klasor
 FILES_META = os.path.join(FILES_DIR, "_files.json")   # dosya bilgileri
 TABLE_EXT = (".csv", ".xlsx", ".xls")
 
-# Sirayla denenecek modeller: ilki mesgulse otomatik digerine gecilir.
-MODELLER = ["gemini-flash-latest", "gemini-2.5-flash",
-            "gemini-2.0-flash", "gemini-flash-lite-latest"]
-DENEME_SAYISI = 3                  # ayni model icin tekrar deneme adedi
+# Sirayla denenecek modeller: biri mesgulse hemen digerine gecilir.
+# Lite modeller daha genis kapasiteye sahip; yogunlukta kurtarici oluyorlar.
+MODELLER = ["gemini-2.5-flash", "gemini-2.0-flash",
+            "gemini-2.5-flash-lite", "gemini-2.0-flash-lite",
+            "gemini-flash-latest", "gemini-flash-lite-latest"]
+DENEME_SAYISI = 4                  # tum modeller denendikten sonraki tur sayisi
+SURE_BUTCESI = 100                 # saniye: bu sureyi asarsa pes eder
+GECMIS_LIMIT = 12                  # modele gonderilen son mesaj adedi
+HAFIF_TEST_SAYISI = 15             # "hafif tur"da havuzdan alinan test adedi
 
 
 # --- Sohbet kaydetme/yukleme (kalicilik) ----------------------------------
@@ -450,7 +456,7 @@ with st.sidebar:
 havuz_text = (None if havuz_hafiza == "Kapalı"
               else th.kb_text(detay=havuz_hafiza.startswith("Tam")))
 
-SYSTEM_PROMPT = (
+KURALLAR = (
     "Sen bir dijital pazarlama 'Test & Learn' asistanısın. Görevin: geçmiş "
     "test ve kampanya öğrenimlerine dayanarak yeni ürün/kampanyalar için "
     "stratejik, uygulanabilir öneriler vermek — kampanya kurgusu, hedef kitle "
@@ -479,13 +485,37 @@ SYSTEM_PROMPT = (
     "- Önerileri hipotez olarak sun; belirsizlik varsa 'şunu test edelim' de.\n"
     "- Somut ol: bütçe mantığı, kitle, platform, kreatif ve ölçülecek metriği söyle.\n"
     "- Türkçe, net ve pratik yanıt ver.\n\n"
-    "=== GEÇMİŞ TEST & LEARN HAFIZASI ===\n"
-    f"{kb_text if kb_text else '(bilgi tabanı yüklenemedi)'}\n\n"
-    "=== TEST & LEARN DENEY HAVUZU (banyo + platform + gerçek kampanyalar) ===\n"
-    f"{havuz_text if havuz_text else '(havuz hafızada değil)'}\n\n"
-    "=== KULLANICININ YÜKLEDİĞİ GERÇEK DOSYALAR ===\n"
-    f"{dosya_text if dosya_text else '(yüklenmiş dosya yok)'}"
 )
+
+
+def _prompt_kur(havuz_bolumu):
+    """Kurallar + hafiza bolumlerini birlestirir."""
+    return (
+        KURALLAR
+        + "=== GEÇMİŞ TEST & LEARN HAFIZASI ===\n"
+        + (kb_text if kb_text else "(bilgi tabanı yüklenemedi)") + "\n\n"
+        + "=== TEST & LEARN DENEY HAVUZU (banyo + platform + gerçek "
+          "kampanyalar) ===\n"
+        + (havuz_bolumu if havuz_bolumu else "(havuz hafızada değil)") + "\n\n"
+        + "=== KULLANICININ YÜKLEDİĞİ GERÇEK DOSYALAR ===\n"
+        + (dosya_text if dosya_text else "(yüklenmiş dosya yok)")
+    )
+
+
+SYSTEM_PROMPT = _prompt_kur(havuz_text)
+
+
+def hafif_system_prompt():
+    """
+    Google yogunluk (503) verdiginde kullanilan kucultulmus surum.
+    Havuzdan sadece ilk HAFIF_TEST_SAYISI test alinir; havuz bolumu
+    ~26.900 tokendan ~6.800 tokena duser (olculdu), kabul sansi artar.
+    """
+    try:
+        kisa_havuz = th.kb_text(detay=False, max_test=HAFIF_TEST_SAYISI)
+    except Exception:
+        kisa_havuz = havuz_text
+    return _prompt_kur(kisa_havuz)
 
 
 # --- Dosya sayfalari -------------------------------------------------------
@@ -816,26 +846,37 @@ def render_havuz_page():
 def _hata_tipi(mesaj):
     """Hata metnine bakip tur belirler: 'mesgul' / 'kota' / 'anahtar' / 'diger'."""
     m = mesaj.upper()
+    # Once kesin teshisler: anahtar ve kota hatalari net sinyal verir.
+    # ("500" gibi kisa desenler baska metinlere de denk gelebildigi icin
+    #  "mesgul" kontrolu en sona birakildi — yoksa gercek sebep gizleniyor.)
+    if any(k in m for k in ("API_KEY", "API KEY", "401", "403",
+                            "PERMISSION_DENIED", "UNAUTHENTICATED",
+                            "ACCESS_TOKEN", "INVALID_ARGUMENT")):
+        return "anahtar"
+    if any(k in m for k in ("429", "RESOURCE_EXHAUSTED", "QUOTA")):
+        return "kota"
+    if any(k in m for k in ("404", "NOT_FOUND", "IS NOT FOUND")):
+        return "model_yok"
     if any(k in m for k in ("503", "UNAVAILABLE", "OVERLOADED", "500",
                             "INTERNAL", "502", "504", "DEADLINE")):
         return "mesgul"
-    if any(k in m for k in ("429", "RESOURCE_EXHAUSTED", "QUOTA")):
-        return "kota"
-    if any(k in m for k in ("API_KEY", "API KEY", "401", "403",
-                            "PERMISSION_DENIED", "UNAUTHENTICATED")):
-        return "anahtar"
     return "diger"
 
 
-def build_contents(chat):
-    """Sohbet gecmisini modelin bekledigi formata cevirir."""
+def build_contents(chat, limit=GECMIS_LIMIT):
+    """
+    Sohbet gecmisini modelin bekledigi formata cevirir.
+    Sadece son `limit` mesaj gonderilir: uzun sohbetlerde istek boyutu
+    surekli buyuyup 503/kota hatasini tetiklemesin diye.
+    """
     metrics_ctx = st.session_state.get("metrics_context")
     secim_ctx = st.session_state.get("havuz_secim_context")
+    mesajlar = chat["messages"][-limit:] if limit else chat["messages"]
     contents = []
-    for i, m in enumerate(chat["messages"]):
+    for i, m in enumerate(mesajlar):
         role = "user" if m["role"] == "user" else "model"
         text = m["content"]
-        if role == "user" and i == len(chat["messages"]) - 1:
+        if role == "user" and i == len(mesajlar) - 1:
             # Son soruya, ekranda hazirlanan baglami eklyoruz
             onek = []
             if metrics_ctx:
@@ -854,51 +895,84 @@ def get_client(api_key):
     return genai.Client(api_key=api_key)
 
 
-def yanit_uret(chat, api_key):
+def _tek_istek(client, model_adi, contents, sys_prompt):
+    """Tek bir cagri yapar. (yanit, hata_tipi, ham_hata) doner."""
+    try:
+        response = client.models.generate_content(
+            model=model_adi,
+            contents=contents,
+            config=types.GenerateContentConfig(
+                system_instruction=sys_prompt,
+                max_output_tokens=8000,
+            ),
+        )
+        answer = (response.text or "").strip()
+        if answer:
+            return answer, None, None
+        return None, "diger", "Model boş yanıt döndü."
+    except Exception as e:
+        ham = str(e)
+        return None, _hata_tipi(ham), ham
+
+
+def yanit_uret(chat, api_key, ilerleme=None):
     """
-    Modelden yanit alir. Model mesgulse (503) bekleyip tekrar dener,
-    olmazsa yedek modellere gecer. (yanit, hata_tipi, ham_hata) doner.
+    Modelden yanit alir; Google yogunlukta (503) pes etmez.
+
+    Strateji:
+      1) Her turda TUM modeller sirayla denenir — biri mesgulse beklemeden
+         digerine gecilir (yogunluk genelde tek modeli etkiler).
+      2) Bir tur bosa giderse artan sureli bekleyip tekrar denenir.
+      3) Son turlarda "hafif" istek kullanilir: havuz ve sohbet gecmisi
+         kirpilir, istek ~4 kat kuculur — kabul sansi belirgin yukselir.
+    Toplam SURE_BUTCESI saniyeyi asmaz. (yanit, hata_tipi, ham_hata) doner.
     """
-    contents = build_contents(chat)
     try:
         client = get_client(api_key)
     except Exception as e:
         return None, "anahtar", str(e)
 
+    baslangic = time.time()
+    tam_icerik = build_contents(chat)
     son_hata, son_tip = "", "diger"
-    for model_adi in MODELLER:
-        for deneme in range(DENEME_SAYISI):
-            try:
-                response = client.models.generate_content(
-                    model=model_adi,
-                    contents=contents,
-                    config=types.GenerateContentConfig(
-                        system_instruction=SYSTEM_PROMPT,
-                        max_output_tokens=8000,
-                    ),
-                )
-                answer = (response.text or "").strip()
-                if answer:
-                    return answer, None, None
-                son_hata, son_tip = "Model boş yanıt döndü.", "diger"
-                break  # bos yanit: bu modelde israr etme, digerine gec
-            except Exception as e:
-                son_hata = str(e)
-                son_tip = _hata_tipi(son_hata)
-                if son_tip == "anahtar":
-                    return None, son_tip, son_hata      # denemeye gerek yok
-                if son_tip in ("mesgul", "kota") and deneme < DENEME_SAYISI - 1:
-                    time.sleep(2 * (deneme + 1))        # 2sn, 4sn bekle
-                    continue
-                break  # bu modelden vazgec, sonraki modeli dene
+
+    for tur in range(DENEME_SAYISI):
+        # Son iki turda kucultulmus istek kullan
+        hafif = tur >= DENEME_SAYISI - 2
+        sys_prompt = hafif_system_prompt() if hafif else SYSTEM_PROMPT
+        icerik = build_contents(chat, limit=4) if hafif else tam_icerik
+
+        for model_adi in MODELLER:
+            if time.time() - baslangic > SURE_BUTCESI:
+                return None, son_tip or "mesgul", son_hata
+            if ilerleme:
+                ilerleme(model_adi, tur + 1, hafif)
+
+            answer, tip, ham = _tek_istek(client, model_adi, icerik,
+                                          sys_prompt)
+            if answer:
+                return answer, None, None
+            son_tip, son_hata = tip, ham
+            if tip == "anahtar":
+                return None, tip, ham          # denemenin anlami yok
+            # mesgul/kota/bos yanit: hemen sonraki modeli dene
+
+        # Tur bitti, hicbiri olmadi: artan sureli bekle (2s, 5s, 9s)
+        bekleme = 2 + tur * 3 + random.uniform(0, 1.5)
+        if time.time() - baslangic + bekleme < SURE_BUTCESI:
+            time.sleep(bekleme)
+
     return None, son_tip, son_hata
 
 
 def hata_mesaji(tip):
     if tip == "mesgul":
-        return ("⏳ Google'ın modeli şu anda çok yoğun (503). Birkaç saniye "
-                "bekleyip **🔄 Tekrar dene**'ye bas — sohbetin ve yazdığın "
-                "soru duruyor, kaybolmadı.")
+        return ("⏳ Google'ın modelleri şu anda çok yoğun (503). Tüm yedek "
+                "modeller ve küçültülmüş istek denendi, hepsi doluydu. "
+                "**🔄 Tekrar dene**'ye basabilirsin — sohbetin ve yazdığın "
+                "soru duruyor, kaybolmadı. Yoğunluk sürerse sol menüden "
+                "**Asistanın hafızası → Kapalı** seçeneği isteği çok "
+                "küçültür ve genelde anında cevap alırsın.")
     if tip == "kota":
         return ("🚦 Ücretsiz kullanım kotan (dakikalık/günlük limit) dolmuş "
                 "görünüyor. Biraz bekleyip **🔄 Tekrar dene**'ye basabilirsin.")
@@ -906,6 +980,9 @@ def hata_mesaji(tip):
         return ("🔑 Servisin erişim yetkisinde bir sorun var. Uygulama "
                 "sahibinin anahtarı yenilemesi gerekiyor — sen bir şey "
                 "yapmana gerek yok.")
+    if tip == "model_yok":
+        return ("🧩 Kullanılan yapay zekâ modeli bu hesapta bulunamadı. "
+                "Uygulama sahibinin model ayarını güncellemesi gerekiyor.")
     return ("⚠️ Yanıt alınamadı. **🔄 Tekrar dene**'ye basabilir ya da soruyu "
             "biraz kısaltıp tekrar sorabilirsin.")
 
@@ -973,8 +1050,22 @@ def render_chat():
                 st.error("⚙️ Servis şu anda yapılandırılmamış. Uygulama "
                          "sahibinin API anahtarını tanımlaması gerekiyor.")
             else:
+                durum = st.empty()
+
+                def ilerleme(model_adi, tur, hafif):
+                    if tur == 1:
+                        durum.caption("Geçmiş öğrenimlere bakıyor...")
+                    else:
+                        durum.caption(
+                            f"Google yoğun — {tur}. deneme"
+                            + (" (hafif mod)" if hafif else "")
+                            + f", model: {model_adi}"
+                        )
+
                 with st.spinner("Geçmiş öğrenimlere bakıyor..."):
-                    answer, hata_tip, ham_hata = yanit_uret(chat, API_KEY)
+                    answer, hata_tip, ham_hata = yanit_uret(
+                        chat, API_KEY, ilerleme=ilerleme)
+                durum.empty()
 
                 if answer:
                     st.markdown(answer)
