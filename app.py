@@ -834,12 +834,6 @@ def render_havuz_page():
                  "dosyaları kontrol et.")
         return
 
-    if havuz_df is not None:
-        st.info(f"Bu dosyalar iç içe geçmiştir (aynı test birden fazla "
-                f"dosyada olabilir). Asistanın hafızasına Test_ID'ye göre "
-                f"**tekilleştirilmiş {len(havuz_df)} test** gider — aynı "
-                f"deney modele birden fazla kez verilmez.")
-
     sekmeler = st.tabs([
         f"{th.VERI_KUMELERI[a]['sekme']} ({len(th.load_dataset(a))})"
         for a in havuz_kumeleri
