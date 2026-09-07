@@ -16,6 +16,14 @@ Su anda uc veri kumesi var ve BUNLAR IC ICE GECMISTIR:
         -> + 15 GERCEK Eczacibasi Meta kampanyasi (REAL###). Bu kumede
            KAYBEDEN (LOSS) testler de var; onlar da birer ogrenimdir.
 
+Bunlarin disinda AYRI duran bir dosya daha var:
+
+  - data/Worst_Case_Tests_Learning.xlsx -> 5 adet EN KOTU (LOSS) banyo
+        testi (*_LOSS### kodlu; Vitra, Artema, Intema). Yukaridaki ic ice
+        gecme bu dosya icin gecerli DEGIL: testleri hicbir kumede yok.
+        Bu yuzden hem kendi sekmesinde, hem banyo sekmesinde, hem de
+        birlesik havuzda (asistanin hafizasinda) yer alir.
+
 Bu yuzden:
   * EKRANDA her dosya kendi sekmesinde ayri ayri gosterilir (kullanici hangi
     dosyada ne var gormek ister).
@@ -66,8 +74,22 @@ VERI_KUMELERI = {
                     "tavsiye, beklenen getiri, uygulama zorluğu ve benzer "
                     "test önerileriyle birlikte.",
     },
+    "worst": {
+        "sekme": "📉 Kaybeden testler",
+        "dosya": os.path.join(DATA_DIR, "Worst_Case_Tests_Learning.xlsx"),
+        "sayfa": "Worst Tests (Detailed)",
+        "aciklama": "En kötü sonuç veren (LOSS) banyo testleri — Vitra, "
+                    "Artema ve İntema. Her biri neyin işe YARAMADIĞINI ve "
+                    "sonrasında ne değiştirildiğini (iş etkisi) anlatır. "
+                    "Bu testler banyo sekmesinde ve asistanın hafızasında "
+                    "da yer alır.",
+    },
 }
-SIRA = ["banyo", "master", "enriched"]
+SIRA = ["banyo", "master", "enriched", "worst"]
+
+# Kaybeden test dosyasinda Data_Source kolonu yok; asistanin kaynagi
+# dogru soyleyebilmesi icin yuklerken ekliyoruz.
+WORST_KAYNAK = "Kaybeden test analizi (Worst_Case_Tests_Learning.xlsx)"
 
 # Bir tablonun "deney havuzu" formatinda olup olmadigini anlamak icin
 # aranan kolonlar (kucuk harfe cevrilerek kontrol edilir).
@@ -119,6 +141,19 @@ def _excel_sayfalari(path, mtime):
         return {}
 
 
+def _kaybedenleri_ekle(df):
+    """
+    Kaybeden testleri banyo tablosuna ekler. Bu testlerin hepsi banyo
+    markalarinin (Vitra/Artema/Intema) testleri, dolayisiyla banyo
+    sekmesinde de gorunmeleri gerekiyor. Test_ID'ye gore tekillestirilir.
+    """
+    ek = load_dataset("worst")
+    if ek is None or "Test_ID" not in df.columns or "Test_ID" not in ek.columns:
+        return df
+    yeni = ek[~ek["Test_ID"].isin(df["Test_ID"])]
+    return pd.concat([df, yeni], ignore_index=True) if len(yeni) else df
+
+
 def load_dataset(anahtar):
     """Bir veri kumesini tablo olarak getirir (yoksa None)."""
     tanim = VERI_KUMELERI.get(anahtar)
@@ -127,6 +162,12 @@ def load_dataset(anahtar):
     df = _oku(tanim["dosya"], os.path.getmtime(tanim["dosya"]), tanim["sayfa"])
     if df is None or df.empty:
         return None
+
+    df = df.copy()          # _oku onbellekli; onbellegi bozmayalim
+    if anahtar == "worst" and "Data_Source" not in df.columns:
+        df["Data_Source"] = WORST_KAYNAK
+    if anahtar == "banyo":
+        df = _kaybedenleri_ekle(df)
     return df
 
 
@@ -175,7 +216,8 @@ def birlesik_havuz():
     En genis kume temel alinir, digerlerinden sadece EKSIK test ve kolonlar
     eklenir. Hafizaya (SYSTEM_PROMPT) bu tablo gider.
     """
-    kumeler = [(a, load_dataset(a)) for a in ("master", "enriched", "banyo")]
+    kumeler = [(a, load_dataset(a))
+               for a in ("master", "enriched", "banyo", "worst")]
     kumeler = [(a, d) for a, d in kumeler if d is not None]
     if not kumeler:
         return None
