@@ -141,6 +141,52 @@ def _excel_sayfalari(path, mtime):
         return {}
 
 
+# Degerin DUSMESI iyi olan metrikler (maliyet, terk, iptal...).
+MALIYET_DESENLERI = ("cost", "cpc", "cpr", "cpa", "cpm", "cpl",
+                     "bounce", "unsubscribe", "churn", "abandon")
+
+
+def _maliyet_metrigi(ad):
+    """Bu metrikte degerin dusmesi mi iyi?"""
+    metin = str(ad).lower()
+    return any(d in metin for d in MALIYET_DESENLERI)
+
+
+def _lift_yonunu_duzelt(df):
+    """
+    Havuzun kurali: Lift_Percent = IYILESME yuzdesi (pozitif = iyi),
+    maliyet metriklerinde de oyle. REAL###/META### kumesindeki 12 maliyet
+    testinin hepsi bu kurala uyuyor (CPR dustugunde lift pozitif yaziliyor).
+
+    Ancak bazi satirlarda lift HAM degisim olarak girilmis. Ornek:
+    AT_LOSS002 -> CPC 2,14'ten 3,47'ye CIKMIS (yani %62 kotulesme) ama
+    lift +62,1 yazilmis; bu haliyle basarili bir test gibi gorunuyor.
+
+    Bu yuzden ham kontrol/varyant degeri olan maliyet testlerinde
+    iyilesmeyi yeniden hesaplayip isareti duzeltiyoruz. Degerler
+    zaten tutarliysa hicbir sey degismez.
+    """
+    gerekli = {"Primary_Metric", "CR_Control", "CR_Treatment", "Lift_Percent"}
+    if not gerekli <= set(df.columns):
+        return df
+
+    kontrol = pd.to_numeric(df["CR_Control"], errors="coerce")
+    varyant = pd.to_numeric(df["CR_Treatment"], errors="coerce")
+    lift = pd.to_numeric(df["Lift_Percent"], errors="coerce")
+    maliyet = df["Primary_Metric"].map(_maliyet_metrigi)
+
+    # Maliyet metriginde iyilesme = degerin dusmesi
+    gecerli = kontrol.notna() & varyant.notna() & (kontrol != 0)
+    iyilesme = (kontrol - varyant) / kontrol.where(gecerli) * 100
+
+    sapan = (maliyet & gecerli & lift.notna() & iyilesme.notna()
+             & ((lift - iyilesme).abs() > 1.0))
+    if sapan.any():
+        df = df.copy()
+        df.loc[sapan, "Lift_Percent"] = iyilesme[sapan].round(1)
+    return df
+
+
 def _kaybedenleri_ekle(df):
     """
     Kaybeden testleri banyo tablosuna ekler. Bu testlerin hepsi banyo
@@ -166,6 +212,7 @@ def load_dataset(anahtar):
     df = df.copy()          # _oku onbellekli; onbellegi bozmayalim
     if anahtar == "worst" and "Data_Source" not in df.columns:
         df["Data_Source"] = WORST_KAYNAK
+    df = _lift_yonunu_duzelt(df)
     if anahtar == "banyo":
         df = _kaybedenleri_ekle(df)
     return df
@@ -296,6 +343,13 @@ def _satir_metni(r, detay=False):
     if sonuc.upper() == "LOSS":
         olcum.append("sonuç LOSS (KAYBEDEN TEST — bu da bir öğrenim, "
                      "aynı hatayı önermemek için kullan)")
+        if lift is not None and lift > 0:
+            # Birincil metrik iyilesmis ama test yine de kaybeden sayilmis;
+            # asistan lift'e bakip "basarili" sanmasin.
+            olcum.append("DİKKAT: birincil metrik iyileşmiş görünse de test "
+                         "KAYBEDEN sayılmış — asıl zarar aşağıdaki öğrenim "
+                         "ve iş etkisi satırlarında, lift'e bakıp bunu "
+                         "başarılı sanma")
     elif sonuc:
         olcum.append(f"sonuç {sonuc}")
 
@@ -370,35 +424,56 @@ def test_satirlari(df, detay=False):
 
 
 def _ozet_metni(df):
-    """Marka / test tipi / sonuc bazinda ozet satirlari (koddan hesaplanir)."""
+    """
+    Marka / test tipi / kategori bazinda ozet satirlari (koddan hesaplanir).
+
+    Kazanan ve kaybeden testler AYRI ortalanir. Hepsi tek ortalamada
+    toplanirsa yaniltici oluyor: orn. Artema'nin iki testi de kaybeden
+    ama birinin birincil metrigi (CPC) iyilestigi icin ortalama +11.95
+    cikip marka basariliymis gibi gorunuyordu.
+
+    Not: Bu havuzda lift, ham metrik degisimi degil IYILESME olarak
+    kayitli — maliyet metriklerinde de (CPR/CPC) pozitif lift iyi
+    demek. Bu yuzden isaret cevirmesi YAPILMAZ.
+    """
     if "Lift_Percent" not in df.columns:
         return []
 
-    lift = pd.to_numeric(df["Lift_Percent"], errors="coerce")
+    calisma = df.copy()
+    calisma["_lift"] = pd.to_numeric(calisma["Lift_Percent"], errors="coerce")
+    calisma["_res"] = (calisma["Result"].astype(str).str.upper()
+                       if "Result" in calisma.columns else "")
     bloklar = []
 
     if "Result" in df.columns:
-        sayim = df["Result"].astype(str).str.upper().value_counts()
+        sayim = calisma["_res"].value_counts()
         bloklar.append("-- Sonuç dağılımı --\n" + ", ".join(
             f"{ad}: {adet} test" for ad, adet in sayim.items()))
 
     for etiket, kolon in (("Marka", "Brand"), ("Test tipi", "Test_Type"),
                           ("Ürün kategorisi", "Product_Category")):
-        if kolon not in df.columns:
+        if kolon not in calisma.columns:
             continue
-        ozet = (df.assign(_lift=lift)
-                  .groupby(kolon)["_lift"]
-                  .agg(["count", "mean", "max"])
-                  .sort_values("mean", ascending=False))
-        satirlar = [f"-- {etiket} bazında ortalama etki --"]
-        for ad, s in ozet.iterrows():
-            if pd.isna(s["mean"]):
-                satirlar.append(f"{ad}: {int(s['count'])} test")
-            else:
-                satirlar.append(f"{ad}: {int(s['count'])} test, "
-                                f"ort. lift {s['mean']:+.1f}%, "
-                                f"en yüksek {s['max']:+.1f}%")
-        bloklar.append("\n".join(satirlar))
+
+        kayitlar = []
+        for ad, grup in calisma.groupby(kolon):
+            kazanan = grup.loc[grup["_res"] == "WIN", "_lift"].dropna()
+            kaybeden = grup.loc[grup["_res"] == "LOSS", "_lift"].dropna()
+            parca = [f"{ad}: {len(grup)} test"]
+            if len(kazanan):
+                parca.append(f"{len(kazanan)} kazanan (ort. "
+                             f"{kazanan.mean():+.1f}%, en iyi "
+                             f"{kazanan.max():+.1f}%)")
+            if len(kaybeden):
+                parca.append(f"{len(kaybeden)} KAYBEDEN (ort. "
+                             f"{kaybeden.mean():+.1f}%, en kötü "
+                             f"{kaybeden.min():+.1f}%)")
+            sira = kazanan.mean() if len(kazanan) else float("-inf")
+            kayitlar.append((sira, " | ".join(parca)))
+
+        kayitlar.sort(key=lambda x: -x[0])
+        bloklar.append(f"-- {etiket} bazında sonuçlar (kazanan/kaybeden "
+                       f"ayrı) --\n" + "\n".join(m for _, m in kayitlar))
     return bloklar
 
 
