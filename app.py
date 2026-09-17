@@ -82,6 +82,7 @@ API_KEY = _api_key_bul()
 CHATS_FILE = "chats.json"          # sohbetlerin kaydedildigi yerel dosya
 FILES_DIR = "files"                # yuklenen dosyalarin durdugu klasor
 FILES_META = os.path.join(FILES_DIR, "_files.json")   # dosya bilgileri
+AKTIF_TESTLER_FILE = os.path.join(FILES_DIR, "_aktif_testler.json")  # su an devam eden testler
 TABLE_EXT = (".csv", ".xlsx", ".xls")
 
 # Sirayla denenecek modeller: biri mesgulse hemen digerine gecilir.
@@ -176,6 +177,102 @@ def delete_file(fid):
 
 def file_path(bilgi):
     return os.path.join(FILES_DIR, bilgi["disk_adi"])
+
+
+# --- Aktif testler: su anda sahada devam eden testlerin panosu -------------
+# Kayit files/_aktif_testler.json icinde durur; uygulamayi acan herkes ayni
+# listeyi gorur. Test bitince manuel olarak "bitti" isaretlenir.
+def load_aktif_testler():
+    """id -> test bilgisi sozlugu (dosya yoksa bos)."""
+    try:
+        with open(AKTIF_TESTLER_FILE, "r", encoding="utf-8") as f:
+            veri = json.load(f)
+            return veri if isinstance(veri, dict) else {}
+    except Exception:
+        return {}
+
+
+def save_aktif_testler(testler):
+    try:
+        os.makedirs(FILES_DIR, exist_ok=True)
+        with open(AKTIF_TESTLER_FILE, "w", encoding="utf-8") as f:
+            json.dump(testler, f, ensure_ascii=False, indent=2)
+        return True
+    except Exception:
+        return False
+
+
+def _satirlara_bol(metin):
+    """Cok satirli kutuyu temiz bir listeye cevirir (bos satirlar atilir)."""
+    return [s.strip(" -•\t") for s in (metin or "").splitlines() if s.strip()]
+
+
+def aktif_test_ekle(bilgi):
+    """Yeni testi kaydeder ve id'sini doner. Kayit anindaki liste tazedir."""
+    testler = load_aktif_testler()          # baskasi eklediyse ezilmesin
+    tid = uuid.uuid4().hex[:8]
+    bilgi["durum"] = "aktif"
+    bilgi["olusturma"] = datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
+    testler[tid] = bilgi
+    save_aktif_testler(testler)
+    return tid
+
+
+def aktif_test_guncelle(tid, **degisiklikler):
+    """Tek bir testin alanlarini gunceller (durum degisimi dahil)."""
+    testler = load_aktif_testler()
+    if tid not in testler:
+        return False
+    testler[tid].update(degisiklikler)
+    save_aktif_testler(testler)
+    return True
+
+
+def aktif_test_kapat(tid, sonuc_notu=""):
+    return aktif_test_guncelle(
+        tid, durum="bitti", sonuc_notu=sonuc_notu,
+        kapanis=datetime.datetime.now().strftime("%d.%m.%Y %H:%M"))
+
+
+def aktif_test_ac(tid):
+    """Yanlislikla kapatilan testi tekrar aktife alir."""
+    return aktif_test_guncelle(tid, durum="aktif", kapanis="", sonuc_notu="")
+
+
+def aktif_test_sil(tid):
+    testler = load_aktif_testler()
+    if testler.pop(tid, None) is not None:
+        save_aktif_testler(testler)
+
+
+def aktif_test_listesi(durum="aktif"):
+    """(id, bilgi) ciftleri — en yeni eklenen en ustte."""
+    return [(tid, b) for tid, b in reversed(list(load_aktif_testler().items()))
+            if b.get("durum", "aktif") == durum]
+
+
+def aktif_testler_metni():
+    """Devam eden testleri asistanin okuyacagi kisa metne cevirir."""
+    bloklar = []
+    for _, b in aktif_test_listesi("aktif"):
+        satirlar = [f"- TEST: {b.get('ad', '(isimsiz)')}"]
+        for etiket, anahtar in (("Hipotez / amaç", "hipotez"),
+                                ("Marka / ürün", "marka"),
+                                ("Platform", "platform"),
+                                ("Ölçülecek metrik", "metrik"),
+                                ("Başlangıç", "baslangic"),
+                                ("Tahmini bitiş", "bitis"),
+                                ("Sorumlu", "sorumlu"),
+                                ("Not", "not")):
+            if b.get(anahtar):
+                satirlar.append(f"  {etiket}: {b[anahtar]}")
+        if b.get("degiskenler"):
+            satirlar.append("  Test edilen değişkenler: "
+                            + " | ".join(b["degiskenler"]))
+        if b.get("sabitler"):
+            satirlar.append("  Sabit tutulanlar: " + " | ".join(b["sabitler"]))
+        bloklar.append("\n".join(satirlar))
+    return "\n".join(bloklar)
 
 
 @st.cache_data(show_spinner=False)
@@ -330,6 +427,7 @@ def yuklenen_dosyalar_hafizasi():
 
 kb_text = load_knowledge_base()
 dosya_text = yuklenen_dosyalar_hafizasi()
+aktif_test_text = aktif_testler_metni()   # su an devam eden testler
 havuz_kumeleri = th.mevcut_kumeler()   # diskte bulunan veri kumeleri
 havuz_df = th.birlesik_havuz()         # hepsinin Test_ID'ye gore tekil hali
 
@@ -337,7 +435,7 @@ havuz_df = th.birlesik_havuz()         # hepsinin Test_ID'ye gore tekil hali
 if "chats" not in st.session_state:
     st.session_state.chats = load_chats()
 if "view" not in st.session_state:
-    st.session_state.view = "chat"       # "chat" | "files" | "file" | "havuz"
+    st.session_state.view = "chat"       # "chat" | "files" | "file" | "havuz" | "aktif"
 if "active" not in st.session_state or st.session_state.active not in st.session_state.chats:
     if st.session_state.chats:
         st.session_state.active = list(st.session_state.chats.keys())[-1]
@@ -428,6 +526,28 @@ with st.sidebar:
         st.caption("Henüz dosya yok.")
 
     st.markdown("---")
+
+    # --- AKTIF TESTLER ------------------------------------------------
+    # Ekibin su anda sahada olan testleri; kaydeden herkes ayni listeyi gorur.
+    st.markdown("**🟢 Aktif testler**")
+    suanki_testler = aktif_test_listesi("aktif")
+    if st.button(f"🟢 Aktif testler ({len(suanki_testler)})",
+                 use_container_width=True):
+        st.session_state.view = "aktif"
+        st.rerun()
+    if suanki_testler:
+        for tid, bilgi in suanki_testler[:6]:
+            etiket = "▸ " + (bilgi.get("ad") or "(isimsiz test)")[:30]
+            if st.button(etiket, key=f"at_{tid}", use_container_width=True):
+                st.session_state.view = "aktif"
+                st.session_state.acilan_aktif_test = tid
+                st.rerun()
+        if len(suanki_testler) > 6:
+            st.caption(f"+{len(suanki_testler) - 6} test daha")
+    else:
+        st.caption("Şu anda aktif test yok.")
+
+    st.markdown("---")
     st.header("Ayarlar")
     # API anahtari secrets/.env'den otomatik gelir; kullaniciya sorulmaz.
     if kb_text:
@@ -452,6 +572,9 @@ with st.sidebar:
         hafizadaki = sum(1 for b in files_meta.values() if b.get("hafizada"))
         st.info(f"Dosyalarım: {len(files_meta)} dosya "
                 f"({hafizadaki} tanesi asistanın hafızasında)")
+    if suanki_testler:
+        st.info(f"Şu anda {len(suanki_testler)} test aktif — asistan da "
+                f"bunları biliyor.")
 
 # --- Asistan kimligi + hafiza ---------------------------------------------
 havuz_text = (None if havuz_hafiza == "Kapalı"
@@ -500,6 +623,11 @@ def _prompt_kur(havuz_bolumu):
         + (havuz_bolumu if havuz_bolumu else "(havuz hafızada değil)") + "\n\n"
         + "=== KULLANICININ YÜKLEDİĞİ GERÇEK DOSYALAR ===\n"
         + (dosya_text if dosya_text else "(yüklenmiş dosya yok)")
+        + "\n\n=== ŞU ANDA SAHADA DEVAM EDEN (AKTİF) TESTLER ===\n"
+        + (aktif_test_text if aktif_test_text
+           else "(şu anda aktif test yok)")
+        + "\n(Bu testlerin sonucu henüz belli değil; öneri verirken aynı şeyi "
+          "tekrar test etmeyi önermek yerine devam eden testi hatırlat.)"
     )
 
 
@@ -847,6 +975,213 @@ def render_havuz_page():
             )
 
 
+# --- Aktif testler sayfasi -------------------------------------------------
+def _aktif_test_formu(form_anahtari, mevcut=None, buton="💾 Kaydet"):
+    """
+    Test giris/duzenleme formu. Kaydedilirse test sozlugunu, aksi halde
+    None doner. Tarihler serbest metin: bos birakilabilsin diye.
+    """
+    m = mevcut or {}
+    with st.form(form_anahtari, clear_on_submit=mevcut is None):
+        ad = st.text_input(
+            "Test adı *", value=m.get("ad", ""),
+            placeholder="Örn: Vitra ürün sayfası görsel testi")
+        hipotez = st.text_area(
+            "Test objective / hipotez *", value=m.get("hipotez", ""), height=80,
+            placeholder="Örn: Ürün görselinde banyo ortamı kullanmak, "
+                        "beyaz fon yerine dönüşüm oranını artırır.")
+
+        k = st.columns(2)
+        marka = k[0].text_input("Marka / ürün", value=m.get("marka", ""),
+                                placeholder="Örn: Vitra")
+        platform = k[1].text_input(
+            "Platform / mecra", value=m.get("platform", ""),
+            placeholder="Örn: Meta, Google, e-ticaret sitesi")
+        metrik = st.text_input(
+            "Ölçülecek ana metrik", value=m.get("metrik", ""),
+            placeholder="Örn: dönüşüm oranı (CR), CTR, CPA")
+
+        d = st.columns(2)
+        degiskenler = d[0].text_area(
+            "Test edilen değişkenler (her satıra bir tane) *",
+            value="\n".join(m.get("degiskenler", [])), height=130,
+            placeholder="Kreatif görsel (banyo ortamı / beyaz fon)\n"
+                        "Başlık metni (indirim vurgulu / fayda vurgulu)")
+        sabitler = d[1].text_area(
+            "Sabit tutulanlar (her satıra bir tane)",
+            value="\n".join(m.get("sabitler", [])), height=130,
+            placeholder="Bütçe\nHedef kitle\nYayın saatleri\nTeklif stratejisi")
+
+        t = st.columns(3)
+        baslangic = t[0].text_input(
+            "Başlangıç tarihi",
+            value=m.get("baslangic",
+                        datetime.date.today().strftime("%d.%m.%Y")))
+        bitis = t[1].text_input("Tahmini bitiş", value=m.get("bitis", ""),
+                                placeholder="gg.aa.yyyy")
+        sorumlu = t[2].text_input("Sorumlu", value=m.get("sorumlu", ""),
+                                  placeholder="Testi kuran kişi")
+        notu = st.text_area("Not (opsiyonel)", value=m.get("not", ""),
+                            height=70)
+
+        gonderildi = st.form_submit_button(buton, type="primary",
+                                           use_container_width=True)
+
+    if not gonderildi:
+        return None
+    if not ad.strip() or not hipotez.strip() or not _satirlara_bol(degiskenler):
+        st.error("Test adı, hipotez ve en az bir değişken zorunlu.")
+        return None
+
+    yeni = dict(m)
+    yeni.update({
+        "ad": ad.strip(),
+        "hipotez": hipotez.strip(),
+        "marka": marka.strip(),
+        "platform": platform.strip(),
+        "metrik": metrik.strip(),
+        "degiskenler": _satirlara_bol(degiskenler),
+        "sabitler": _satirlara_bol(sabitler),
+        "baslangic": baslangic.strip(),
+        "bitis": bitis.strip(),
+        "sorumlu": sorumlu.strip(),
+        "not": notu.strip(),
+    })
+    return yeni
+
+
+def _aktif_test_detay(bilgi):
+    """Bir testin alanlarini kart icinde gosterir."""
+    st.markdown(f"**Hipotez / objective:** {bilgi.get('hipotez', '-')}")
+
+    k = st.columns(2)
+    k[0].markdown("**🔀 Test edilen değişkenler**")
+    for i, d in enumerate(bilgi.get("degiskenler", []), 1):
+        k[0].markdown(f"{i}. {d}")
+    if not bilgi.get("degiskenler"):
+        k[0].caption("—")
+    k[1].markdown("**📌 Sabit tutulanlar**")
+    for i, s in enumerate(bilgi.get("sabitler", []), 1):
+        k[1].markdown(f"{i}. {s}")
+    if not bilgi.get("sabitler"):
+        k[1].caption("—")
+
+    alt = []
+    for etiket, anahtar in (("Marka/ürün", "marka"), ("Platform", "platform"),
+                            ("Ölçülen metrik", "metrik"),
+                            ("Başlangıç", "baslangic"),
+                            ("Tahmini bitiş", "bitis"), ("Sorumlu", "sorumlu"),
+                            ("Eklenme", "olusturma")):
+        if bilgi.get(anahtar):
+            alt.append(f"{etiket}: {bilgi[anahtar]}")
+    if alt:
+        st.caption(" · ".join(alt))
+    if bilgi.get("not"):
+        st.markdown(f"**Not:** {bilgi['not']}")
+
+
+def _aktif_test_karti(tid, bilgi):
+    """Devam eden tek bir test: detay + düzenle / bitir / sil."""
+    basliklar = [x for x in (bilgi.get("marka"), bilgi.get("platform"))
+                 if x]
+    etiket = "🟢 " + (bilgi.get("ad") or "(isimsiz test)")
+    if basliklar:
+        etiket += " · " + " · ".join(basliklar)
+    if bilgi.get("baslangic"):
+        etiket += f"  (başlangıç: {bilgi['baslangic']})"
+
+    acik = st.session_state.get("acilan_aktif_test") == tid
+    with st.expander(etiket, expanded=acik):
+        duzenleme = st.session_state.get(f"duzenle_{tid}", False)
+        if duzenleme:
+            guncel = _aktif_test_formu(f"duzenle_form_{tid}", mevcut=bilgi,
+                                       buton="💾 Değişiklikleri kaydet")
+            if guncel:
+                aktif_test_guncelle(tid, **guncel)
+                st.session_state[f"duzenle_{tid}"] = False
+                st.rerun()
+            if st.button("Vazgeç", key=f"vazgec_{tid}"):
+                st.session_state[f"duzenle_{tid}"] = False
+                st.rerun()
+            return
+
+        _aktif_test_detay(bilgi)
+        st.markdown("---")
+        sonuc = st.text_input(
+            "Testi bitirirken kısa sonuç notu (opsiyonel)",
+            key=f"sonuc_{tid}",
+            placeholder="Örn: Banyo ortamı görseli kazandı, +%12 CR")
+        islem = st.columns([2, 1.4, 1.4, 3])
+        if islem[0].button("✅ Testi bitir", key=f"bitir_{tid}",
+                           type="primary", use_container_width=True):
+            aktif_test_kapat(tid, sonuc)
+            st.session_state.pop("acilan_aktif_test", None)
+            st.rerun()
+        if islem[1].button("✏️ Düzenle", key=f"duz_{tid}",
+                           use_container_width=True):
+            st.session_state[f"duzenle_{tid}"] = True
+            st.rerun()
+        if islem[2].button("🗑️ Sil", key=f"sil_{tid}",
+                           use_container_width=True):
+            aktif_test_sil(tid)
+            st.session_state.pop("acilan_aktif_test", None)
+            st.rerun()
+
+
+def render_aktif_testler_page():
+    """Ekibin su anda devam eden testlerini herkesin gordugu pano."""
+    ust = st.columns([6, 1])
+    with ust[0]:
+        st.title("🟢 Aktif testler")
+        st.caption("Şu anda sahada devam eden testler. Buraya girilen test "
+                   "herkesin ekranında görünür; test bitince 'Testi bitir' ile "
+                   "manuel olarak kapatılır. Test verisini yüklemek için "
+                   "Dosyalarım bölümünü kullanabilirsin.")
+    with ust[1]:
+        if st.button("⬅️ Sohbete dön", use_container_width=True):
+            st.session_state.pop("acilan_aktif_test", None)
+            st.session_state.view = "chat"
+            st.rerun()
+
+    aktifler = aktif_test_listesi("aktif")
+    bitenler = aktif_test_listesi("bitti")
+
+    with st.expander("➕ Yeni aktif test ekle", expanded=not aktifler):
+        yeni = _aktif_test_formu("yeni_aktif_test",
+                                 buton="💾 Kaydet ve aktif testlere ekle")
+        if yeni:
+            tid = aktif_test_ekle(yeni)
+            st.session_state["acilan_aktif_test"] = tid
+            st.rerun()
+
+    st.markdown(f"### Devam eden testler ({len(aktifler)})")
+    if not aktifler:
+        st.info("Şu anda aktif test yok. Yukarıdaki **Yeni aktif test ekle** "
+                "bölümünden ekleyebilirsin.")
+    for tid, bilgi in aktifler:
+        _aktif_test_karti(tid, bilgi)
+
+    if bitenler:
+        st.markdown("---")
+        with st.expander(f"✅ Biten testler ({len(bitenler)})"):
+            for tid, bilgi in bitenler:
+                st.markdown(f"**{bilgi.get('ad', '(isimsiz test)')}** — "
+                            f"bitiş: {bilgi.get('kapanis', '-')}")
+                if bilgi.get("sonuc_notu"):
+                    st.markdown(f"Sonuç: {bilgi['sonuc_notu']}")
+                st.caption(f"Hipotez: {bilgi.get('hipotez', '-')}")
+                satir = st.columns([1.4, 1.4, 5])
+                if satir[0].button("↩️ Tekrar aktif et", key=f"ac_{tid}",
+                                   use_container_width=True):
+                    aktif_test_ac(tid)
+                    st.rerun()
+                if satir[1].button("🗑️ Sil", key=f"bsil_{tid}",
+                                   use_container_width=True):
+                    aktif_test_sil(tid)
+                    st.rerun()
+                st.markdown("---")
+
+
 # --- Modelden yanit alma (yeniden deneme + yedek model) -------------------
 def _hata_tipi(mesaj):
     """Hata metnine bakip tur belirler: 'mesgul' / 'kota' / 'anahtar' / 'diger'."""
@@ -1102,6 +1437,8 @@ if st.session_state.view == "files":
     render_files_page()
 elif st.session_state.view == "havuz":
     render_havuz_page()
+elif st.session_state.view == "aktif":
+    render_aktif_testler_page()
 elif st.session_state.view == "file" and st.session_state.active_file:
     render_file_detail(st.session_state.active_file)
 else:
