@@ -89,6 +89,32 @@ def _api_key_bul():
 st.set_page_config(page_title="Digital Marketing Test & Learn",
                    page_icon="🧪", layout="wide")
 
+# --- Gorunum: ortalanmis karsilama + yumusak sohbet kutusu ----------------
+st.markdown("""
+<style>
+/* Bos sohbette baslik ve kutuyu ekranin ortasina yaklastiran bosluk */
+.tl-bosluk { height: 11vh; }
+.tl-karsilama { text-align: center; margin-bottom: 1.6rem; }
+.tl-karsilama .tl-logo { font-size: 2.8rem; line-height: 1; }
+.tl-karsilama h1 {
+    font-size: 2.5rem; font-weight: 700; letter-spacing: -0.02em;
+    margin: .4rem 0 0; padding: 0;
+}
+/* Sohbet kutusu: yuvarlak koseler, ince cerceve, yumusak golge */
+[data-testid="stChatInput"], [data-testid="stChatInputContainer"] {
+    border-radius: 20px;
+    border: 1px solid rgba(128, 128, 128, .28);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, .18);
+    padding: 2px 4px;
+}
+[data-testid="stChatInput"]:focus-within {
+    border-color: rgba(128, 128, 128, .55);
+}
+/* Karsilama ekranindaki kutuyu ortada ve daha dar tut */
+.tl-orta-kutu { max-width: 720px; margin: 0 auto; }
+</style>
+""", unsafe_allow_html=True)
+
 API_KEY = _api_key_bul()
 
 # Sohbetler, dosyalar ve aktif testler depo.py uzerinden saklanir:
@@ -1388,50 +1414,48 @@ def hata_mesaji(tip):
             "biraz kısaltıp tekrar sorabilirsin.")
 
 
-def render_chat():
-    st.title("🧪 Digital Marketing Test & Learn")
-    st.caption("Geçmiş test öğrenimlerine dayanarak kampanya, hedef kitle ve "
-               "optimizasyon önerileri veren AI pazarlama asistanı.")
-
-    # --- Veri yukleme (OPSIYONEL, tek seferlik metrik hesaplama) ----------
-    with st.expander("📎 (Opsiyonel) Kampanya verisi yükle — metrikleri hesaplayayım"):
-        uploaded = st.file_uploader(
-            "CSV veya Excel", type=["csv", "xlsx", "xls"],
-            label_visibility="collapsed", key="chat_uploader"
-        )
-        if uploaded is not None:
-            if uploaded.name.lower().endswith(".csv"):
-                df = pd.read_csv(uploaded)
+def ekli_dosyalari_isle(dosyalar):
+    """
+    Sohbet kutusundaki ataçla eklenen dosyaları işler:
+    kalıcı olarak ortak dosyalara kaydeder, metriklerini hesaplayıp bir
+    sonraki soruya bağlam olarak ekler. Dosya adlarını doner.
+    """
+    adlar = []
+    for dosya in dosyalar:
+        adlar.append(dosya.name)
+        save_uploaded_file(dosya, kategori="Kampanya verisi",
+                           not_metni="Sohbetten eklendi")
+        try:
+            dosya.seek(0)
+            if dosya.name.lower().endswith(".csv"):
+                df = pd.read_csv(dosya)
             else:
-                df = pd.read_excel(uploaded)
-            st.dataframe(df.head())
-            metrics = compute_metrics(df)
-            st.dataframe(
-                pd.DataFrame(metrics.items(), columns=["Metrik", "Değer"]),
-                hide_index=True,
-            )
-            st.session_state["metrics_context"] = metrics_to_text(metrics)
-            if st.button("📁 Bu dosyayı ortak dosyalara kalıcı olarak kaydet"):
-                save_uploaded_file(uploaded, kategori="Kampanya verisi")
-                st.success("Ortak dosyalara kaydedildi — ekipteki herkes "
-                           "görebilir.")
-                st.rerun()
+                df = pd.read_excel(dosya)
+            metrikler = compute_metrics(df)
+            if any(v for v in metrikler.values()):
+                st.session_state["metrics_context"] = metrics_to_text(metrikler)
+        except Exception:
+            pass   # okunamayan dosya yine de kaydedildi; sohbet aksamasin
+    return adlar
 
-    # --- Ekrandan tasinan test secimi varsa gosterelim -------------------
-    if st.session_state.get("havuz_secim_context"):
-        satir = st.columns([5, 1])
-        satir[0].info("🧪 Havuzdan seçtiğin testler sorularına ek bağlam "
-                      "olarak veriliyor.")
-        if satir[1].button("Kaldır", use_container_width=True):
-            st.session_state.pop("havuz_secim_context", None)
-            st.rerun()
 
-    st.markdown("---")
+def render_chat():
     cid = st.session_state.active
     chat = st.session_state.chats[cid]
+    bos_sohbet = not chat.get("messages")
 
-    # Bu sohbet kime ait? (baskasinin sohbetini de acip okuyabiliriz)
-    if chat.get("messages"):
+    if bos_sohbet:
+        # --- Karsilama: baslik ve kutu ekranin ortasinda ------------------
+        st.markdown("<div class='tl-bosluk'></div>", unsafe_allow_html=True)
+        st.markdown(
+            "<div class='tl-karsilama'>"
+            "<div class='tl-logo'>🧪</div>"
+            "<h1>Digital Marketing Test &amp; Learn</h1>"
+            "</div>",
+            unsafe_allow_html=True,
+        )
+    else:
+        # --- Sohbet basligi: kime ait + arsivle ---------------------------
         baslik_satiri = st.columns([5, 1])
         sahip = chat.get("yazar") or "bilinmiyor"
         benim = sahip == st.session_state.get("kullanici", "")
@@ -1444,23 +1468,61 @@ def render_chat():
             depo.sohbet_arsivle(cid, True)
             st.rerun()
 
-    for msg in chat["messages"]:
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
+        for msg in chat["messages"]:
+            with st.chat_message(msg["role"]):
+                st.markdown(msg["content"])
 
-    user_input = st.chat_input(
-        "Örn: Elimizde yeni bir vitamin ürünü var, satışı artırmak için nasıl bir kampanya kurmalıyız?"
-    )
+    # --- Ekrandan tasinan baglamlar (havuz secimi / dosya metrikleri) ----
+    rozetler = st.columns([3, 3, 2])
+    if st.session_state.get("havuz_secim_context"):
+        if rozetler[0].button("🧪 Havuzdan seçilen testler ekli — kaldır",
+                              use_container_width=True):
+            st.session_state.pop("havuz_secim_context", None)
+            st.rerun()
+    if st.session_state.get("metrics_context"):
+        if rozetler[1].button("📊 Yüklenen dosyanın metrikleri ekli — kaldır",
+                              use_container_width=True):
+            st.session_state.pop("metrics_context", None)
+            st.rerun()
+
+    # --- Sohbet kutusu (ataç ile dosya ekleme kutunun icinde) ------------
+    # Bos sohbette kutu ortada durur; sohbet basladiginda alta sabitlenir.
+    ipucu = "Bir soru yaz ya da 📎 ile kampanya verisi ekle…"
+    if bos_sohbet:
+        orta = st.columns([1, 5, 1])
+        with orta[1]:
+            user_input = st.chat_input(ipucu, accept_file="multiple",
+                                       file_type=["csv", "xlsx", "xls"],
+                                       key="sohbet_kutusu_bos")
+        st.markdown(
+            "<p style='text-align:center;opacity:.55;font-size:.86rem;"
+            "margin-top:.9rem'>Geçmiş test havuzundan öğrenerek yanıtlar · "
+            "CSV/XLSX ekleyebilirsin</p>", unsafe_allow_html=True)
+    else:
+        user_input = st.chat_input(ipucu, accept_file="multiple",
+                                   file_type=["csv", "xlsx", "xls"],
+                                   key="sohbet_kutusu")
 
     if user_input:
-        chat["messages"].append({"role": "user", "content": user_input})
-        if not chat.get("title") or chat["title"] == "Yeni sohbet":
-            chat["title"] = user_input[:40]
-        if not chat.get("yazar"):
-            chat["yazar"] = st.session_state.get("kullanici", "")
-        save_chat(cid, chat)
-        st.session_state.pop("taslak_sohbet", None)   # artik kayitli
-        st.rerun()   # mesaj gecmise yazildi; yanit asagida uretilir
+        # accept_file acikken donen deger .text ve .files tasir
+        metin = (getattr(user_input, "text", None) or "").strip()
+        dosyalar = list(getattr(user_input, "files", None) or [])
+
+        adlar = ekli_dosyalari_isle(dosyalar) if dosyalar else []
+        if adlar:
+            ek = "📎 " + ", ".join(adlar)
+            metin = f"{ek}\n\n{metin}" if metin else (
+                f"{ek}\n\nBu dosyayı inceleyip metriklerini yorumlar mısın?")
+
+        if metin:
+            chat["messages"].append({"role": "user", "content": metin})
+            if not chat.get("title") or chat["title"] == "Yeni sohbet":
+                chat["title"] = metin.replace("\n", " ")[:40]
+            if not chat.get("yazar"):
+                chat["yazar"] = st.session_state.get("kullanici", "")
+            save_chat(cid, chat)
+            st.session_state.pop("taslak_sohbet", None)   # artik kayitli
+            st.rerun()   # mesaj gecmise yazildi; yanit asagida uretilir
 
     # --- Cevap bekleyen bir soru varsa yanit uret -------------------------
     # (yanit alinamazsa soru gecmiste kalir; "Tekrar dene" ile yeniden denenir)
