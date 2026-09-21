@@ -107,6 +107,14 @@ GECMIS_LIMIT = 12                  # modele gonderilen son mesaj adedi
 ILGILI_TEST_SAYISI = 12            # soruyla en ilgili kac test gonderilsin
 HAFIF_TEST_SAYISI = 5              # yogunlukta son care: cok daha kucuk istek
 
+# Asistanin dusunme seviyesi: ekrandaki isim -> koddaki mod.
+# Dusukten yuksege siralidir; etiketler degisse de mantik bozulmaz.
+DUSUNME_SEVIYELERI = {
+    "⚡ Hızlı": "kapali",      # havuz sohbete hic girmez
+    "🧠 Pro (önerilen)": "ozet",
+    "🚀 Max": "tam",           # yonetici ozeti + uygulama plani da dahil
+}
+
 
 # --- Sohbet kaydetme/yukleme (kalicilik) ----------------------------------
 # Sohbetler ekipce ORTAKTIR: ayni linke giren herkes ayni listeyi gorur,
@@ -457,14 +465,12 @@ files_meta = load_files_meta()
 with st.sidebar:
     kullanici = st.session_state.get("kullanici", "")
     if kullanici:
-        st.caption(f"👤 **{kullanici}** olarak giriş yaptın")
+        st.markdown(f"### Merhaba {kullanici} 👋")
     if st.button("➕ Yeni sohbet", use_container_width=True):
         new_chat()
         st.rerun()
 
     st.markdown(f"**Sohbetler** ({len(aktif_sohbetler)})")
-    st.caption("Ekipteki herkesin sohbetleri burada — başkalarının "
-               "sorularından da öğrenebilirsin.")
     for cid in reversed(list(aktif_sohbetler.keys())):
         sohbet = aktif_sohbetler[cid]
         aktif = (cid == st.session_state.active
@@ -499,16 +505,20 @@ with st.sidebar:
         if st.button("🧪 Test havuzları", use_container_width=True):
             st.session_state.view = "havuz"
             st.rerun()
-        havuz_hafiza = st.radio(
-            "Asistanın hafızası",
-            ["Özet (önerilen)", "Tam (yönetici özeti + playbook)", "Kapalı"],
-            key="havuz_hafiza",
-            help="Özet: her testin hipotezi, ölçümü, öğrenimi ve tavsiyesi. "
-                 "Tam: buna yönetici özeti ve 4 aşamalı uygulama planı da "
-                 "eklenir (yanıtlar yavaşlar). Kapalı: havuz sohbete girmez.",
+        secim = st.radio(
+            "Düşünme seviyesi",
+            list(DUSUNME_SEVIYELERI.keys()),
+            index=1,                       # varsayilan: Pro
+            key="dusunme_seviyesi",
+            help="⚡ Hızlı: test havuzuna bakmadan yanıtlar, en hızlısı.\n\n"
+                 "🧠 Pro (önerilen): her testin hipotezi, ölçümü, öğrenimi ve "
+                 "tavsiyesiyle düşünür.\n\n"
+                 "🚀 Max: buna yönetici özeti ve 4 aşamalı uygulama planı da "
+                 "eklenir — en derin analiz, en yavaş yanıt.",
         )
+        hafiza = DUSUNME_SEVIYELERI[secim]
     else:
-        havuz_hafiza = "Kapalı"
+        hafiza = "kapali"
         st.caption("Havuz bulunamadı (data/ klasörünü kontrol et).")
 
     st.markdown("---")
@@ -606,8 +616,8 @@ with st.sidebar:
         ozet = (f"Test havuzu: {len(havuz_df)} tekil test / "
                 f"{marka_sayisi} marka / {len(havuz_kumeleri)} dosya"
                 + (f" ({kayip} kaybeden test dahil)" if kayip else ""))
-        if havuz_hafiza == "Kapalı":
-            st.caption(ozet + " — hafıza kapalı")
+        if hafiza == "kapali":
+            st.caption(ozet + " — ⚡ Hızlı modda sohbete girmez")
         else:
             st.success(ozet)
     if files_meta:
@@ -619,8 +629,8 @@ with st.sidebar:
                 f"bunları biliyor.")
 
 # --- Asistan kimligi + hafiza ---------------------------------------------
-havuz_text = (None if havuz_hafiza == "Kapalı"
-              else th.kb_text(detay=havuz_hafiza.startswith("Tam")))
+havuz_text = (None if hafiza == "kapali"
+              else th.kb_text(detay=(hafiza == "tam")))
 
 KURALLAR = (
     "Sen bir dijital pazarlama 'Test & Learn' asistanısın. Görevin: geçmiş "
@@ -680,12 +690,12 @@ def system_prompt_kur(soru, test_sayisi=ILGILI_TEST_SAYISI):
     (%71-80 kucuk). Istek kuculdukce Google'in 503 (yogunluk) ile geri
     cevirme ihtimali belirgin dusuyor ve yanit hizlaniyor.
     """
-    if havuz_hafiza == "Kapalı":
+    if hafiza == "kapali":
         return _prompt_kur(None)
     try:
         havuz = th.ilgili_kb_text(
             soru, max_test=test_sayisi,
-            detay=havuz_hafiza.startswith("Tam"))
+            detay=(hafiza == "tam"))
     except Exception:
         havuz = havuz_text          # secim basarisiz olursa eski davranis
     return _prompt_kur(havuz or havuz_text)
@@ -1362,7 +1372,7 @@ def hata_mesaji(tip):
                 "modeller ve küçültülmüş istek denendi, hepsi doluydu. "
                 "**🔄 Tekrar dene**'ye basabilirsin — sohbetin ve yazdığın "
                 "soru duruyor, kaybolmadı. Yoğunluk sürerse sol menüden "
-                "**Asistanın hafızası → Kapalı** seçeneği isteği çok "
+                "**Düşünme seviyesi → ⚡ Hızlı** seçeneği isteği çok "
                 "küçültür ve genelde anında cevap alırsın.")
     if tip == "kota":
         return ("🚦 Ücretsiz kullanım kotan (dakikalık/günlük limit) dolmuş "
