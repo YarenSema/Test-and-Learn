@@ -13,15 +13,26 @@ import streamlit as st
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 
+if "kullanici" not in st.session_state:
+    st.session_state.kullanici = ""
+
 if not st.session_state.authenticated:
     st.set_page_config(page_title="Login")
     st.markdown("# 🔐 Digital Marketing Test & Learn")
-    
+    st.caption("Sohbetler, yüklenen dosyalar ve aktif testler ekipçe ortaktır: "
+               "herkes birbirinin sorusunu ve öğrenimini görebilir. Adın, "
+               "açtığın sohbetin ve yüklediğin dosyanın yanında görünür.")
+
+    isim = st.text_input("Adın:", key="login_isim", placeholder="Örn: Yaren")
     password = st.text_input("Şifre gir:", type="password", key="login_pass")
-    
+
     if password == "digital123":  # BURAYA KENDİ ŞİFREN YAZ
-        st.session_state.authenticated = True
-        st.rerun()
+        if isim.strip():
+            st.session_state.kullanici = isim.strip()[:40]
+            st.session_state.authenticated = True
+            st.rerun()
+        else:
+            st.warning("Devam etmek için adını yazman gerekiyor.")
     elif password:
         st.error("❌ Yanlış şifre!")
     st.stop()
@@ -41,6 +52,7 @@ from google import genai
 from google.genai import types
 from metrics import compute_metrics, metrics_to_text
 import test_havuzu as th
+import depo
 
 load_dotenv()
 
@@ -79,10 +91,9 @@ st.set_page_config(page_title="Digital Marketing Test & Learn",
 
 API_KEY = _api_key_bul()
 
-CHATS_FILE = "chats.json"          # sohbetlerin kaydedildigi yerel dosya
-FILES_DIR = "files"                # yuklenen dosyalarin durdugu klasor
-FILES_META = os.path.join(FILES_DIR, "_files.json")   # dosya bilgileri
-AKTIF_TESTLER_FILE = os.path.join(FILES_DIR, "_aktif_testler.json")  # su an devam eden testler
+# Sohbetler, dosyalar ve aktif testler depo.py uzerinden saklanir:
+# Supabase ayarliysa bulutta (kalici + herkes ayni veriyi gorur),
+# degilse eskisi gibi yerel dosyalarda (chats.json, files/).
 TABLE_EXT = (".csv", ".xlsx", ".xls")
 
 # Sirayla denenecek modeller: biri mesgulse hemen digerine gecilir.
@@ -98,108 +109,90 @@ HAFIF_TEST_SAYISI = 5              # yogunlukta son care: cok daha kucuk istek
 
 
 # --- Sohbet kaydetme/yukleme (kalicilik) ----------------------------------
+# Sohbetler ekipce ORTAKTIR: ayni linke giren herkes ayni listeyi gorur,
+# baskasinin sorusundan da ogrenebilsin diye. Depolama depo.py'de: Supabase
+# ayarliysa bulutta (kalici), degilse eskisi gibi yerel chats.json icinde.
 def load_chats():
-    try:
-        with open(CHATS_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception:
-        return {}
+    """Tum sohbetler (arsivdekiler dahil): {cid: {title, messages, ...}}."""
+    return depo.sohbetleri_getir()
+
+
+def save_chat(cid, chat):
+    """Tek bir sohbeti kaydeder — baskalarinin sohbetlerini etkilemez."""
+    depo.sohbet_kaydet(cid, chat)
 
 
 def save_chats(chats):
-    try:
-        with open(CHATS_FILE, "w", encoding="utf-8") as f:
-            json.dump(chats, f, ensure_ascii=False, indent=2)
-    except Exception:
-        pass  # kaydedilemezse uygulama yine calisir
+    """Geriye donuk uyumluluk: verilen sohbetlerin hepsini kaydeder."""
+    for cid, chat in chats.items():
+        depo.sohbet_kaydet(cid, chat)
 
 
-def new_chat():
+def yenile_sohbetler():
+    """
+    Paylasilan sohbet listesini tazeler (baskasinin actigi sohbet de gorunsun).
+    Henuz tek mesaj yazilmamis "taslak" sohbet kaybolmasin diye korunur.
+    """
+    sohbetler = load_chats()
+    taslak = st.session_state.get("taslak_sohbet")
+    if taslak and taslak[0] not in sohbetler:
+        sohbetler[taslak[0]] = taslak[1]
+    st.session_state.chats = sohbetler
+    return sohbetler
+
+
+def new_chat(sohbete_gec=True):
+    """
+    Yeni (bos) sohbet acar. Ilk mesaj yazilana kadar kaydedilmez.
+    `sohbete_gec=False`: sadece bos sohbet hazirlanir, acik olan ekran
+    (orn. arsiv sayfasi) degismez.
+    """
     cid = uuid.uuid4().hex[:8]
-    st.session_state.chats[cid] = {"title": "Yeni sohbet", "messages": []}
+    sohbet = {"title": "Yeni sohbet", "messages": [],
+              "yazar": st.session_state.get("kullanici", ""), "arsiv": False}
+    st.session_state.chats[cid] = sohbet
+    st.session_state.taslak_sohbet = (cid, sohbet)
     st.session_state.active = cid
-    st.session_state.view = "chat"
-    save_chats(st.session_state.chats)
+    if sohbete_gec:
+        st.session_state.view = "chat"
+
+
+def sohbet_etiketi(sohbet, uzunluk=30):
+    """Sol menudeki sohbet butonunun yazisi: 'Ad · baslik'."""
+    baslik = (sohbet.get("title") or "Yeni sohbet")[:uzunluk]
+    yazar = sohbet.get("yazar")
+    return f"{yazar} · {baslik}" if yazar else baslik
 
 
 # --- Dosyalarim: kayit / okuma / silme ------------------------------------
+# Dosyalar da ortaktir: kim yuklerse yuklesin herkes ayni listede gorur.
 def load_files_meta():
     """Yuklenen dosyalarin listesini (id -> bilgi) getirir."""
-    try:
-        with open(FILES_META, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except Exception:
-        return {}
-
-
-def save_files_meta(meta):
-    try:
-        os.makedirs(FILES_DIR, exist_ok=True)
-        with open(FILES_META, "w", encoding="utf-8") as f:
-            json.dump(meta, f, ensure_ascii=False, indent=2)
-    except Exception:
-        pass
+    return depo.dosyalari_getir()
 
 
 def save_uploaded_file(uploaded, kategori="Kampanya verisi", not_metni=""):
-    """Yuklenen dosyayi diske yazar ve kaydini olusturur. id doner."""
-    os.makedirs(FILES_DIR, exist_ok=True)
-    fid = uuid.uuid4().hex[:8]
-    orijinal = os.path.basename(uploaded.name)
-    disk_adi = f"{fid}_{orijinal}"
-    with open(os.path.join(FILES_DIR, disk_adi), "wb") as f:
-        f.write(uploaded.getbuffer())
-
-    meta = load_files_meta()
-    meta[fid] = {
-        "ad": orijinal,
-        "disk_adi": disk_adi,
-        "kategori": kategori,
-        "not": not_metni,
-        "hafizada": True,   # varsayilan: asistan bu dosyayi da okusun
-        "tarih": datetime.datetime.now().strftime("%d.%m.%Y %H:%M"),
-        "boyut": os.path.getsize(os.path.join(FILES_DIR, disk_adi)),
-    }
-    save_files_meta(meta)
-    return fid
+    """Yuklenen dosyayi kalici olarak saklar ve kaydini olusturur. id doner."""
+    return depo.dosya_kaydet(
+        uploaded.getvalue(), uploaded.name, kategori=kategori,
+        notu=not_metni, yukleyen=st.session_state.get("kullanici", ""))
 
 
 def delete_file(fid):
-    meta = load_files_meta()
-    bilgi = meta.pop(fid, None)
-    if bilgi:
-        try:
-            os.remove(os.path.join(FILES_DIR, bilgi["disk_adi"]))
-        except Exception:
-            pass
-        save_files_meta(meta)
+    depo.dosya_sil(fid)
 
 
 def file_path(bilgi):
-    return os.path.join(FILES_DIR, bilgi["disk_adi"])
+    """Dosyanin okunabilecegi yerel yol (bulut modunda indirip onbellekler)."""
+    return depo.dosya_yolu(bilgi)
 
 
 # --- Aktif testler: su anda sahada devam eden testlerin panosu -------------
 # Kayit files/_aktif_testler.json icinde durur; uygulamayi acan herkes ayni
 # listeyi gorur. Test bitince manuel olarak "bitti" isaretlenir.
 def load_aktif_testler():
-    """id -> test bilgisi sozlugu (dosya yoksa bos)."""
-    try:
-        with open(AKTIF_TESTLER_FILE, "r", encoding="utf-8") as f:
-            veri = json.load(f)
-            return veri if isinstance(veri, dict) else {}
-    except Exception:
-        return {}
-
-
-def save_aktif_testler(testler):
-    try:
-        os.makedirs(FILES_DIR, exist_ok=True)
-        with open(AKTIF_TESTLER_FILE, "w", encoding="utf-8") as f:
-            json.dump(testler, f, ensure_ascii=False, indent=2)
-        return True
-    except Exception:
-        return False
+    """id -> test bilgisi sozlugu (kayit yoksa bos)."""
+    return depo.testleri_getir()
 
 
 def _satirlara_bol(metin):
@@ -208,13 +201,12 @@ def _satirlara_bol(metin):
 
 
 def aktif_test_ekle(bilgi):
-    """Yeni testi kaydeder ve id'sini doner. Kayit anindaki liste tazedir."""
-    testler = load_aktif_testler()          # baskasi eklediyse ezilmesin
+    """Yeni testi kaydeder ve id'sini doner."""
     tid = uuid.uuid4().hex[:8]
     bilgi["durum"] = "aktif"
     bilgi["olusturma"] = datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
-    testler[tid] = bilgi
-    save_aktif_testler(testler)
+    bilgi.setdefault("ekleyen", st.session_state.get("kullanici", ""))
+    depo.test_kaydet(tid, bilgi)
     return tid
 
 
@@ -223,8 +215,9 @@ def aktif_test_guncelle(tid, **degisiklikler):
     testler = load_aktif_testler()
     if tid not in testler:
         return False
-    testler[tid].update(degisiklikler)
-    save_aktif_testler(testler)
+    bilgi = dict(testler[tid])
+    bilgi.update(degisiklikler)
+    depo.test_kaydet(tid, bilgi)
     return True
 
 
@@ -240,9 +233,7 @@ def aktif_test_ac(tid):
 
 
 def aktif_test_sil(tid):
-    testler = load_aktif_testler()
-    if testler.pop(tid, None) is not None:
-        save_aktif_testler(testler)
+    depo.test_sil(tid)
 
 
 def aktif_test_listesi(durum="aktif"):
@@ -432,15 +423,29 @@ havuz_kumeleri = th.mevcut_kumeler()   # diskte bulunan veri kumeleri
 havuz_df = th.birlesik_havuz()         # hepsinin Test_ID'ye gore tekil hali
 
 # --- Oturum ilk kurulum ----------------------------------------------------
-if "chats" not in st.session_state:
-    st.session_state.chats = load_chats()
 if "view" not in st.session_state:
-    st.session_state.view = "chat"       # "chat" | "files" | "file" | "havuz" | "aktif"
-if "active" not in st.session_state or st.session_state.active not in st.session_state.chats:
-    if st.session_state.chats:
-        st.session_state.active = list(st.session_state.chats.keys())[-1]
+    # "chat" | "files" | "file" | "havuz" | "aktif" | "arsiv"
+    st.session_state.view = "chat"
+if "chats" not in st.session_state:
+    st.session_state.chats = {}
+# Her calismada ortak listeyi tazele: baskasinin actigi sohbet de gorunsun
+yenile_sohbetler()
+if ("active" not in st.session_state
+        or st.session_state.active not in st.session_state.chats
+        or st.session_state.chats[st.session_state.active].get("arsiv")):
+    acik = [cid for cid, s in st.session_state.chats.items()
+            if not s.get("arsiv")]
+    if acik:
+        st.session_state.active = acik[-1]
     else:
-        new_chat()
+        # Acik sohbet kalmadi: bos bir tane hazirla ama acik ekrani
+        # (orn. arsiv sayfasini) degistirme.
+        new_chat(sohbete_gec=False)
+# Sol menude gorunen (arsivde olmayan) sohbetler
+aktif_sohbetler = {cid: s for cid, s in st.session_state.chats.items()
+                   if not s.get("arsiv")}
+arsiv_sohbetler = {cid: s for cid, s in st.session_state.chats.items()
+                   if s.get("arsiv")}
 if "active_file" not in st.session_state:
     st.session_state.active_file = None
 if "uploader_key" not in st.session_state:
@@ -450,19 +455,40 @@ files_meta = load_files_meta()
 
 # --- Kenar cubugu: sohbetler + dosyalar + ayarlar -------------------------
 with st.sidebar:
+    kullanici = st.session_state.get("kullanici", "")
+    if kullanici:
+        st.caption(f"👤 **{kullanici}** olarak giriş yaptın")
     if st.button("➕ Yeni sohbet", use_container_width=True):
         new_chat()
         st.rerun()
 
-    st.markdown("**Sohbetler**")
-    for cid in reversed(list(st.session_state.chats.keys())):
-        baslik = st.session_state.chats[cid].get("title") or "Yeni sohbet"
+    st.markdown(f"**Sohbetler** ({len(aktif_sohbetler)})")
+    st.caption("Ekipteki herkesin sohbetleri burada — başkalarının "
+               "sorularından da öğrenebilirsin.")
+    for cid in reversed(list(aktif_sohbetler.keys())):
+        sohbet = aktif_sohbetler[cid]
         aktif = (cid == st.session_state.active
                  and st.session_state.view == "chat")
-        etiket = ("🟢 " if aktif else "") + baslik[:32]
-        if st.button(etiket, key=f"sw_{cid}", use_container_width=True):
+        satir = st.columns([5, 1])
+        etiket = ("🟢 " if aktif else "") + sohbet_etiketi(sohbet)
+        if satir[0].button(etiket, key=f"sw_{cid}", use_container_width=True,
+                           help=sohbet.get("title") or "Yeni sohbet"):
             st.session_state.active = cid
             st.session_state.view = "chat"
+            st.rerun()
+        if satir[1].button("🗄️", key=f"ars_{cid}", use_container_width=True,
+                           help="Arşive taşı (silinmez, geri alınabilir)"):
+            if sohbet.get("messages"):
+                depo.sohbet_arsivle(cid, True)
+            taslak = st.session_state.get("taslak_sohbet")
+            if taslak and taslak[0] == cid:      # kaydedilmemis bos sohbet
+                st.session_state.pop("taslak_sohbet", None)
+            st.rerun()
+
+    if arsiv_sohbetler:
+        if st.button(f"🗄️ Arşiv ({len(arsiv_sohbetler)})",
+                     use_container_width=True):
+            st.session_state.view = "arsiv"
             st.rerun()
 
     st.markdown("---")
@@ -488,7 +514,8 @@ with st.sidebar:
     st.markdown("---")
 
     # --- DOSYALARIM ---------------------------------------------------
-    st.markdown("**📁 Dosyalarım**")
+    st.markdown("**📁 Ortak dosyalar**")
+    st.caption("Kim yüklerse yüklesin herkes aynı dosyaları görür.")
     if st.button("🗂️ Tüm dosyalar", use_container_width=True):
         st.session_state.view = "files"
         st.rerun()
@@ -518,7 +545,11 @@ with st.sidebar:
             aktif = (st.session_state.view == "file"
                      and st.session_state.active_file == fid)
             etiket = ("🟢 " if aktif else "📄 ") + bilgi["ad"][:28]
-            if st.button(etiket, key=f"f_{fid}", use_container_width=True):
+            ipucu = bilgi["ad"]
+            if bilgi.get("yukleyen"):
+                ipucu += f" · yükleyen: {bilgi['yukleyen']}"
+            if st.button(etiket, key=f"f_{fid}", use_container_width=True,
+                         help=ipucu):
                 st.session_state.view = "file"
                 st.session_state.active_file = fid
                 st.rerun()
@@ -549,6 +580,17 @@ with st.sidebar:
 
     st.markdown("---")
     st.header("Ayarlar")
+    # Kalici depolama durumu (Supabase acik mi?)
+    if depo.bulut_acik():
+        st.success(depo.durum_metni())
+    else:
+        st.warning(depo.durum_metni())
+    if depo.son_hata():
+        with st.expander("⚠️ Depolama uyarısı"):
+            st.code(depo.son_hata())
+            if st.button("Uyarıyı temizle"):
+                depo.hatayi_temizle()
+                st.rerun()
     # API anahtari secrets/.env'den otomatik gelir; kullaniciya sorulmaz.
     if kb_text:
         st.success(f"Bilgi tabanı: {kb_text.count(chr(10)) + 1} geçmiş deney")
@@ -671,17 +713,18 @@ def render_file_detail(fid):
         st.caption(f"{bilgi.get('kategori', '-')} · yüklenme: "
                    f"{bilgi.get('tarih', '-')} · "
                    f"{round(bilgi.get('boyut', 0) / 1024, 1)} KB"
+                   + (f" · yükleyen: {bilgi['yukleyen']}"
+                      if bilgi.get("yukleyen") else "")
                    + (f" · {bilgi['not']}" if bilgi.get("not") else ""))
     with ust[1]:
         if st.button("⬅️ Sohbete dön", use_container_width=True):
             st.session_state.view = "chat"
             st.rerun()
 
-    yol = file_path(bilgi)
-    if os.path.exists(yol):
-        with open(yol, "rb") as f:
-            st.download_button("⬇️ İndir", f.read(), file_name=bilgi["ad"],
-                               key=f"dl_{fid}")
+    icerik = depo.dosya_icerigi(bilgi)
+    if icerik:
+        st.download_button("⬇️ İndir", icerik, file_name=bilgi["ad"],
+                           key=f"dl_{fid}")
 
     sayfalar = load_tables(bilgi)
     if not sayfalar:
@@ -726,9 +769,7 @@ def render_file_detail(fid):
             value=bool(bilgi.get("hafizada")), key=f"kb_{fid}",
         )
         if hafizada != bool(bilgi.get("hafizada")):
-            meta = load_files_meta()
-            meta[fid]["hafizada"] = hafizada
-            save_files_meta(meta)
+            depo.dosya_guncelle(fid, hafizada=hafizada)
             st.rerun()
     with alt[1]:
         if st.button("🗑️ Dosyayı sil", key=f"del_{fid}",
@@ -743,9 +784,10 @@ def render_files_page():
     """Tum dosyalarin listelendigi ekran."""
     ust = st.columns([6, 1])
     with ust[0]:
-        st.title("🗂️ Dosyalarım")
-        st.caption("Gerçek Test & Learn öğrenimlerin ve kampanya verilerin "
-                   "burada saklanır. Bir dosyaya tıklayıp içeriğini ve "
+        st.title("🗂️ Ortak dosyalar")
+        st.caption("Gerçek Test & Learn öğrenimleri ve kampanya verileri "
+                   "burada saklanır — kim yüklerse yüklesin ekipteki herkes "
+                   "aynı listeyi görür. Bir dosyaya tıklayıp içeriğini ve "
                    "metriklerini inceleyebilirsin.")
     with ust[1]:
         if st.button("⬅️ Sohbete dön", use_container_width=True):
@@ -753,7 +795,7 @@ def render_files_page():
             st.rerun()
 
     if not files_meta:
-        st.info("Henüz dosya yüklenmemiş. Sol taraftaki **Dosyalarım → "
+        st.info("Henüz dosya yüklenmemiş. Sol taraftaki **Ortak dosyalar → "
                 "Dosya yükle** bölümünden CSV veya Excel yükleyebilirsin.")
         return
 
@@ -761,6 +803,7 @@ def render_files_page():
         {
             "Dosya": b["ad"],
             "Kategori": b.get("kategori", "-"),
+            "Yükleyen": b.get("yukleyen", "—") or "—",
             "Not": b.get("not", ""),
             "Yüklenme": b.get("tarih", "-"),
             "Boyut (KB)": round(b.get("boyut", 0) / 1024, 1),
@@ -774,7 +817,9 @@ def render_files_page():
     for fid, bilgi in reversed(list(files_meta.items())):
         satir = st.columns([5, 1])
         satir[0].markdown(f"**📄 {bilgi['ad']}** — {bilgi.get('kategori', '-')}"
-                          f" · {bilgi.get('tarih', '-')}")
+                          f" · {bilgi.get('tarih', '-')}"
+                          + (f" · yükleyen: {bilgi['yukleyen']}"
+                             if bilgi.get("yukleyen") else ""))
         if satir[1].button("Aç", key=f"open_{fid}", use_container_width=True):
             st.session_state.view = "file"
             st.session_state.active_file = fid
@@ -1071,7 +1116,7 @@ def _aktif_test_detay(bilgi):
                             ("Ölçülen metrik", "metrik"),
                             ("Başlangıç", "baslangic"),
                             ("Tahmini bitiş", "bitis"), ("Sorumlu", "sorumlu"),
-                            ("Eklenme", "olusturma")):
+                            ("Ekleyen", "ekleyen"), ("Eklenme", "olusturma")):
         if bilgi.get(anahtar):
             alt.append(f"{etiket}: {bilgi[anahtar]}")
     if alt:
@@ -1136,7 +1181,7 @@ def render_aktif_testler_page():
         st.caption("Şu anda sahada devam eden testler. Buraya girilen test "
                    "herkesin ekranında görünür; test bitince 'Testi bitir' ile "
                    "manuel olarak kapatılır. Test verisini yüklemek için "
-                   "Dosyalarım bölümünü kullanabilirsin.")
+                   "Ortak dosyalar bölümünü kullanabilirsin.")
     with ust[1]:
         if st.button("⬅️ Sohbete dön", use_container_width=True):
             st.session_state.pop("acilan_aktif_test", None)
@@ -1356,9 +1401,10 @@ def render_chat():
                 hide_index=True,
             )
             st.session_state["metrics_context"] = metrics_to_text(metrics)
-            if st.button("📁 Bu dosyayı Dosyalarım'a kalıcı olarak kaydet"):
+            if st.button("📁 Bu dosyayı ortak dosyalara kalıcı olarak kaydet"):
                 save_uploaded_file(uploaded, kategori="Kampanya verisi")
-                st.success("Dosyalarım'a kaydedildi.")
+                st.success("Ortak dosyalara kaydedildi — ekipteki herkes "
+                           "görebilir.")
                 st.rerun()
 
     # --- Ekrandan tasinan test secimi varsa gosterelim -------------------
@@ -1371,7 +1417,22 @@ def render_chat():
             st.rerun()
 
     st.markdown("---")
-    chat = st.session_state.chats[st.session_state.active]
+    cid = st.session_state.active
+    chat = st.session_state.chats[cid]
+
+    # Bu sohbet kime ait? (baskasinin sohbetini de acip okuyabiliriz)
+    if chat.get("messages"):
+        baslik_satiri = st.columns([5, 1])
+        sahip = chat.get("yazar") or "bilinmiyor"
+        benim = sahip == st.session_state.get("kullanici", "")
+        baslik_satiri[0].caption(
+            f"💬 **{chat.get('title', 'Yeni sohbet')}** — "
+            + ("senin sohbetin" if benim else f"{sahip} adlı kişinin sohbeti"))
+        if baslik_satiri[1].button("🗄️ Arşivle", use_container_width=True,
+                                   help="Listeden kaldırır; arşivde durur, "
+                                        "istediğinde geri alınır."):
+            depo.sohbet_arsivle(cid, True)
+            st.rerun()
 
     for msg in chat["messages"]:
         with st.chat_message(msg["role"]):
@@ -1385,7 +1446,10 @@ def render_chat():
         chat["messages"].append({"role": "user", "content": user_input})
         if not chat.get("title") or chat["title"] == "Yeni sohbet":
             chat["title"] = user_input[:40]
-        save_chats(st.session_state.chats)
+        if not chat.get("yazar"):
+            chat["yazar"] = st.session_state.get("kullanici", "")
+        save_chat(cid, chat)
+        st.session_state.pop("taslak_sohbet", None)   # artik kayitli
         st.rerun()   # mesaj gecmise yazildi; yanit asagida uretilir
 
     # --- Cevap bekleyen bir soru varsa yanit uret -------------------------
@@ -1417,7 +1481,7 @@ def render_chat():
                     st.markdown(answer)
                     chat["messages"].append({"role": "assistant",
                                              "content": answer})
-                    save_chats(st.session_state.chats)
+                    save_chat(cid, chat)
                 else:
                     st.error(hata_mesaji(hata_tip))
                     kol = st.columns([1, 1, 4])
@@ -1425,11 +1489,70 @@ def render_chat():
                         st.rerun()
                     if kol[1].button("🗑️ Soruyu geri al"):
                         chat["messages"].pop()
-                        save_chats(st.session_state.chats)
+                        save_chat(cid, chat)
                         st.rerun()
                     if ham_hata:
                         with st.expander("Teknik detay"):
                             st.code(ham_hata)
+
+
+def render_arsiv_page():
+    """Arsivlenen sohbetler: okunabilir, geri alinabilir, kalici silinebilir."""
+    ust = st.columns([6, 1])
+    with ust[0]:
+        st.title("🗄️ Sohbet arşivi")
+        st.caption("Listeden kaldırılan sohbetler burada durur — içerikleri "
+                   "kaybolmaz, istediğin zaman geri alabilirsin.")
+    with ust[1]:
+        if st.button("⬅️ Sohbete dön", use_container_width=True):
+            st.session_state.view = "chat"
+            st.rerun()
+
+    if not arsiv_sohbetler:
+        st.info("Arşivde sohbet yok.")
+        return
+
+    for cid, sohbet in reversed(list(arsiv_sohbetler.items())):
+        mesajlar = sohbet.get("messages", [])
+        baslik = sohbet.get("title") or "Yeni sohbet"
+        yazar = sohbet.get("yazar") or "bilinmiyor"
+        with st.expander(f"🗄️ {baslik} — {yazar} · {len(mesajlar)} mesaj"):
+            for msg in mesajlar[:6]:
+                rol = "👤" if msg["role"] == "user" else "🤖"
+                st.markdown(f"{rol} {msg['content'][:400]}"
+                            + ("..." if len(msg["content"]) > 400 else ""))
+            if len(mesajlar) > 6:
+                st.caption(f"(+{len(mesajlar) - 6} mesaj daha — geri alıp "
+                           f"tamamını okuyabilirsin)")
+
+            islem = st.columns([1.6, 1.6, 4])
+            if islem[0].button("↩️ Geri al", key=f"geri_{cid}",
+                               use_container_width=True):
+                depo.sohbet_arsivle(cid, False)
+                st.session_state.active = cid
+                st.session_state.view = "chat"
+                st.rerun()
+            onay_anahtari = f"sil_onay_{cid}"
+            if st.session_state.get(onay_anahtari):
+                islem[1].warning("Emin misin?")
+                if islem[2].button("Evet, kalıcı sil", key=f"evet_{cid}"):
+                    depo.sohbet_sil(cid)
+                    st.session_state.pop(onay_anahtari, None)
+                    st.rerun()
+                if islem[2].button("Vazgeç", key=f"hayir_{cid}"):
+                    st.session_state.pop(onay_anahtari, None)
+                    st.rerun()
+            elif islem[1].button("🗑️ Kalıcı sil", key=f"ksil_{cid}",
+                                 use_container_width=True):
+                st.session_state[onay_anahtari] = True
+                st.rerun()
+
+
+# --- Depolama uyarisi: Supabase'e ulasilamadiysa kullaniciyi bilgilendir ---
+if depo.son_hata():
+    st.warning("⚠️ Buluta (Supabase) şu anda ulaşılamıyor. Uygulama çalışmaya "
+               "devam ediyor ama kayıtlar geçici olarak yalnızca bu sunucuda "
+               "tutuluyor. Ayrıntı: soldaki **Ayarlar → Depolama uyarısı**.")
 
 
 # --- Yonlendirme (hangi ekran gosterilecek) --------------------------------
@@ -1439,6 +1562,8 @@ elif st.session_state.view == "havuz":
     render_havuz_page()
 elif st.session_state.view == "aktif":
     render_aktif_testler_page()
+elif st.session_state.view == "arsiv":
+    render_arsiv_page()
 elif st.session_state.view == "file" and st.session_state.active_file:
     render_file_detail(st.session_state.active_file)
 else:

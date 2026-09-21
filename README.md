@@ -67,6 +67,55 @@ birleştirilir.
   kolonuna göre bunu belirtir ve kaybeden testleri "bunu yapmayın" uyarısı
   olarak kullanır.
 
+## Ekip kullanımı: ortak sohbetler, ortak dosyalar, aktif testler
+Uygulamaya giren herkes **aynı** sohbetleri, dosyaları ve aktif testleri
+görür — biri bir soru sorduğunda diğerleri o sohbeti açıp öğrenebilir.
+Girişte istenen **ad**, açtığın sohbetin ve yüklediğin dosyanın yanında görünür.
+
+- **Sohbetler:** Sol menüde herkesin sohbeti listelenir (`Ad · başlık`).
+  Yanındaki 🗄️ ile sohbet **arşive** taşınır (silinmez). Arşivden
+  **↩️ Geri al** ile geri gelir; gerçekten silmek istersen arşiv ekranında
+  **🗑️ Kalıcı sil** vardır (onay sorar).
+- **Ortak dosyalar:** Kim yüklerse yüklesin herkes görür; listede
+  "yükleyen" bilgisi yazar.
+- **🟢 Aktif testler:** Devam eden testler (hipotez, değişkenler, sabitler)
+  herkese açıktır; test bitince **✅ Testi bitir** ile kapatılır.
+
+### Kalıcı depolama (Supabase) — cihazdan bağımsız, silinmeyen kayıt
+Streamlit Cloud'un diski **geçicidir**: uygulama uyuyup uyandığında veya yeni
+sürüm yayınlandığında `chats.json` ve `files/` silinir. Kalıcı olması için
+Supabase (ücretsiz) bağlanır:
+
+1. https://supabase.com → ücretsiz hesap → **New project** (bölge: Frankfurt).
+2. Sol menü → **SQL Editor** → `supabase_kurulum.sql` dosyasının tamamını
+   yapıştır → **Run**. (Tabloları ve dosya deposunu kurar.)
+3. **Project Settings → API**: `Project URL` ve `anon` anahtarını kopyala.
+4. Streamlit Cloud → **Manage app → Settings → Secrets** içine ekle:
+
+       gemini_api_key = "AIza..."
+       supabase_url   = "https://xxxx.supabase.co"
+       supabase_key   = "eyJhbGciOi..."
+
+   (Lokalde `.env` dosyasına `SUPABASE_URL=` / `SUPABASE_KEY=` yazılır.)
+5. Sol menüdeki **Ayarlar** bölümünde "✅ Bulut depolama açık" yazmalı.
+
+Bağlantı tek bir yerden kurulur: `depo.py` içindeki **`supabase_client()`**
+(resmi `supabase` paketi, `@st.cache_resource` ile önbelleklenir; önce
+`st.secrets`, yoksa `.env` okunur). Paket `requirements.txt` içinde — lokalde
+`pip install -r requirements.txt`, Streamlit Cloud'da otomatik kurulur.
+Buluta ulaşılamazsa uygulama çökmez: ekranda `st.warning` ile uyarır, kayıtları
+geçici olarak yerel dosyaya yazar ve 60 saniye boyunca tekrar denemez.
+
+**Eski sohbetlerini taşımak için** (kendi bilgisayarında, bir kez):
+
+    python aktar_supabase.py
+
+`chats.json`, yüklediğin dosyalar ve aktif testler buluta kopyalanır; script
+tekrar çalıştırılsa bile kayıtlar çoğalmaz.
+
+> Supabase ayarlanmazsa uygulama eskisi gibi çalışır, sadece veriler sunucu
+> yeniden başlayınca silinir (sol menüde turuncu uyarı olarak görünür).
+
 ## Notlar
 - Terminali kapatma; uygulama çalıştığı sürece açık kalmalı.
 - Gerçek şirket verisini KOYMA; sadece sahte veriyle test et (onay sürecine kadar).

@@ -1,6 +1,8 @@
 # --- Gizli bilgiler (ASLA GitHub'a gitmemeli) ---
+# .env: GEMINI_API_KEY + SUPABASE_URL/SUPABASE_KEY
 .env
 .streamlit/
+.streamlit/secrets.toml
 
 # --- Kisisel / oturuma ozel veriler ---
 # sohbet gecmisi (sirket ici konular icerir)

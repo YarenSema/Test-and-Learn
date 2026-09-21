@@ -3,3 +3,4 @@ google-genai>=1.0.0
 pandas
 openpyxl
 python-dotenv
+supabase>=2.4.0
