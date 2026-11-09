@@ -11,17 +11,28 @@ Baglanti tek yerden kurulur: supabase_client() (resmi supabase-py istemcisi,
 @st.cache_resource ile onbellekli). Anahtarlar once st.secrets'tan, yoksa
 .env / ortam degiskeninden okunur.
 
-Supabase ayarlanmamissa (supabase_url / supabase_key yoksa) uygulama hicbir
-sey degismemis gibi yerel dosyalarla calisir. Ayarli ama ulasilamiyorsa
-kullanici uyarilir, islem yerel dosyaya yazilir ve BEKLEME_SURESI boyunca
-bulut denenmez (her istekte zaman asimi beklenmesin diye). Bu sirada yerele
-yazilan kayitlar bulut geri geldiginde otomatik senkronize EDILMEZ.
+TEK DOGRU KAYNAK KURALI
+  Supabase ayarlanmamissa uygulama yerel dosyalarla calisir. Ayarliysa TEK
+  dogru kaynak buluttur; yerel chats.json / _aktif_testler.json / _files.json
+  bir daha okunmaz ve bulutla karismaz. Bulut gecici olarak ulasilamazsa:
+    - okumalarda son basarili bulut goruntusu gosterilir,
+    - sohbet ve test kayitlari siraya alinir (_bekleyen_kayitlar.json) ve
+      bulut geri geldiginde otomatik gonderilir,
+    - dosya yukleme ve silme hata mesajiyla reddedilir.
+
+AYNI ANDA YAZMA
+  Tablo guncellemeleri kaydin tamamini degil, yalnizca degisen alani yazar.
+  Sohbet kaydedilirken buluttaki mesajlar okunup birlestirilir; ayni sohbete
+  iki kisi yazsa da birinin mesaji silinmez.
 
 Kurulum: supabase_kurulum.sql dosyasini Supabase SQL Editor'de calistir,
 sonra Streamlit secrets'a supabase_url ve supabase_key satirlarini ekle.
 """
+import copy
 import os
 import json
+import sys
+import threading
 import time
 import uuid
 import datetime
@@ -31,12 +42,23 @@ from dotenv import load_dotenv
 
 load_dotenv()          # lokalde .env, Streamlit Cloud'da secrets kullanilir
 
+# Sirket aginda HTTPS trafigi kurumsal sertifikayla imzalanir; Python'un kendi
+# sertifika listesi bunu tanimaz ve Supabase baglantisi SSL hatasi verir.
+# Windows'un sertifika deposunu kullaniyoruz (dogrulama kapanmaz).
+if sys.platform == "win32":
+    try:
+        import truststore
+        truststore.inject_into_ssl()
+    except Exception:
+        pass
+
 # --- Yerel dosya yollari (bulut kapaliyken ve onbellek icin) --------------
 CHATS_FILE = "chats.json"
 FILES_DIR = "files"
 FILES_META = os.path.join(FILES_DIR, "_files.json")
 AKTIF_TESTLER_FILE = os.path.join(FILES_DIR, "_aktif_testler.json")
 CACHE_DIR = os.path.join(FILES_DIR, "_bulut")   # buluttan inen dosyalar
+BEKLEYEN_FILE = os.path.join(FILES_DIR, "_bekleyen_kayitlar.json")
 
 # --- Supabase sabitleri ---------------------------------------------------
 SOHBET_TABLO = "sohbetler"
@@ -45,11 +67,13 @@ TEST_TABLO = "aktif_testler"
 KOVA = "dosyalar"                  # storage bucket adi
 ONBELLEK_SURESI = 15               # saniye: ayni veriyi tekrar tekrar cekme
 ISTEK_ZAMAN_ASIMI = 8              # saniye: tek bir Supabase istegi
-BEKLEME_SURESI = 60                # saniye: bulut hata verirse ne kadar susulur
+BEKLEME_SURESI = 20                # saniye: bulut hata verirse ne kadar susulur
 
 # Bulut ulasilamaz oldugunda her istekte yeniden zaman asimi beklememek icin
-# kisa bir "soguma" suresi tutulur; bu sure boyunca dogrudan yerele dusulur.
+# kisa bir "soguma" suresi tutulur.
 _bulut_bekleme_sonu = 0.0
+_son_goruntu = {}                  # tur -> son basarili bulut okumasi
+_bekleyen_kilidi = threading.Lock()
 
 
 def _ayar(*adlar):
@@ -100,7 +124,7 @@ def bulut_ayarli():
 
 
 def bulut_beklemede():
-    """Bulut az once hata verdi mi (kisa sure yerelden devam ediyoruz)?"""
+    """Bulut az once hata verdi mi (kisa sure tekrar denenmiyor mu)?"""
     return time.time() < _bulut_bekleme_sonu
 
 
@@ -110,10 +134,7 @@ def bulut_acik():
 
 
 def _bulut_hata(mesaj):
-    """
-    Bulut islemi basarisiz: kullaniciyi uyar ve kisa sure boyunca (soguma)
-    dogrudan yerel kayda dus — her istekte zaman asimi beklenmesin.
-    """
+    """Bulut islemi basarisiz: kullaniciyi uyar, kisa sure tekrar deneme."""
     global _bulut_bekleme_sonu
     _bulut_bekleme_sonu = time.time() + BEKLEME_SURESI
     hata_bildir(mesaj)
@@ -143,15 +164,29 @@ def hatayi_temizle():
 
 
 # --- Supabase islemleri (tablolar + dosya deposu) ------------------------
-def _tablo_oku(tablo):
-    """Tablodaki tum satirlari getirir."""
-    yanit = supabase_client().table(tablo).select("*").execute()
-    return yanit.data or []
+def _tablo_oku(tablo, sira=None):
+    """Tablodaki tum satirlari getirir (Postgres sira garantisi vermez)."""
+    sorgu = supabase_client().table(tablo).select("*")
+    if sira:
+        sorgu = sorgu.order(sira)
+    return sorgu.execute().data or []
+
+
+def _tablo_satiri(tablo, kimlik, alanlar="*"):
+    """Tek satiri onbellege bakmadan okur (yoksa None)."""
+    yanit = (supabase_client().table(tablo).select(alanlar)
+             .eq("id", kimlik).limit(1).execute())
+    return yanit.data[0] if yanit.data else None
 
 
 def _tablo_yaz(tablo, kayit):
     """Kayit varsa gunceller, yoksa ekler (upsert — id birincil anahtar)."""
     supabase_client().table(tablo).upsert(kayit).execute()
+
+
+def _tablo_guncelle(tablo, kimlik, alanlar):
+    """Yalnizca verilen alanlari yazar; baskasinin degisikligini ezmez."""
+    supabase_client().table(tablo).update(alanlar).eq("id", kimlik).execute()
 
 
 def _tablo_sil(tablo, kimlik):
@@ -185,12 +220,15 @@ def _json_oku(yol, varsayilan=None):
 
 
 def _json_yaz(yol, veri):
+    """Once gecici dosyaya yazar; yarim kalan yazma kaydi bozmaz."""
     try:
         klasor = os.path.dirname(yol)
         if klasor:
             os.makedirs(klasor, exist_ok=True)
-        with open(yol, "w", encoding="utf-8") as f:
+        gecici = f"{yol}.{uuid.uuid4().hex[:6]}.tmp"
+        with open(gecici, "w", encoding="utf-8") as f:
             json.dump(veri, f, ensure_ascii=False, indent=2)
+        os.replace(gecici, yol)
         return True
     except Exception:
         return False
@@ -198,6 +236,82 @@ def _json_yaz(yol, veri):
 
 def _simdi():
     return datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
+
+
+def _simdi_utc():
+    return datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+
+# --- Buluttan guvenli okuma ----------------------------------------------
+def _buluttan_oku(tur, okuyucu, hata_metni):
+    """
+    Bulutu okur; ulasilamazsa son basarili goruntuyu doner. Yerel dosyalara
+    asla dusmez — eski yerel kopya ortak listeyle karismasin diye.
+    """
+    if not bulut_beklemede():
+        try:
+            veri = okuyucu()
+            _son_goruntu[tur] = copy.deepcopy(veri)
+            return veri
+        except Exception as e:
+            _bulut_hata(f"{hata_metni}: {e}")
+    return copy.deepcopy(_son_goruntu.get(tur, {}))
+
+
+# --- Bekleyen kayitlar: bulut yokken yazilanlar kaybolmasin ---------------
+def _siraya_al(tablo, kayit, birlestir=False):
+    """Yazilamayan kaydi siraya alir; ayni kaydin son hali gecerlidir."""
+    with _bekleyen_kilidi:
+        hepsi = _json_oku(BEKLEYEN_FILE)
+        hepsi[f"{tablo}:{kayit['id']}"] = {
+            "tablo": tablo, "kayit": kayit, "birlestir": birlestir}
+        return _json_yaz(BEKLEYEN_FILE, hepsi)
+
+
+def bekleyen_sayisi():
+    return len(_json_oku(BEKLEYEN_FILE))
+
+
+def _bekleyen_kayitlar(tablo):
+    return [b["kayit"] for b in _json_oku(BEKLEYEN_FILE).values()
+            if b.get("tablo") == tablo]
+
+
+def _kayit_gonder(tablo, kayit, birlestir=False):
+    if tablo == SOHBET_TABLO and birlestir:
+        kayit = _bulutla_birlestir(kayit)
+    _tablo_yaz(tablo, kayit)
+
+
+def bekleyenleri_gonder():
+    """Bulut geri geldiyse siradaki kayitlari sirayla gonderir."""
+    if not bulut_acik() or not os.path.exists(BEKLEYEN_FILE):
+        return
+    with _bekleyen_kilidi:
+        hepsi = _json_oku(BEKLEYEN_FILE)
+        try:
+            for anahtar in list(hepsi):
+                b = hepsi[anahtar]
+                _kayit_gonder(b["tablo"], b["kayit"],
+                              bool(b.get("birlestir")))
+                del hepsi[anahtar]
+        except Exception as e:
+            _bulut_hata(f"Bekleyen kayıtlar gönderilemedi: {e}")
+        if hepsi:
+            _json_yaz(BEKLEYEN_FILE, hepsi)
+        else:
+            try:
+                os.remove(BEKLEYEN_FILE)
+            except OSError:
+                pass
+    _sohbet_onbellegi_tazele()
+    _test_onbellegi_tazele()
+
+
+def _bulut_saglikli_ise_uyariyi_temizle():
+    """Bulut duzeldiyse eski uyari ekranda takili kalmasin."""
+    if son_hata() and bulut_acik() and not bekleyen_sayisi():
+        hatayi_temizle()
 
 
 # =========================================================================
@@ -215,22 +329,22 @@ def _sohbet_satirindan(satir):
 
 @st.cache_data(ttl=ONBELLEK_SURESI, show_spinner=False)
 def _sohbetleri_oku():
-    """Tum sohbetler (arsivdekiler dahil). Kisa sureli onbellekli."""
-    if not bulut_acik():
-        return _json_oku(CHATS_FILE)
-    satirlar = _tablo_oku(SOHBET_TABLO)
+    """Bulut: tum sohbetler (arsivdekiler dahil), eskiden yeniye."""
+    satirlar = _tablo_oku(SOHBET_TABLO, sira="guncelleme")
     return dict(_sohbet_satirindan(s) for s in satirlar)
 
 
 def sohbetleri_getir():
-    """
-    {cid: {title, messages, yazar, arsiv}} — hata olursa bos sozluk yerine
-    elde ne varsa onu doner ki uygulama calismaya devam etsin.
-    """
-    try:
-        sohbetler = _sohbetleri_oku()
-    except Exception as e:
-        _bulut_hata(f"Sohbetler okunamadı: {e}")
+    """{cid: {title, messages, yazar, arsiv}} — ekranda gosterilecek liste."""
+    if bulut_ayarli():
+        bekleyenleri_gonder()
+        sohbetler = _buluttan_oku("sohbet", _sohbetleri_oku,
+                                  "Sohbetler okunamadı")
+        for satir in _bekleyen_kayitlar(SOHBET_TABLO):
+            cid, sohbet = _sohbet_satirindan(satir)
+            sohbetler[cid] = sohbet
+        _bulut_saglikli_ise_uyariyi_temizle()
+    else:
         sohbetler = _json_oku(CHATS_FILE)
     # Eski kayitlarda olmayan alanlari tamamla
     for s in sohbetler.values():
@@ -248,57 +362,93 @@ def _sohbet_onbellegi_tazele():
         pass
 
 
-def sohbet_kaydet(cid, sohbet):
-    """Tek bir sohbeti kaydeder (baskalarinin sohbetlerine dokunmadan)."""
+def _mesajlari_birlestir(buluttaki, bizdeki):
+    """
+    Ortak baslangictan sonra ikisine de eklenen mesajlari korur. Ayni sohbete
+    iki kisi yazdiginda sonra kaydedenin digerini silmesini engeller.
+    """
+    ortak = 0
+    for a, b in zip(buluttaki, bizdeki):
+        if a != b:
+            break
+        ortak += 1
+    return list(buluttaki) + list(bizdeki[ortak:])
+
+
+def _bulutla_birlestir(kayit):
+    satir = _tablo_satiri(SOHBET_TABLO, kayit["id"], "mesajlar")
+    if not satir:
+        return kayit
+    kayit = dict(kayit)
+    kayit["mesajlar"] = _mesajlari_birlestir(satir.get("mesajlar") or [],
+                                             kayit.get("mesajlar") or [])
+    return kayit
+
+
+def sohbet_kaydet(cid, sohbet, birlestir=True):
+    """
+    Tek bir sohbeti kaydeder (baskalarinin sohbetlerine dokunmadan).
+    `birlestir=False`: mesaj bilerek silindiyse (soruyu geri al) kullanilir;
+    aksi halde silinen mesaj buluttan geri gelirdi.
+    """
     sohbet = dict(sohbet)
     sohbet.setdefault("arsiv", False)
+    if not bulut_ayarli():
+        hepsi = _json_oku(CHATS_FILE)
+        hepsi[cid] = sohbet
+        _json_yaz(CHATS_FILE, hepsi)
+        return True
+
+    kayit = {
+        "id": cid,
+        "baslik": sohbet.get("title") or "Yeni sohbet",
+        "yazar": sohbet.get("yazar") or "",
+        "mesajlar": sohbet.get("messages") or [],
+        "arsiv": bool(sohbet.get("arsiv")),
+        "guncelleme": _simdi_utc(),
+    }
     if bulut_acik():
         try:
-            _tablo_yaz(SOHBET_TABLO, {
-                "id": cid,
-                "baslik": sohbet.get("title") or "Yeni sohbet",
-                "yazar": sohbet.get("yazar") or "",
-                "mesajlar": sohbet.get("messages") or [],
-                "arsiv": bool(sohbet.get("arsiv")),
-                "guncelleme": datetime.datetime.now(
-                    datetime.timezone.utc).isoformat(),
-            })
+            _kayit_gonder(SOHBET_TABLO, kayit, birlestir)
             _sohbet_onbellegi_tazele()
             return True
         except Exception as e:
             _bulut_hata(f"Sohbet buluta kaydedilemedi: {e}")
-    # Bulut yok ya da yazilamadi: yerel dosyaya yaz (veri kaybolmasin)
-    hepsi = _json_oku(CHATS_FILE)
-    hepsi[cid] = sohbet
-    _json_yaz(CHATS_FILE, hepsi)
-    _sohbet_onbellegi_tazele()
-    return True
+    return _siraya_al(SOHBET_TABLO, kayit, birlestir)
 
 
 def sohbet_arsivle(cid, arsiv=True):
-    sohbetler = sohbetleri_getir()
-    if cid not in sohbetler:
+    """Yalnizca arsiv alanini yazar; sohbetin mesajlarina dokunmaz."""
+    if not bulut_ayarli():
+        hepsi = _json_oku(CHATS_FILE)
+        if cid not in hepsi:
+            return False
+        hepsi[cid]["arsiv"] = bool(arsiv)
+        _json_yaz(CHATS_FILE, hepsi)
+        return True
+    try:
+        _tablo_guncelle(SOHBET_TABLO, cid, {"arsiv": bool(arsiv)})
+        _sohbet_onbellegi_tazele()
+        return True
+    except Exception as e:
+        _bulut_hata(f"Sohbet arşivlenemedi: {e}")
         return False
-    sohbet = sohbetler[cid]
-    sohbet["arsiv"] = bool(arsiv)
-    return sohbet_kaydet(cid, sohbet)
 
 
 def sohbet_sil(cid):
     """Kalici silme (arsiv ekranindan)."""
-    if bulut_acik():
-        try:
-            _tablo_sil(SOHBET_TABLO, cid)
-            _sohbet_onbellegi_tazele()
-            return True
-        except Exception as e:
-            _bulut_hata(f"Sohbet silinemedi: {e}")
-            return False
-    hepsi = _json_oku(CHATS_FILE)
-    hepsi.pop(cid, None)
-    _json_yaz(CHATS_FILE, hepsi)
-    _sohbet_onbellegi_tazele()
-    return True
+    if not bulut_ayarli():
+        hepsi = _json_oku(CHATS_FILE)
+        hepsi.pop(cid, None)
+        _json_yaz(CHATS_FILE, hepsi)
+        return True
+    try:
+        _tablo_sil(SOHBET_TABLO, cid)
+        _sohbet_onbellegi_tazele()
+        return True
+    except Exception as e:
+        _bulut_hata(f"Sohbet silinemedi: {e}")
+        return False
 
 
 # =========================================================================
@@ -320,11 +470,6 @@ def _dosya_satirindan(satir):
 
 @st.cache_data(ttl=ONBELLEK_SURESI, show_spinner=False)
 def _dosyalari_oku():
-    if not bulut_acik():
-        yerel = _json_oku(FILES_META)
-        for fid, bilgi in yerel.items():
-            bilgi["id"] = fid
-        return yerel
     satirlar = _tablo_oku(DOSYA_TABLO)
     return dict(_dosya_satirindan(s) for s in satirlar)
 
@@ -337,14 +482,12 @@ def _dosya_onbellegi_tazele():
 
 
 def dosyalari_getir():
-    try:
-        return _dosyalari_oku()
-    except Exception as e:
-        _bulut_hata(f"Dosyalar okunamadı: {e}")
-        yerel = _json_oku(FILES_META)
-        for fid, bilgi in yerel.items():
-            bilgi["id"] = fid
-        return yerel
+    if bulut_ayarli():
+        return _buluttan_oku("dosya", _dosyalari_oku, "Dosyalar okunamadı")
+    yerel = _json_oku(FILES_META)
+    for fid, bilgi in yerel.items():
+        bilgi["id"] = fid
+    return yerel
 
 
 def dosya_kaydet(icerik, ad, kategori="Kampanya verisi", notu="",
@@ -352,13 +495,14 @@ def dosya_kaydet(icerik, ad, kategori="Kampanya verisi", notu="",
     """
     Yuklenen dosyayi saklar ve kaydini olusturur; id doner.
     `fid` verilirse o kimlikle yazilir (eski kayitlari aktarirken ayni
-    dosyanin ikinci kez eklenmemesi icin).
+    dosyanin ikinci kez eklenmemesi icin). Bulut ayarli ama yukleme
+    basarisizsa None doner: dosya kimsenin goremeyecegi bir yere yazilmaz.
     """
     fid = fid or uuid.uuid4().hex[:8]
     ad = os.path.basename(ad)
     boyut = len(icerik)
 
-    if bulut_acik():
+    if bulut_ayarli():
         yol = f"{fid}/{ad}"
         try:
             _depo_yukle(yol, icerik)
@@ -367,16 +511,20 @@ def dosya_kaydet(icerik, ad, kategori="Kampanya verisi", notu="",
                 "notu": notu, "hafizada": True, "yukleyen": yukleyen,
                 "tarih": _simdi(), "boyut": boyut,
             })
-            # Bu container icin yerel kopyayi da birakalim (tekrar inmesin)
+        except Exception as e:
+            _bulut_hata(f"Dosya buluta yüklenemedi ({ad}): {e}")
+            return None
+        # Bu container icin yerel kopyayi da birakalim (tekrar inmesin)
+        try:
             os.makedirs(CACHE_DIR, exist_ok=True)
             with open(os.path.join(CACHE_DIR, f"{fid}_{ad}"), "wb") as f:
                 f.write(icerik)
-            _dosya_onbellegi_tazele()
-            return fid
-        except Exception as e:
-            _bulut_hata(f"Dosya buluta yüklenemedi: {e}")
+        except OSError:
+            pass
+        _dosya_onbellegi_tazele()
+        return fid
 
-    # Yerel kayit (bulut kapali ya da yazilamadi)
+    # Yerel kayit (bulut ayarli degil)
     os.makedirs(FILES_DIR, exist_ok=True)
     disk_adi = f"{fid}_{ad}"
     with open(os.path.join(FILES_DIR, disk_adi), "wb") as f:
@@ -388,36 +536,27 @@ def dosya_kaydet(icerik, ad, kategori="Kampanya verisi", notu="",
         "boyut": boyut,
     }
     _json_yaz(FILES_META, meta)
-    _dosya_onbellegi_tazele()
     return fid
 
 
 def dosya_guncelle(fid, **alanlar):
-    """Dosya kaydinin alanlarini gunceller (orn. hafizada)."""
-    bilgi = dosyalari_getir().get(fid)
-    if not bilgi:
-        return False
-    bilgi = dict(bilgi)
-    bilgi.update(alanlar)
-    if bulut_acik():
+    """Dosya kaydinin yalnizca verilen alanlarini gunceller (orn. hafizada)."""
+    if bulut_ayarli():
+        # Ekrandaki "not" alani tabloda "notu" kolonudur
+        kolonlar = {("notu" if k == "not" else k): v
+                    for k, v in alanlar.items()}
         try:
-            _tablo_yaz(DOSYA_TABLO, {
-                "id": fid, "ad": bilgi.get("ad"), "yol": bilgi.get("yol"),
-                "kategori": bilgi.get("kategori"), "notu": bilgi.get("not"),
-                "hafizada": bool(bilgi.get("hafizada")),
-                "yukleyen": bilgi.get("yukleyen"),
-                "tarih": bilgi.get("tarih"), "boyut": bilgi.get("boyut"),
-            })
+            _tablo_guncelle(DOSYA_TABLO, fid, kolonlar)
             _dosya_onbellegi_tazele()
             return True
         except Exception as e:
             _bulut_hata(f"Dosya güncellenemedi: {e}")
             return False
     meta = _json_oku(FILES_META)
-    if fid in meta:
-        meta[fid].update(alanlar)
-        _json_yaz(FILES_META, meta)
-    _dosya_onbellegi_tazele()
+    if fid not in meta:
+        return False
+    meta[fid].update(alanlar)
+    _json_yaz(FILES_META, meta)
     return True
 
 
@@ -425,7 +564,7 @@ def dosya_sil(fid):
     bilgi = dosyalari_getir().get(fid)
     if not bilgi:
         return False
-    if bulut_acik():
+    if bulut_ayarli():
         try:
             if bilgi.get("yol"):
                 try:
@@ -495,17 +634,18 @@ def dosya_icerigi(bilgi):
 # =========================================================================
 # AKTIF TESTLER
 # =========================================================================
+def _test_satirindan(satir):
+    bilgi = dict(satir.get("veri") or {})
+    # Kolon ve JSON ayrismasin: gecerli durum her zaman kolondaki degerdir
+    bilgi["durum"] = satir.get("durum") or bilgi.get("durum") or "aktif"
+    return satir["id"], bilgi
+
+
 @st.cache_data(ttl=ONBELLEK_SURESI, show_spinner=False)
 def _testleri_oku():
-    if not bulut_acik():
-        return _json_oku(AKTIF_TESTLER_FILE)
-    satirlar = _tablo_oku(TEST_TABLO)
-    testler = {}
-    for s in satirlar:
-        bilgi = dict(s.get("veri") or {})
-        bilgi["durum"] = s.get("durum") or bilgi.get("durum") or "aktif"
-        testler[s["id"]] = bilgi
-    return testler
+    """Bulut: tum testler, eskiden yeniye."""
+    satirlar = _tablo_oku(TEST_TABLO, sira="guncelleme")
+    return dict(_test_satirindan(s) for s in satirlar)
 
 
 def _test_onbellegi_tazele():
@@ -516,62 +656,88 @@ def _test_onbellegi_tazele():
 
 
 def testleri_getir():
-    try:
-        return _testleri_oku()
-    except Exception as e:
-        _bulut_hata(f"Aktif testler okunamadı: {e}")
+    if not bulut_ayarli():
         return _json_oku(AKTIF_TESTLER_FILE)
+    testler = _buluttan_oku("test", _testleri_oku, "Aktif testler okunamadı")
+    for satir in _bekleyen_kayitlar(TEST_TABLO):
+        tid, bilgi = _test_satirindan(satir)
+        testler[tid] = bilgi
+    return testler
 
 
 def test_kaydet(tid, bilgi):
     bilgi = dict(bilgi)
     bilgi.setdefault("durum", "aktif")
+    if not bulut_ayarli():
+        hepsi = _json_oku(AKTIF_TESTLER_FILE)
+        hepsi[tid] = bilgi
+        _json_yaz(AKTIF_TESTLER_FILE, hepsi)
+        return True
+
+    kayit = {"id": tid, "veri": bilgi, "durum": bilgi["durum"],
+             "guncelleme": _simdi_utc()}
     if bulut_acik():
         try:
-            _tablo_yaz(TEST_TABLO, {
-                "id": tid, "veri": bilgi, "durum": bilgi["durum"],
-                "guncelleme": datetime.datetime.now(
-                    datetime.timezone.utc).isoformat(),
-            })
+            _kayit_gonder(TEST_TABLO, kayit)
             _test_onbellegi_tazele()
             return True
         except Exception as e:
             _bulut_hata(f"Test buluta kaydedilemedi: {e}")
-    hepsi = _json_oku(AKTIF_TESTLER_FILE)
-    hepsi[tid] = bilgi
-    _json_yaz(AKTIF_TESTLER_FILE, hepsi)
-    _test_onbellegi_tazele()
-    return True
+    return _siraya_al(TEST_TABLO, kayit)
+
+
+def test_guncelle(tid, **alanlar):
+    """
+    Testin verilen alanlarini gunceller. Bulut acikken guncel kayit
+    onbellege bakilmadan okunur: baskasinin az once yaptigi degisiklik ezilmez.
+    """
+    if bulut_acik():
+        try:
+            satir = _tablo_satiri(TEST_TABLO, tid)
+            if not satir:
+                _test_onbellegi_tazele()
+                return False
+            bilgi = _test_satirindan(satir)[1]
+        except Exception as e:
+            _bulut_hata(f"Test okunamadı: {e}")
+            bilgi = testleri_getir().get(tid)
+    else:
+        bilgi = testleri_getir().get(tid)
+    if not bilgi:
+        return False
+    bilgi = dict(bilgi)
+    bilgi.update(alanlar)
+    return test_kaydet(tid, bilgi)
 
 
 def test_sil(tid):
-    if bulut_acik():
-        try:
-            _tablo_sil(TEST_TABLO, tid)
-            _test_onbellegi_tazele()
-            return True
-        except Exception as e:
-            _bulut_hata(f"Test silinemedi: {e}")
-            return False
-    hepsi = _json_oku(AKTIF_TESTLER_FILE)
-    hepsi.pop(tid, None)
-    _json_yaz(AKTIF_TESTLER_FILE, hepsi)
-    _test_onbellegi_tazele()
-    return True
+    if not bulut_ayarli():
+        hepsi = _json_oku(AKTIF_TESTLER_FILE)
+        hepsi.pop(tid, None)
+        _json_yaz(AKTIF_TESTLER_FILE, hepsi)
+        return True
+    try:
+        _tablo_sil(TEST_TABLO, tid)
+        _test_onbellegi_tazele()
+        return True
+    except Exception as e:
+        _bulut_hata(f"Test silinemedi: {e}")
+        return False
 
 
 # =========================================================================
 # DURUM BILGISI (kenar cubugunda gosterilir)
 # =========================================================================
 def durum_metni():
-    if bulut_acik():
+    bekleyen = bekleyen_sayisi() if bulut_ayarli() else 0
+    if bulut_acik() and not bekleyen:
         return ("✅ Bulut depolama açık (Supabase) — sohbetler, dosyalar ve "
                 "aktif testler kalıcı; herkes aynı veriyi görür.")
-    if bulut_ayarli():      # ayarli ama az once hata verdi
-        kalan = max(1, int(_bulut_bekleme_sonu - time.time()))
-        return (f"⏳ Buluta şu anda ulaşılamıyor — {kalan} sn sonra yeniden "
-                f"denenecek. Bu sırada kayıtlar geçici olarak bu sunucuda "
-                f"tutuluyor.")
+    if bulut_ayarli():
+        ek = (f" {bekleyen} kayıt sırada, bulut geri gelince otomatik "
+              f"gönderilecek." if bekleyen else "")
+        return ("⏳ Buluta şu anda ulaşılamıyor; son bilinen veriler "
+                "gösteriliyor, otomatik yeniden denenecek." + ek)
     return ("⚠️ Bulut depolama kapalı — veriler yalnızca bu sunucuda tutulur "
             "ve uygulama yeniden başlayınca silinir. (Kurulum için "
             "supabase_kurulum.sql)")

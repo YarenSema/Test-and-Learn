@@ -103,8 +103,35 @@ Bağlantı tek bir yerden kurulur: `depo.py` içindeki **`supabase_client()`**
 (resmi `supabase` paketi, `@st.cache_resource` ile önbelleklenir; önce
 `st.secrets`, yoksa `.env` okunur). Paket `requirements.txt` içinde — lokalde
 `pip install -r requirements.txt`, Streamlit Cloud'da otomatik kurulur.
-Buluta ulaşılamazsa uygulama çökmez: ekranda `st.warning` ile uyarır, kayıtları
-geçici olarak yerel dosyaya yazar ve 60 saniye boyunca tekrar denemez.
+
+Supabase ayarlıysa **tek doğru kaynak buluttur**; yerel `chats.json`,
+`files/_files.json` ve `files/_aktif_testler.json` okunmaz ve ortak veriyle
+karışmaz. Buluta ulaşılamazsa uygulama çökmez, ekranda uyarır ve:
+
+- son bilinen ortak veriyi göstermeye devam eder,
+- sohbet ve aktif test kayıtlarını sıraya alır, bulut geri gelince otomatik
+  gönderir (`files/_bekleyen_kayitlar.json`). Streamlit Cloud'da sunucu tam bu
+  sırada yeniden başlarsa bu kuyruk da silinir,
+- dosya yükleme ve silmeyi hata mesajıyla reddeder; sonra tekrar denemek gerekir.
+
+Şirket ağında Windows'un sertifika deposu kullanılır (`truststore`), böylece
+Supabase bağlantısı SSL hatası vermez.
+
+Aynı sohbete iki kişi yazarsa mesajlar birleştirilir. Bir aktif testi iki kişi
+aynı anda düzenlerse aynı alanda son kaydeden geçerli olur.
+
+### Sohbet nereden okur?
+Her soruda aynı anda şunlara bakar: bilgi tabanı, test havuzundan soruyla en
+ilgili testler, hafızada işaretli ortak dosyalar (büyük dosyada soruyla eşleşen
+satırlar öncelikli), aktif ve biten testler, açıksa internet.
+
+- **Modeller** hesaptan otomatik alınır; Google bir modeli kapatınca kod
+  değişikliği gerekmez. Hızlı yanıt için önce Flash-Lite, **🚀 Max** modunda
+  önce tam Flash denenir.
+- **🌐 İnternette de ara** (sol menü) soruyu `ddgs` ile arama motorlarına
+  gönderir ve kullanılan kaynakları yanıtın altına ekler. Selamlaşma ve iç
+  veri sorularında arama yapılmaz. Dosya veya test verisi gönderilmez, ama
+  sorunun metni dışarı çıkar; gizli bir bilgi soracaksan aramayı kapat.
 
 **Eski sohbetlerini taşımak için** (kendi bilgisayarında, bir kez):
 
