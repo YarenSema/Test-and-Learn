@@ -87,7 +87,9 @@ Girişte istenen **ad**, açtığın sohbetin ve yüklediğin dosyanın yanında
   sonra da girilebilir (**✏️ Sonuç / bilgileri düzenle**). Asistan bu
   testleri ve insight'ları sohbette okur. Aynı testler
   **Test havuzları → 👥 Ekibin testleri** sekmesinde havuz formatında
-  (filtre, grafik, "sohbette kullan") görünür.
+  (filtre, grafik, "sohbette kullan") görünür; bu tablo düzenlenebilir —
+  boş (None) hücreler doldurulup **💾 Tablodaki değişiklikleri kaydet** ile
+  kaydedilir. Test kartları eksik alanları ayrıca listeler.
 - **🎞️ Sunuma aktar:** Biten testler, ekibin "Meta CPAS | Low-Selling
   Products Test" slaytı düzeninde test başına bir sayfa olarak PPTX
   indirilir (başlıklar English ya da Türkçe). Kurumsal logo ve arka planın

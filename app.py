@@ -1038,7 +1038,7 @@ def render_test_detay(r):
 
 
 def render_havuz_sekmesi(anahtar, df, kume_adi, aciklama, kaynak=None,
-                         kolonlar=None):
+                         kolonlar=None, tablo_cizici=None):
     """Bir veri kumesinin sekmesi: filtre, ozet, grafik, tablo, detaylar."""
     if aciklama:
         st.markdown(aciklama)
@@ -1102,8 +1102,11 @@ def render_havuz_sekmesi(anahtar, df, kume_adi, aciklama, kaynak=None,
     gosterilecek = [k for k in (kolonlar or th.TABLO_KOLONLARI)
                     if k in secili.columns]
     st.markdown(f"**{len(secili)} test**")
-    st.dataframe(secili[gosterilecek] if gosterilecek else secili,
-                 hide_index=True, use_container_width=True, height=340)
+    if tablo_cizici:                       # orn. ekip testleri: duzenlenebilir
+        tablo_cizici(secili)
+    else:
+        st.dataframe(secili[gosterilecek] if gosterilecek else secili,
+                     hide_index=True, use_container_width=True, height=340)
 
     # --- Sohbete tasima ----------------------------------------------
     islem = st.columns([2, 2, 4])
@@ -1213,7 +1216,7 @@ def _aktif_test_formu(form_anahtari, mevcut=None, buton="💾 Kaydet",
                 format_func={"aktif": "🟢 Sahada devam ediyor",
                              "bitti": "✅ Bitti — sonucunu giriyorum"}.get)
         bilgi_sekmesi, sonuc_sekmesi, sunum_sekmesi = st.tabs(
-            ["📝 Test bilgisi", "📊 Sonuç & insight", "🎞️ Sunum slaytı"])
+            ["📝 Test bilgisi", "📊 Sonuç & sayılar", "🎞️ Sunum slaytı"])
 
         with bilgi_sekmesi:
             ad = st.text_input(
@@ -1230,19 +1233,19 @@ def _aktif_test_formu(form_anahtari, mevcut=None, buton="💾 Kaydet",
             platform = s[1].text_input(
                 "Platform / mecra", value=m.get("platform", ""),
                 key=k("platform"), placeholder="Örn: Meta CPAS, Google")
-            ulke = s[2].text_input("Ülke", value=m.get("ulke", ""),
+            ulke = s[2].text_input("Ülke (Country)", value=m.get("ulke", ""),
                                    key=k("ulke"), placeholder="Örn: Türkiye")
             s = st.columns(3)
             kategori = s[0].text_input(
-                "Ürün kategorisi", value=m.get("kategori", ""),
+                "Ürün kategorisi (Product_Category)", value=m.get("kategori", ""),
                 key=k("kategori"), placeholder="Örn: Banyo bataryası")
-            test_tipi = _secim_kutusu(s[1], "Test tipi", et.TEST_TIPLERI,
+            test_tipi = _secim_kutusu(s[1], "Test tipi (Test_Type)", et.TEST_TIPLERI,
                                       m.get("test_tipi", ""), key=k("tip"))
             kampanya_amaci = s[2].text_input(
-                "Kampanya amacı", value=m.get("kampanya_amaci", ""),
+                "Kampanya amacı (Campaign_Objective)", value=m.get("kampanya_amaci", ""),
                 key=k("amac"), placeholder="Örn: Satış, trafik")
             metrik = st.text_input(
-                "Ölçülen ana metrik", value=m.get("metrik", ""),
+                "Ölçülen ana metrik (Primary_Metric)", value=m.get("metrik", ""),
                 key=k("metrik"), placeholder="Örn: ROAS, dönüşüm oranı, CPC")
 
             d = st.columns(2)
@@ -1279,22 +1282,22 @@ def _aktif_test_formu(form_anahtari, mevcut=None, buton="💾 Kaydet",
                 "maliyet metriklerinde düşüş iyileşme sayılır).")
             r = st.columns(3)
             kontrol = r[0].text_input(
-                "Kontrol değeri", value=m.get("kontrol_deger", ""),
+                "Kontrol değeri (CR_Control)", value=m.get("kontrol_deger", ""),
                 key=k("kontrol"), placeholder="Örn: 4,42 (Always On ROAS)")
             varyant = r[1].text_input(
-                "Varyant / test değeri", value=m.get("varyant_deger", ""),
+                "Varyant / test değeri (CR_Treatment)", value=m.get("varyant_deger", ""),
                 key=k("varyant"), placeholder="Örn: 0,90")
-            lift = r[2].text_input("Lift % (opsiyonel)", value=m.get("lift", ""),
+            lift = r[2].text_input("Lift % (Lift_Percent — boşsa hesaplanır)", value=m.get("lift", ""),
                                    key=k("lift"), placeholder="Boşsa hesaplanır")
             r = st.columns(4)
-            p_degeri = r[0].text_input("P-value", value=m.get("p_degeri", ""),
+            p_degeri = r[0].text_input("P-value (P_Value)", value=m.get("p_degeri", ""),
                                        key=k("p"), placeholder="Örn: 0.03")
-            guven = r[1].text_input("Güven düzeyi", value=m.get("guven", ""),
+            guven = r[1].text_input("Güven düzeyi (Confidence)", value=m.get("guven", ""),
                                     key=k("guven"), placeholder="Örn: 95%")
             orneklem = r[2].text_input(
-                "Örneklem", value=m.get("orneklem", ""), key=k("orneklem"),
+                "Örneklem (Sample_Size)", value=m.get("orneklem", ""), key=k("orneklem"),
                 placeholder="Örn: 12400")
-            sonuc = _secim_kutusu(r[3], "Sonuç", et.SONUCLAR,
+            sonuc = _secim_kutusu(r[3], "Sonuç (Result)", et.SONUCLAR,
                                   m.get("sonuc", ""), key=k("sonuc"),
                                   format_func=lambda x: et.SONUCLAR.get(x, x))
             sonuc_notu = st.text_area(
@@ -1394,7 +1397,7 @@ def _aktif_test_formu(form_anahtari, mevcut=None, buton="💾 Kaydet",
               and et.sayi(sayilar[anahtar]) is None]
     if hatali:
         st.error("Sayı olarak okunamadı: " + ", ".join(hatali)
-                 + " (📊 Sonuç & insight sekmesi).")
+                 + " (📊 Sonuç & sayılar sekmesi).")
         return None
 
     # Yalnizca formdaki alanlar: durum gibi alanlar eski ekran verisiyle
@@ -1491,6 +1494,33 @@ def _aktif_test_detay(bilgi):
     if bilgi.get("not"):
         st.markdown(f"**Not:** {bilgi['not']}")
 
+    eksik = eksik_alanlar(bilgi)
+    if eksik:
+        mesaj = ("Eksik bilgiler: " + ", ".join(eksik) + " → **"
+                 + ("✏️ Sonuç / bilgileri düzenle" if bilgi.get("durum") == "bitti"
+                    else "📊 Ara sonuç / düzenle")
+                 + "** ile ya da Test havuzları → 👥 Ekibin testleri "
+                   "tablosundan doldurabilirsin.")
+        (st.warning if bilgi.get("durum") == "bitti" else st.caption)(
+            "⚠️ " + mesaj)
+
+
+# Havuz tablosundaki kolonlar: biten testte hepsi beklenir, devam edende
+# yalnizca test bilgisi (sonuc sayilari test bitince gelir)
+_BILGI_ALANLARI = (("Ülke", "ulke"), ("Ürün kategorisi", "kategori"),
+                   ("Test tipi", "test_tipi"), ("Ölçülen metrik", "metrik"))
+_SONUC_ALANLARI = (("Kontrol değeri", "kontrol_deger"),
+                   ("Varyant değeri", "varyant_deger"),
+                   ("P-value", "p_degeri"), ("Güven", "guven"),
+                   ("Örneklem", "orneklem"), ("Sonuç", "sonuc"),
+                   ("Insight", "insight"))
+
+
+def eksik_alanlar(bilgi):
+    alanlar = _BILGI_ALANLARI + (_SONUC_ALANLARI
+                                 if bilgi.get("durum") == "bitti" else ())
+    return [etiket for etiket, anahtar in alanlar if not bilgi.get(anahtar)]
+
 
 @st.cache_data(show_spinner=False, max_entries=100)
 def _sunum_baytlari(testler_json, dil):
@@ -1533,9 +1563,9 @@ def _test_karti(tid, bilgi):
             etiket += "  " + et.SONUCLAR[bilgi["sonuc"]].split(" ")[0]
         if lift is not None:
             etiket += f" {lift:+.1f}%"
-        if not (bilgi.get("insight") or bilgi.get("sonuc_notu")
-                or bilgi.get("kontrol_deger")):
-            etiket += "  · sonuç girilmemiş"
+        eksik = len(eksik_alanlar(bilgi))
+        if eksik:
+            etiket += f"  · ⚠️ {eksik} eksik bilgi"
     elif bilgi.get("baslangic"):
         etiket += f"  (başlangıç: {bilgi['baslangic']})"
 
@@ -1709,17 +1739,136 @@ def render_ekip_sekmesi():
     if df.empty:
         st.info("Henüz ekip testi yok. Yukarıdan ilk testi ekleyebilirsin.")
         return
-    if st.button("🟢 Düzenle / sonuç gir / sunuma aktar →", key="ekip_git"):
+    if st.button("🟢 Sunum slaytı ve detaylı düzenleme için Aktif testler "
+                 "sayfası →", key="ekip_git"):
         st.session_state.view = "aktif"
         st.rerun()
     render_havuz_sekmesi(
-        "ekip", df.drop(columns=["_tid"]), kume_adi="Ekibin testleri",
+        "ekip", df, kume_adi="Ekibin testleri",
         aciklama="", kaynak="Ekip girişleri (Aktif testler sayfası)",
-        kolonlar=["Test_ID", "Test_Name", "Status", "Brand", "Platform",
-                  "Country", "Test_Type", "Primary_Metric", "CR_Control",
-                  "CR_Treatment", "Lift_Percent", "P_Value", "Confidence",
-                  "Sample_Size", "Result", "Launch_Date", "End_Date",
-                  "Added_By"])
+        tablo_cizici=_ekip_tablo_duzenleyici)
+
+
+# Tablodan duzenlenebilen kolonlar -> testin kayittaki alani
+_TABLO_ALANLARI = {
+    "Test_Name": "ad", "Brand": "marka", "Platform": "platform",
+    "Country": "ulke", "Product_Category": "kategori",
+    "Test_Type": "test_tipi", "Campaign_Objective": "kampanya_amaci",
+    "Primary_Metric": "metrik", "CR_Control": "kontrol_deger",
+    "CR_Treatment": "varyant_deger", "Lift_Percent": "lift",
+    "P_Value": "p_degeri", "Confidence": "guven", "Sample_Size": "orneklem",
+    "Result": "sonuc", "Key_Learnings": "insight",
+    "Launch_Date": "baslangic", "End_Date": "bitis",
+}
+_TABLO_SAYILARI = {"CR_Control", "CR_Treatment", "Lift_Percent", "P_Value",
+                   "Sample_Size"}
+_TABLO_SIRASI = ["Test_ID", "Test_Name", "Status", "Brand", "Platform",
+                 "Country", "Product_Category", "Test_Type",
+                 "Campaign_Objective", "Primary_Metric", "CR_Control",
+                 "CR_Treatment", "Lift_Percent", "P_Value", "Confidence",
+                 "Sample_Size", "Result", "Key_Learnings", "Launch_Date",
+                 "End_Date", "Added_By"]
+
+
+def _bos_mu(deger):
+    if deger is None:
+        return True
+    if isinstance(deger, str):
+        return not deger.strip()
+    try:
+        return bool(pd.isna(deger))
+    except (TypeError, ValueError):
+        return False
+
+
+def _tablo_kayit_degeri(kolon, deger):
+    """Tablodaki hucreyi kayittaki metin bicimine cevirir."""
+    if _bos_mu(deger):
+        return ""
+    if kolon == "Sample_Size":
+        return str(int(round(float(deger))))
+    if kolon in _TABLO_SAYILARI:
+        return et.bicim(float(deger), 6).replace(" ", "")
+    return str(deger).strip()
+
+
+def _tablo_farki(eski, yeni):
+    """{tid: {alan: yeni deger}} — yalnizca gercekten degisen hucreler."""
+    farklar = {}
+    for i in range(len(eski)):
+        tid = eski.iloc[i]["_tid"]
+        for kolon, alan in _TABLO_ALANLARI.items():
+            a, b = eski.iloc[i][kolon], yeni.iloc[i][kolon]
+            if _bos_mu(a) and _bos_mu(b):
+                continue
+            if not _bos_mu(a) and not _bos_mu(b):
+                if kolon in _TABLO_SAYILARI:
+                    if abs(float(a) - float(b)) < 1e-9:
+                        continue
+                elif str(a).strip() == str(b).strip():
+                    continue
+            farklar.setdefault(tid, {})[alan] = _tablo_kayit_degeri(kolon, b)
+    return farklar
+
+
+def _ekip_tablo_duzenleyici(secili):
+    """Ekip testleri tablosu: bos hucreler dogrudan doldurulup kaydedilir."""
+    st.caption("✏️ Boş (None) hücreye çift tıklayıp doldurabilirsin; "
+               "bitince **💾 Tablodaki değişiklikleri kaydet**. Sayılarda "
+               "ondalık için nokta kullan (0.043). Lift boş kalırsa kontrol "
+               "ve varyanttan hesaplanır.")
+    tablo = secili.reset_index(drop=True).copy()
+    for kolon in _TABLO_ALANLARI:
+        if kolon not in _TABLO_SAYILARI:
+            tablo[kolon] = tablo[kolon].fillna("").astype(str)
+        else:
+            tablo[kolon] = pd.to_numeric(tablo[kolon], errors="coerce")
+    tipler = sorted((set(et.TEST_TIPLERI) | set(tablo["Test_Type"])) - {""})
+    sayi = lambda baslik, yardim, **kw: st.column_config.NumberColumn(
+        baslik, help=yardim, **kw)
+    ayar = {
+        "Test_ID": st.column_config.TextColumn("Test_ID", width="small"),
+        "Test_Name": st.column_config.TextColumn("Test_Name", width="medium"),
+        "Test_Type": st.column_config.SelectboxColumn(
+            "Test_Type", options=tipler, help="Test tipi"),
+        "Result": st.column_config.SelectboxColumn(
+            "Result", options=["WIN", "LOSS", "INCONCLUSIVE"],
+            help="WIN = kazandı, LOSS = kaybetti, INCONCLUSIVE = anlamlı "
+                 "fark yok"),
+        "CR_Control": sayi("CR_Control", "Kontrol değeri (ölçülen metrikte)"),
+        "CR_Treatment": sayi("CR_Treatment", "Varyant / test değeri"),
+        "Lift_Percent": sayi("Lift_Percent",
+                             "İyileşme yüzdesi; boşsa hesaplanır",
+                             format="%.1f"),
+        "P_Value": sayi("P_Value", "Örn: 0.03", min_value=0.0,
+                        max_value=1.0),
+        "Sample_Size": sayi("Sample_Size", "Örneklem", min_value=0,
+                            step=1, format="%d"),
+        "Confidence": st.column_config.TextColumn("Confidence",
+                                                  help="Örn: 95%"),
+        "Key_Learnings": st.column_config.TextColumn(
+            "Insight", width="large", help="Bu testten ne çıkardık?"),
+    }
+    # Filtre degisince satirlar kayar: anahtar gorunen testlere bagli
+    anahtar = "ekip_tablo_" + uuid.uuid5(
+        uuid.NAMESPACE_OID, ",".join(tablo["_tid"])).hex[:10]
+    duzen = st.data_editor(
+        tablo, column_order=_TABLO_SIRASI, column_config=ayar,
+        disabled=[k for k in _TABLO_SIRASI if k not in _TABLO_ALANLARI],
+        hide_index=True, use_container_width=True, num_rows="fixed",
+        key=anahtar)
+    farklar = _tablo_farki(tablo, duzen)
+    k = st.columns([2.2, 4])
+    if k[0].button("💾 Tablodaki değişiklikleri kaydet", type="primary",
+                   disabled=not farklar, use_container_width=True,
+                   key="ekip_tablo_kaydet"):
+        for tid, alanlar in farklar.items():
+            aktif_test_guncelle(tid, **alanlar)
+        st.session_state.pop(anahtar, None)
+        st.toast(f"{len(farklar)} test güncellendi.")
+        st.rerun()
+    if farklar:
+        k[1].info(f"{len(farklar)} testte kaydedilmemiş değişiklik var.")
 
 
 # --- Modelden yanit alma (yeniden deneme + yedek model) -------------------

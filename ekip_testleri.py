@@ -130,7 +130,9 @@ def havuz_tablosu(testler):
             "Sample_Size": sayi(b.get("orneklem")),
             "Result": b.get("sonuc") or None,
             "Launch_Date": b.get("baslangic") or None,
-            "End_Date": (b.get("kapanis") if bitti else b.get("bitis")) or None,
+            "End_Date": (b.get("bitis")
+                         or ((b.get("kapanis") or "").split(" ")[0]
+                             if bitti else "")) or None,
             "Added_By": b.get("ekleyen") or None,
             "Hypothesis": b.get("hipotez") or None,
             "Executive_Summary": b.get("sonuc_notu") or None,
