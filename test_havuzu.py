@@ -105,6 +105,10 @@ FILTRE_ADAYLARI = {
     "Test tipi": "Test_Type",
     "Kampanya amacı": "Campaign_Objective",
     "Sonuç": "Result",
+    # Yalnizca ekibin girdigi testlerde bulunan kolonlar
+    "Durum": "Status",
+    "Platform": "Platform",
+    "Ekleyen": "Added_By",
 }
 
 # Ekranda tabloda gosterilecek kolon sirasi

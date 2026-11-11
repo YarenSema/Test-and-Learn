@@ -78,8 +78,22 @@ Girişte istenen **ad**, açtığın sohbetin ve yüklediğin dosyanın yanında
   **🗑️ Kalıcı sil** vardır (onay sorar).
 - **Ortak dosyalar:** Kim yüklerse yüklesin herkes görür; listede
   "yükleyen" bilgisi yazar.
-- **🟢 Aktif testler:** Devam eden testler (hipotez, değişkenler, sabitler)
-  herkese açıktır; test bitince **✅ Testi bitir** ile kapatılır.
+- **🟢 Aktif testler:** Devam eden ve biten testler herkese açıktır.
+  **➕ Yeni test ekle** formunda test "devam ediyor" ya da "bitti" olarak
+  girilir; ekleyen olarak giriş yapan kullanıcı adı yazılır. Form üç
+  sekmedir: **📝 Test bilgisi**, **📊 Sonuç & insight** (kontrol/varyant,
+  lift — boşsa hesaplanır —, p-value, güven, örneklem, sonuç, insight,
+  sonraki adım) ve **🎞️ Sunum slaytı**. Sonuç test sürerken de bittikten
+  sonra da girilebilir (**✏️ Sonuç / bilgileri düzenle**). Asistan bu
+  testleri ve insight'ları sohbette okur. Aynı testler
+  **Test havuzları → 👥 Ekibin testleri** sekmesinde havuz formatında
+  (filtre, grafik, "sohbette kullan") görünür.
+- **🎞️ Sunuma aktar:** Biten testler, ekibin "Meta CPAS | Low-Selling
+  Products Test" slaytı düzeninde test başına bir sayfa olarak PPTX
+  indirilir (başlıklar English ya da Türkçe). Kurumsal logo ve arka planın
+  birebir gelmesi için PowerPoint'te şablonun boş bir halini
+  `data/sunum_sablonu.pptx` olarak kaydet; varsa slaytlar onun üzerine
+  kurulur.
 
 ### Kalıcı depolama (Supabase) — cihazdan bağımsız, silinmeyen kayıt
 Streamlit Cloud'un diski **geçicidir**: uygulama uyuyup uyandığında veya yeni

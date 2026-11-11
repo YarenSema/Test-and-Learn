@@ -57,6 +57,7 @@ from metrics import compute_metrics, metrics_to_text
 import test_havuzu as th
 import depo
 import internet
+import ekip_testleri as et
 
 load_dotenv()
 
@@ -261,8 +262,12 @@ def _satirlara_bol(metin):
 def aktif_test_ekle(bilgi):
     """Yeni testi kaydeder ve id'sini doner."""
     tid = uuid.uuid4().hex[:8]
-    bilgi["durum"] = "aktif"
-    bilgi["olusturma"] = datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
+    simdi = datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
+    # Bitmis bir testin sonucu sonradan da girilebilir
+    bilgi["durum"] = "bitti" if bilgi.get("durum") == "bitti" else "aktif"
+    if bilgi["durum"] == "bitti":
+        bilgi.setdefault("kapanis", simdi)
+    bilgi["olusturma"] = simdi
     bilgi.setdefault("ekleyen", st.session_state.get("kullanici", ""))
     depo.test_kaydet(tid, bilgi)
     return tid
@@ -274,14 +279,16 @@ def aktif_test_guncelle(tid, **degisiklikler):
 
 
 def aktif_test_kapat(tid, sonuc_notu=""):
-    return aktif_test_guncelle(
-        tid, durum="bitti", sonuc_notu=sonuc_notu,
-        kapanis=datetime.datetime.now().strftime("%d.%m.%Y %H:%M"))
+    alanlar = {"durum": "bitti",
+               "kapanis": datetime.datetime.now().strftime("%d.%m.%Y %H:%M")}
+    if sonuc_notu.strip():          # bos not, onceden girilmis ozeti silmesin
+        alanlar["sonuc_notu"] = sonuc_notu.strip()
+    return aktif_test_guncelle(tid, **alanlar)
 
 
 def aktif_test_ac(tid):
-    """Yanlislikla kapatilan testi tekrar aktife alir."""
-    return aktif_test_guncelle(tid, durum="aktif", kapanis="", sonuc_notu="")
+    """Yanlislikla kapatilan testi tekrar aktife alir (girilen sonuclar kalir)."""
+    return aktif_test_guncelle(tid, durum="aktif", kapanis="")
 
 
 def aktif_test_sil(tid):
@@ -295,43 +302,15 @@ def aktif_test_listesi(durum="aktif"):
 
 
 def aktif_testler_metni():
-    """Devam eden testleri asistanin okuyacagi kisa metne cevirir."""
-    bloklar = []
-    for _, b in aktif_test_listesi("aktif"):
-        satirlar = [f"- TEST: {b.get('ad', '(isimsiz)')}"]
-        for etiket, anahtar in (("Hipotez / amaç", "hipotez"),
-                                ("Marka / ürün", "marka"),
-                                ("Platform", "platform"),
-                                ("Ölçülecek metrik", "metrik"),
-                                ("Başlangıç", "baslangic"),
-                                ("Tahmini bitiş", "bitis"),
-                                ("Sorumlu", "sorumlu"),
-                                ("Not", "not")):
-            if b.get(anahtar):
-                satirlar.append(f"  {etiket}: {b[anahtar]}")
-        if b.get("degiskenler"):
-            satirlar.append("  Test edilen değişkenler: "
-                            + " | ".join(b["degiskenler"]))
-        if b.get("sabitler"):
-            satirlar.append("  Sabit tutulanlar: " + " | ".join(b["sabitler"]))
-        bloklar.append("\n".join(satirlar))
-    return "\n".join(bloklar)
+    """Devam eden testleri (varsa ara sonuclariyla) asistan metnine cevirir."""
+    return "\n".join(et.asistan_metni(tid, b)
+                     for tid, b in aktif_test_listesi("aktif"))
 
 
 def biten_testler_metni():
-    """Ekibin bitirdigi testleri ve sonuc notlarini kisa metne cevirir."""
-    satirlar = []
-    for _, b in aktif_test_listesi("bitti"):
-        parcalar = [f"- TEST: {b.get('ad', '(isimsiz)')}"]
-        if b.get("marka"):
-            parcalar.append(f"Marka: {b['marka']}")
-        if b.get("hipotez"):
-            parcalar.append(f"Hipotez: {b['hipotez']}")
-        if b.get("kapanis"):
-            parcalar.append(f"Bitiş: {b['kapanis']}")
-        parcalar.append(f"Sonuç notu: {b.get('sonuc_notu') or '(girilmemiş)'}")
-        satirlar.append(" | ".join(parcalar))
-    return "\n".join(satirlar)
+    """Ekibin bitirdigi testler: sayisal sonuc, insight ve sonraki adim."""
+    return "\n".join(et.asistan_metni(tid, b)
+                     for tid, b in aktif_test_listesi("bitti"))
 
 
 @st.cache_data(show_spinner=False)
@@ -781,9 +760,12 @@ def _prompt_kur(havuz_bolumu, soru="", internet_metni=""):
         + "\n\n=== ŞU ANDA SAHADA DEVAM EDEN (AKTİF) TESTLER ===\n"
         + (aktif_test_text if aktif_test_text
            else "(şu anda aktif test yok)")
-        + "\n(Bu testlerin sonucu henüz belli değil; öneri verirken aynı şeyi "
-          "tekrar test etmeyi önermek yerine devam eden testi hatırlat.)"
-        + "\n\n=== EKİBİN BİTİRDİĞİ TESTLER ===\n"
+        + "\n(Bu testler sürüyor; 'Ara sonuç' satırı varsa kesin değildir, "
+          "öyle belirt. Öneri verirken aynı şeyi tekrar test etmeyi önermek "
+          "yerine devam eden testi hatırlat.)"
+        + "\n\n=== EKİBİN BİTİRDİĞİ TESTLER (gerçek sonuçlar ve ekibin "
+          "çıkardığı insight'lar — öneri verirken önce bunlara dayan, "
+          "atıf yaparken test kodunu [EK-...] yaz) ===\n"
         + (biten_test_text if biten_test_text else "(bitmiş test kaydı yok)")
         + (f"\n\n=== İNTERNET ARAMA SONUÇLARI (dış kaynak, doğrulanmamış) ===\n"
            f"{internet_metni}" if internet_metni else
@@ -1045,6 +1027,9 @@ def render_test_detay(r):
     alt = []
     for baslik, kolon in (("Uygulama zorluğu", "Implementation_Difficulty"),
                           ("Benzer testler", "Similar_Tests"),
+                          ("Durum", "Status"), ("Platform", "Platform"),
+                          ("Başlangıç", "Launch_Date"), ("Bitiş", "End_Date"),
+                          ("Ekleyen", "Added_By"),
                           ("Veri kaynağı", "Data_Source")):
         if _alan(r, kolon):
             alt.append(f"{baslik}: {_alan(r, kolon)}")
@@ -1052,10 +1037,13 @@ def render_test_detay(r):
         st.caption(" · ".join(alt))
 
 
-def render_havuz_sekmesi(anahtar, df, kume_adi, aciklama):
+def render_havuz_sekmesi(anahtar, df, kume_adi, aciklama, kaynak=None,
+                         kolonlar=None):
     """Bir veri kumesinin sekmesi: filtre, ozet, grafik, tablo, detaylar."""
-    st.markdown(aciklama)
-    st.caption(f"Kaynak: `{th.VERI_KUMELERI[anahtar]['dosya']}` · "
+    if aciklama:
+        st.markdown(aciklama)
+    kaynak = kaynak or f"`{th.VERI_KUMELERI[anahtar]['dosya']}`"
+    st.caption(f"Kaynak: {kaynak} · "
                f"{len(df)} test × {len(df.columns)} kolon")
 
     # --- Filtreler (satir basina 3 kutu) ------------------------------
@@ -1080,6 +1068,10 @@ def render_havuz_sekmesi(anahtar, df, kume_adi, aciklama):
                 help="Negatif değerler kaybeden testlerdir; onları da "
                      "görmek için soldan başlat.",
             )
+            # Kaydirici en soldayken filtre yok: lift'i henuz olmayan
+            # (orn. devam eden) testler de gorunsun
+            if min_lift <= float(lift_hepsi.min()):
+                min_lift = None
 
     secili = th.filtrele(df, secimler, min_lift=min_lift)
     if secili.empty:
@@ -1107,7 +1099,8 @@ def render_havuz_sekmesi(anahtar, df, kume_adi, aciklama):
                                      .sort_values(ascending=False))
 
     # --- Tablo --------------------------------------------------------
-    gosterilecek = [k for k in th.TABLO_KOLONLARI if k in secili.columns]
+    gosterilecek = [k for k in (kolonlar or th.TABLO_KOLONLARI)
+                    if k in secili.columns]
     st.markdown(f"**{len(secili)} test**")
     st.dataframe(secili[gosterilecek] if gosterilecek else secili,
                  hide_index=True, use_container_width=True, height=340)
@@ -1130,7 +1123,9 @@ def render_havuz_sekmesi(anahtar, df, kume_adi, aciklama):
     for _, r in secili.iterrows():
         lift = pd.to_numeric(r.get("Lift_Percent"), errors="coerce")
         sonuc = str(r.get("Result", "")).upper()
-        isaret = "🔴" if sonuc == "LOSS" else "🟢"
+        isaret = ("🔴" if sonuc == "LOSS" else
+                  "🟡" if r.get("Status") == "Aktif" else
+                  "⚪" if sonuc == "INCONCLUSIVE" else "🟢")
         etiket = (f"{isaret} {r.get('Test_ID', '?')} · {r.get('Brand', '-')} · "
                   f"{r.get('Test_Name', '-')}")
         if pd.notna(lift):
@@ -1163,15 +1158,16 @@ def render_havuz_page():
             st.rerun()
 
     if not havuz_kumeleri:
-        st.error("Hiçbir test veri kümesi bulunamadı. `data/` klasöründeki "
-                 "dosyaları kontrol et.")
-        return
+        st.warning("Hiçbir test veri dosyası bulunamadı. `data/` klasöründeki "
+                   "dosyaları kontrol et.")
 
-    sekmeler = st.tabs([
-        f"{th.VERI_KUMELERI[a]['sekme']} ({len(th.load_dataset(a))})"
-        for a in havuz_kumeleri
-    ])
-    for sekme, anahtar in zip(sekmeler, havuz_kumeleri):
+    sekmeler = st.tabs(
+        [f"👥 Ekibin testleri ({len(load_aktif_testler())})"]
+        + [f"{th.VERI_KUMELERI[a]['sekme']} ({len(th.load_dataset(a))})"
+           for a in havuz_kumeleri])
+    with sekmeler[0]:
+        render_ekip_sekmesi()
+    for sekme, anahtar in zip(sekmeler[1:], havuz_kumeleri):
         with sekme:
             render_havuz_sekmesi(
                 anahtar, th.load_dataset(anahtar),
@@ -1181,55 +1177,206 @@ def render_havuz_page():
 
 
 # --- Aktif testler sayfasi -------------------------------------------------
-def _aktif_test_formu(form_anahtari, mevcut=None, buton="💾 Kaydet"):
+# Ayni sayfada hem devam eden hem biten testler durur. Bir testin sayisal
+# sonucu, insight'i ve sunum slayti alanlari test surerken de, bittikten
+# sonra da girilebilir. Ekleyen: giris yapan kullanici adi.
+_SAYI_ALANLARI = (("kontrol_deger", "Kontrol değeri"),
+                  ("varyant_deger", "Varyant değeri"), ("lift", "Lift %"),
+                  ("p_degeri", "P-value"), ("orneklem", "Örneklem"))
+
+
+def _secim_kutusu(kutu, etiket, secenekler, mevcut, **kw):
+    """Selectbox; kayittaki deger listede yoksa (eski giris) da korunur."""
+    secenekler = list(secenekler)
+    if mevcut and mevcut not in secenekler:
+        secenekler.append(mevcut)
+    return kutu.selectbox(etiket, secenekler,
+                          index=secenekler.index(mevcut or ""), **kw)
+
+
+def _aktif_test_formu(form_anahtari, mevcut=None, buton="💾 Kaydet",
+                      yeni=False):
     """
-    Test giris/duzenleme formu. Kaydedilirse test sozlugunu, aksi halde
-    None doner. Tarihler serbest metin: bos birakilabilsin diye.
+    Test giris/duzenleme formu (3 sekme: bilgi, sonuc & insight, sunum).
+    Kaydedilirse test sozlugunu, aksi halde None doner. yeni=True ise
+    testin aktif mi bitmis mi oldugu da sorulur.
     """
     m = mevcut or {}
+    k = lambda ad: f"{form_anahtari}_{ad}"   # ayni etiketler cakismasin
     # clear_on_submit kapali: zorunlu alan eksikse yazilanlar silinmesin.
     # Yeni test formu kaydedilince cagiran taraf form anahtarini degistirir.
     with st.form(form_anahtari):
-        ad = st.text_input(
-            "Test adı *", value=m.get("ad", ""),
-            placeholder="Örn: Vitra ürün sayfası görsel testi")
-        hipotez = st.text_area(
-            "Test objective / hipotez *", value=m.get("hipotez", ""), height=80,
-            placeholder="Örn: Ürün görselinde banyo ortamı kullanmak, "
-                        "beyaz fon yerine dönüşüm oranını artırır.")
+        durum = None
+        if yeni:
+            durum = st.radio(
+                "Bu test", ["aktif", "bitti"], horizontal=True, key=k("durum"),
+                format_func={"aktif": "🟢 Sahada devam ediyor",
+                             "bitti": "✅ Bitti — sonucunu giriyorum"}.get)
+        bilgi_sekmesi, sonuc_sekmesi, sunum_sekmesi = st.tabs(
+            ["📝 Test bilgisi", "📊 Sonuç & insight", "🎞️ Sunum slaytı"])
 
-        k = st.columns(2)
-        marka = k[0].text_input("Marka / ürün", value=m.get("marka", ""),
-                                placeholder="Örn: Vitra")
-        platform = k[1].text_input(
-            "Platform / mecra", value=m.get("platform", ""),
-            placeholder="Örn: Meta, Google, e-ticaret sitesi")
-        metrik = st.text_input(
-            "Ölçülecek ana metrik", value=m.get("metrik", ""),
-            placeholder="Örn: dönüşüm oranı (CR), CTR, CPA")
+        with bilgi_sekmesi:
+            ad = st.text_input(
+                "Test adı *", value=m.get("ad", ""), key=k("ad"),
+                placeholder="Örn: Vitra ürün sayfası görsel testi")
+            hipotez = st.text_area(
+                "Test objective / hipotez *", value=m.get("hipotez", ""),
+                height=80, key=k("hipotez"),
+                placeholder="Örn: Ürün görselinde banyo ortamı kullanmak, "
+                            "beyaz fon yerine dönüşüm oranını artırır.")
+            s = st.columns(3)
+            marka = s[0].text_input("Marka / ürün", value=m.get("marka", ""),
+                                    key=k("marka"), placeholder="Örn: Vitra")
+            platform = s[1].text_input(
+                "Platform / mecra", value=m.get("platform", ""),
+                key=k("platform"), placeholder="Örn: Meta CPAS, Google")
+            ulke = s[2].text_input("Ülke", value=m.get("ulke", ""),
+                                   key=k("ulke"), placeholder="Örn: Türkiye")
+            s = st.columns(3)
+            kategori = s[0].text_input(
+                "Ürün kategorisi", value=m.get("kategori", ""),
+                key=k("kategori"), placeholder="Örn: Banyo bataryası")
+            test_tipi = _secim_kutusu(s[1], "Test tipi", et.TEST_TIPLERI,
+                                      m.get("test_tipi", ""), key=k("tip"))
+            kampanya_amaci = s[2].text_input(
+                "Kampanya amacı", value=m.get("kampanya_amaci", ""),
+                key=k("amac"), placeholder="Örn: Satış, trafik")
+            metrik = st.text_input(
+                "Ölçülen ana metrik", value=m.get("metrik", ""),
+                key=k("metrik"), placeholder="Örn: ROAS, dönüşüm oranı, CPC")
 
-        d = st.columns(2)
-        degiskenler = d[0].text_area(
-            "Test edilen değişkenler (her satıra bir tane) *",
-            value="\n".join(m.get("degiskenler", [])), height=130,
-            placeholder="Kreatif görsel (banyo ortamı / beyaz fon)\n"
-                        "Başlık metni (indirim vurgulu / fayda vurgulu)")
-        sabitler = d[1].text_area(
-            "Sabit tutulanlar (her satıra bir tane)",
-            value="\n".join(m.get("sabitler", [])), height=130,
-            placeholder="Bütçe\nHedef kitle\nYayın saatleri\nTeklif stratejisi")
+            d = st.columns(2)
+            degiskenler = d[0].text_area(
+                "Test edilen değişkenler (her satıra bir tane) *",
+                value="\n".join(m.get("degiskenler", [])), height=110,
+                key=k("degiskenler"),
+                placeholder="Kreatif görsel (banyo ortamı / beyaz fon)")
+            sabitler = d[1].text_area(
+                "Sabit tutulanlar (her satıra bir tane)",
+                value="\n".join(m.get("sabitler", [])), height=110,
+                key=k("sabitler"),
+                placeholder="Bütçe\nHedef kitle\nYayın saatleri")
 
-        t = st.columns(3)
-        baslangic = t[0].text_input(
-            "Başlangıç tarihi",
-            value=m.get("baslangic",
-                        datetime.date.today().strftime("%d.%m.%Y")))
-        bitis = t[1].text_input("Tahmini bitiş", value=m.get("bitis", ""),
-                                placeholder="gg.aa.yyyy")
-        sorumlu = t[2].text_input("Sorumlu", value=m.get("sorumlu", ""),
-                                  placeholder="Testi kuran kişi")
-        notu = st.text_area("Not (opsiyonel)", value=m.get("not", ""),
-                            height=70)
+            t = st.columns(3)
+            baslangic = t[0].text_input(
+                "Başlangıç tarihi", key=k("baslangic"),
+                value=m.get("baslangic",
+                            datetime.date.today().strftime("%d.%m.%Y")))
+            bitis = t[1].text_input("Bitiş / tahmini bitiş",
+                                    value=m.get("bitis", ""), key=k("bitis"),
+                                    placeholder="gg.aa.yyyy")
+            sorumlu = t[2].text_input("Sorumlu", value=m.get("sorumlu", ""),
+                                      key=k("sorumlu"),
+                                      placeholder="Testi kuran kişi")
+            notu = st.text_area("Not (opsiyonel)", value=m.get("not", ""),
+                                height=68, key=k("not"))
+
+        with sonuc_sekmesi:
+            st.caption(
+                "Test sürerken ara sonucu, bitince kesin sonucu girebilirsin. "
+                "Sayıları 0,043 ya da 0.043 diye yazabilirsin. Lift boş "
+                "kalırsa kontrol ve varyanttan hesaplanır (CPC, CPA gibi "
+                "maliyet metriklerinde düşüş iyileşme sayılır).")
+            r = st.columns(3)
+            kontrol = r[0].text_input(
+                "Kontrol değeri", value=m.get("kontrol_deger", ""),
+                key=k("kontrol"), placeholder="Örn: 4,42 (Always On ROAS)")
+            varyant = r[1].text_input(
+                "Varyant / test değeri", value=m.get("varyant_deger", ""),
+                key=k("varyant"), placeholder="Örn: 0,90")
+            lift = r[2].text_input("Lift % (opsiyonel)", value=m.get("lift", ""),
+                                   key=k("lift"), placeholder="Boşsa hesaplanır")
+            r = st.columns(4)
+            p_degeri = r[0].text_input("P-value", value=m.get("p_degeri", ""),
+                                       key=k("p"), placeholder="Örn: 0.03")
+            guven = r[1].text_input("Güven düzeyi", value=m.get("guven", ""),
+                                    key=k("guven"), placeholder="Örn: 95%")
+            orneklem = r[2].text_input(
+                "Örneklem", value=m.get("orneklem", ""), key=k("orneklem"),
+                placeholder="Örn: 12400")
+            sonuc = _secim_kutusu(r[3], "Sonuç", et.SONUCLAR,
+                                  m.get("sonuc", ""), key=k("sonuc"),
+                                  format_func=lambda x: et.SONUCLAR.get(x, x))
+            sonuc_notu = st.text_area(
+                "Sonuç özeti (sunumda **01 Result** kutusu)",
+                value=m.get("sonuc_notu", ""), height=68, key=k("sonuc_notu"),
+                placeholder="Örn: Test ROAS HB'de 0.90, TY'de 1.08; Always On "
+                            "4.42 ve 3.52.")
+            insight = st.text_area(
+                "💡 Insight — bu testten ne çıkardık? (sunumda **02 Read**)",
+                value=m.get("insight", ""), height=90, key=k("insight"),
+                placeholder="Örn: TY'de alıcılar sepette kayboldu; HB'de "
+                            "tıklamaların yarısı ürün görüntülemeye ulaşmadı.")
+            sonraki_adim = st.text_area(
+                "Sonraki adım / öneri (asistan için)",
+                value=m.get("sonraki_adim", ""), height=68, key=k("sonraki"),
+                placeholder="Örn: Düşük satışlı ürünleri ayrı sette değil, "
+                            "Always On içinde test et.")
+
+        with sunum_sekmesi:
+            st.caption(
+                "Opsiyonel. Boş bıraktığın alanlar diğer sekmelerden otomatik "
+                "doldurulur; kutular girilmezse **Kontrol vs Varyant** "
+                "olarak kurulur.")
+            sunum_sorusu = st.text_input(
+                "Slayt alt başlığı / testin sorusu",
+                value=m.get("sunum_sorusu", ""), key=k("soru"),
+                placeholder="Boşsa hipotez yazılır. Örn: Does a dedicated "
+                            "product set lift sales of low-selling products?")
+            s = st.columns(2)
+            tasarim_basligi = s[0].text_input(
+                "Test tasarımı başlığı", value=m.get("tasarim_basligi", ""),
+                key=k("tasarim"), placeholder="Örn: Two marketplaces")
+            tasarim_notu = s[1].text_input(
+                "Okların üstündeki not", value=m.get("tasarim_notu", ""),
+                key=k("tasarim_notu"),
+                placeholder="Örn: Low-selling product set on CPAS")
+            kurulum = st.text_area(
+                "Amaç & hipotez kutusu: en fazla 3 madde (her satır bir madde; "
+                "ilk kelime ya da ':' öncesi kalın yazılır)",
+                value="\n".join(m.get("kurulum", [])), height=90,
+                key=k("kurulum"),
+                placeholder="Build a separate product set from low-selling "
+                            "products\nRun it through Meta CPAS on Hepsiburada "
+                            "and Trendyol\nCompare results with Always On "
+                            "averages")
+            eski = (m.get("kutular") or []) + [{}, {}]
+            kutular = []
+            for i, (kolon, baslik, ornek) in enumerate(zip(
+                    st.columns(2), ("Sol kutu (açık renk)", "Sağ kutu (koyu)"),
+                    ("Hepsiburada", "Trendyol"))):
+                e = eski[i]
+                with kolon:
+                    st.markdown(f"**{baslik}**")
+                    kutu = {
+                        "ad": st.text_input("Kutu adı", e.get("ad", ""),
+                                            key=k(f"k{i}ad"),
+                                            placeholder=f"Örn: {ornek}"),
+                        "alt": st.text_input("Alt satır", e.get("alt", ""),
+                                             key=k(f"k{i}alt"),
+                                             placeholder="Örn: Test set vs Always On"),
+                        "detay": st.text_input(
+                            "Detay", e.get("detay", ""), key=k(f"k{i}detay"),
+                            placeholder="Örn: 7.102₺ spend, 2 purchases"),
+                    }
+                    a = st.columns(2)
+                    kutu["deger1"] = a[0].text_input(
+                        "Büyük sayı 1", e.get("deger1", ""), key=k(f"k{i}d1"),
+                        placeholder="0.90")
+                    kutu["etiket1"] = a[1].text_input(
+                        "Etiketi", e.get("etiket1", ""), key=k(f"k{i}e1"),
+                        placeholder="Test ROAS")
+                    a = st.columns(2)
+                    kutu["deger2"] = a[0].text_input(
+                        "Büyük sayı 2", e.get("deger2", ""), key=k(f"k{i}d2"),
+                        placeholder="4.42")
+                    kutu["etiket2"] = a[1].text_input(
+                        "Etiketi ", e.get("etiket2", ""), key=k(f"k{i}e2"),
+                        placeholder="Always On ROAS")
+                    kutu["not"] = st.text_input(
+                        "Alt not", e.get("not", ""), key=k(f"k{i}not"),
+                        placeholder="Örn: 46% of clicks became product views")
+                    kutular.append({a_: v.strip() for a_, v in kutu.items()})
 
         gonderildi = st.form_submit_button(buton, type="primary",
                                            use_container_width=True)
@@ -1237,16 +1384,30 @@ def _aktif_test_formu(form_anahtari, mevcut=None, buton="💾 Kaydet"):
     if not gonderildi:
         return None
     if not ad.strip() or not hipotez.strip() or not _satirlara_bol(degiskenler):
-        st.error("Test adı, hipotez ve en az bir değişken zorunlu.")
+        st.error("Test adı, hipotez ve en az bir değişken zorunlu "
+                 "(📝 Test bilgisi sekmesi).")
+        return None
+    sayilar = {"kontrol_deger": kontrol, "varyant_deger": varyant,
+               "lift": lift, "p_degeri": p_degeri, "orneklem": orneklem}
+    hatali = [etiket for anahtar, etiket in _SAYI_ALANLARI
+              if sayilar[anahtar].strip()
+              and et.sayi(sayilar[anahtar]) is None]
+    if hatali:
+        st.error("Sayı olarak okunamadı: " + ", ".join(hatali)
+                 + " (📊 Sonuç & insight sekmesi).")
         return None
 
     # Yalnizca formdaki alanlar: durum gibi alanlar eski ekran verisiyle
     # yazilirsa baskasinin az once bitirdigi test yeniden aktif olurdu.
-    return {
+    sonuc_bilgisi = {
         "ad": ad.strip(),
         "hipotez": hipotez.strip(),
         "marka": marka.strip(),
         "platform": platform.strip(),
+        "ulke": ulke.strip(),
+        "kategori": kategori.strip(),
+        "test_tipi": test_tipi,
+        "kampanya_amaci": kampanya_amaci.strip(),
         "metrik": metrik.strip(),
         "degiskenler": _satirlara_bol(degiskenler),
         "sabitler": _satirlara_bol(sabitler),
@@ -1254,11 +1415,25 @@ def _aktif_test_formu(form_anahtari, mevcut=None, buton="💾 Kaydet"):
         "bitis": bitis.strip(),
         "sorumlu": sorumlu.strip(),
         "not": notu.strip(),
+        **{a: v.strip() for a, v in sayilar.items()},
+        "guven": guven.strip(),
+        "sonuc": sonuc,
+        "sonuc_notu": sonuc_notu.strip(),
+        "insight": insight.strip(),
+        "sonraki_adim": sonraki_adim.strip(),
+        "sunum_sorusu": sunum_sorusu.strip(),
+        "tasarim_basligi": tasarim_basligi.strip(),
+        "tasarim_notu": tasarim_notu.strip(),
+        "kurulum": _satirlara_bol(kurulum)[:3],
+        "kutular": kutular,
     }
+    if yeni:
+        sonuc_bilgisi["durum"] = durum
+    return sonuc_bilgisi
 
 
 def _aktif_test_detay(bilgi):
-    """Bir testin alanlarini kart icinde gosterir."""
+    """Bir testin alanlarini (sonuc ve insight dahil) kart icinde gosterir."""
     st.markdown(f"**Hipotez / objective:** {bilgi.get('hipotez', '-')}")
 
     k = st.columns(2)
@@ -1273,11 +1448,41 @@ def _aktif_test_detay(bilgi):
     if not bilgi.get("sabitler"):
         k[1].caption("—")
 
+    # Sayisal sonuc
+    lift = et.lift_hesapla(bilgi)
+    kartlar = [(e, bilgi.get(a)) for e, a in (
+        (f"Kontrol ({bilgi.get('metrik') or 'metrik'})", "kontrol_deger"),
+        ("Varyant", "varyant_deger")) if bilgi.get(a)]
+    if lift is not None:
+        kartlar.append(("Lift", f"{lift:+.1f}%"))
+    if bilgi.get("sonuc"):
+        kartlar.append(("Sonuç", et.SONUCLAR.get(bilgi["sonuc"],
+                                                 bilgi["sonuc"])))
+    if kartlar:
+        st.markdown("**📊 Sonuç**" if bilgi.get("durum") == "bitti"
+                    else "**📊 Ara sonuç**")
+        for kutu, (etiket, deger) in zip(st.columns(len(kartlar)), kartlar):
+            kutu.metric(etiket, deger)
+    istatistik = [f"{e}: {bilgi[a]}" for e, a in (
+        ("p", "p_degeri"), ("güven", "guven"), ("örneklem", "orneklem"))
+        if bilgi.get(a)]
+    if istatistik:
+        st.caption(" · ".join(istatistik))
+    for baslik, anahtar in (("Sonuç özeti", "sonuc_notu"),
+                            ("💡 Insight", "insight"),
+                            ("➡️ Sonraki adım", "sonraki_adim")):
+        if bilgi.get(anahtar):
+            st.markdown(f"**{baslik}:** {bilgi[anahtar]}")
+
     alt = []
     for etiket, anahtar in (("Marka/ürün", "marka"), ("Platform", "platform"),
+                            ("Ülke", "ulke"), ("Kategori", "kategori"),
+                            ("Test tipi", "test_tipi"),
+                            ("Kampanya amacı", "kampanya_amaci"),
                             ("Ölçülen metrik", "metrik"),
                             ("Başlangıç", "baslangic"),
-                            ("Tahmini bitiş", "bitis"), ("Sorumlu", "sorumlu"),
+                            ("Bitiş", "bitis"), ("Kapanış", "kapanis"),
+                            ("Sorumlu", "sorumlu"),
                             ("Ekleyen", "ekleyen"), ("Eklenme", "olusturma")):
         if bilgi.get(anahtar):
             alt.append(f"{etiket}: {bilgi[anahtar]}")
@@ -1287,25 +1492,62 @@ def _aktif_test_detay(bilgi):
         st.markdown(f"**Not:** {bilgi['not']}")
 
 
-def _aktif_test_karti(tid, bilgi):
-    """Devam eden tek bir test: detay + düzenle / bitir / sil."""
-    basliklar = [x for x in (bilgi.get("marka"), bilgi.get("platform"))
-                 if x]
-    etiket = "🟢 " + (bilgi.get("ad") or "(isimsiz test)")
+@st.cache_data(show_spinner=False, max_entries=100)
+def _sunum_baytlari(testler_json, dil):
+    """Secili testlerin PPTX dosyasi (ayni icerik tekrar uretilmez)."""
+    import sunum
+    return sunum.sunum_olustur(json.loads(testler_json), dil=dil)
+
+
+def _sunum_dosyasi(testler, dil):
+    """(byte'lar, hata metni) — python-pptx yoksa uygulama cokmesin."""
+    try:
+        return _sunum_baytlari(
+            json.dumps(testler, ensure_ascii=False, sort_keys=True), dil), None
+    except ImportError:
+        return None, ("Sunum için `python-pptx` paketi gerekli "
+                      "(requirements.txt'te var; uygulamayı yeniden başlat).")
+    except Exception as e:
+        return None, f"Sunum oluşturulamadı: {e}"
+
+
+PPTX_TURU = ("application/vnd.openxmlformats-officedocument."
+             "presentationml.presentation")
+
+
+def _dosya_adi(metin):
+    sade = re.sub(r"[^\w\-]+", "_", th._sadelestir(metin)).strip("_")
+    return (sade or "test")[:60]
+
+
+def _test_karti(tid, bilgi):
+    """Tek bir test karti: detay + duzenle / bitir / slayt / sil."""
+    bitti = bilgi.get("durum") == "bitti"
+    basliklar = [x for x in (bilgi.get("marka"), bilgi.get("platform")) if x]
+    etiket = ("✅ " if bitti else "🟢 ") + (bilgi.get("ad") or "(isimsiz test)")
     if basliklar:
         etiket += " · " + " · ".join(basliklar)
-    if bilgi.get("baslangic"):
+    lift = et.lift_hesapla(bilgi)
+    if bitti:
+        if bilgi.get("sonuc") in et.SONUCLAR and bilgi.get("sonuc"):
+            etiket += "  " + et.SONUCLAR[bilgi["sonuc"]].split(" ")[0]
+        if lift is not None:
+            etiket += f" {lift:+.1f}%"
+        if not (bilgi.get("insight") or bilgi.get("sonuc_notu")
+                or bilgi.get("kontrol_deger")):
+            etiket += "  · sonuç girilmemiş"
+    elif bilgi.get("baslangic"):
         etiket += f"  (başlangıç: {bilgi['baslangic']})"
 
     acik = st.session_state.get("acilan_aktif_test") == tid
     with st.expander(etiket, expanded=acik):
-        duzenleme = st.session_state.get(f"duzenle_{tid}", False)
-        if duzenleme:
+        if st.session_state.get(f"duzenle_{tid}", False):
             guncel = _aktif_test_formu(f"duzenle_form_{tid}", mevcut=bilgi,
                                        buton="💾 Değişiklikleri kaydet")
             if guncel:
                 aktif_test_guncelle(tid, **guncel)
                 st.session_state[f"duzenle_{tid}"] = False
+                st.session_state["acilan_aktif_test"] = tid
                 st.rerun()
             if st.button("Vazgeç", key=f"vazgec_{tid}"):
                 st.session_state[f"duzenle_{tid}"] = False
@@ -1314,19 +1556,40 @@ def _aktif_test_karti(tid, bilgi):
 
         _aktif_test_detay(bilgi)
         st.markdown("---")
-        sonuc = st.text_input(
-            "Testi bitirirken kısa sonuç notu (opsiyonel)",
-            key=f"sonuc_{tid}",
-            placeholder="Örn: Banyo ortamı görseli kazandı, +%12 CR")
-        islem = st.columns([2, 1.4, 1.4, 3])
-        if islem[0].button("✅ Testi bitir", key=f"bitir_{tid}",
-                           type="primary", use_container_width=True):
-            aktif_test_kapat(tid, sonuc)
-            st.session_state.pop("acilan_aktif_test", None)
-            st.rerun()
-        if islem[1].button("✏️ Düzenle", key=f"duz_{tid}",
+        if not bitti:
+            sonuc = st.text_input(
+                "Testi bitirirken kısa sonuç notu (opsiyonel)",
+                key=f"sonuc_{tid}",
+                placeholder="Örn: Banyo ortamı görseli kazandı, +%12 CR")
+            islem = st.columns([2, 2.4, 1.4, 2])
+            if islem[0].button("✅ Testi bitir", key=f"bitir_{tid}",
+                               type="primary", use_container_width=True):
+                aktif_test_kapat(tid, sonuc)
+                # Bitince sonuc formu acik gelsin: sayilar hemen girilebilsin
+                st.session_state["acilan_aktif_test"] = tid
+                st.session_state[f"duzenle_{tid}"] = True
+                st.rerun()
+            duzen_etiketi = "📊 Ara sonuç / düzenle"
+        else:
+            islem = st.columns([2, 2.4, 1.4, 2])
+            dosya, hata = _sunum_dosyasi(
+                [bilgi], st.session_state.get("sunum_dili", "en"))
+            if dosya:
+                islem[0].download_button(
+                    "🎞️ Slaytı indir", dosya, key=f"slayt_{tid}",
+                    file_name=f"{_dosya_adi(bilgi.get('ad', ''))}.pptx",
+                    mime=PPTX_TURU, use_container_width=True)
+            elif hata:
+                islem[0].caption(hata)
+            duzen_etiketi = "✏️ Sonuç / bilgileri düzenle"
+        if islem[1].button(duzen_etiketi, key=f"duz_{tid}",
                            use_container_width=True):
             st.session_state[f"duzenle_{tid}"] = True
+            st.session_state["acilan_aktif_test"] = tid
+            st.rerun()
+        if bitti and islem[3].button("↩️ Tekrar aktif et", key=f"ac_{tid}",
+                                     use_container_width=True):
+            aktif_test_ac(tid)
             st.rerun()
         if islem[2].button("🗑️ Sil", key=f"sil_{tid}",
                            use_container_width=True):
@@ -1335,15 +1598,78 @@ def _aktif_test_karti(tid, bilgi):
             st.rerun()
 
 
+def _yeni_test_bolumu(yer, acik=False):
+    """'Yeni test ekle' formu; aktif testler sayfasinda ve havuzda kullanilir."""
+    with st.expander("➕ Yeni test ekle (devam eden ya da bitmiş)",
+                     expanded=acik):
+        st.caption(f"Ekleyen olarak **{st.session_state.get('kullanici', '')}"
+                   "** kaydedilir. Kaydedilen test herkesin ekranında görünür "
+                   "ve asistan sohbette onu da okur.")
+        sayac_anahtari = f"yeni_test_sayac_{yer}"
+        sayac = st.session_state.get(sayac_anahtari, 0)
+        yeni = _aktif_test_formu(f"yeni_test_{yer}_{sayac}", yeni=True,
+                                 buton="💾 Testi kaydet")
+        if yeni:
+            tid = aktif_test_ekle(yeni)
+            st.session_state["acilan_aktif_test"] = tid
+            st.session_state[sayac_anahtari] = sayac + 1   # form bosalsin
+            st.toast(f"Kaydedildi: {yeni['ad']}")
+            st.rerun()
+
+
+def _sunum_bolumu(bitenler):
+    """Secilen biten testleri tek PPTX'te indirme."""
+    st.markdown("### 🎞️ Biten testleri sunuma aktar")
+    st.caption("Her test, ekibin 'Meta CPAS | Low-Selling Products Test' "
+               "slaytı düzeninde bir sayfa olur. Boş alanlar test "
+               "bilgisinden doldurulur; kartta **✏️ Sonuç / bilgileri "
+               "düzenle → 🎞️ Sunum slaytı** sekmesinden tek tek "
+               "değiştirebilirsin.")
+    if not bitenler:
+        st.info("Henüz biten test yok.")
+        return
+    adlar = {tid: f"{b.get('ad', '(isimsiz)')}"
+                  + (f" · {b['marka']}" if b.get("marka") else "")
+             for tid, b in bitenler}
+    if "sunum_secim" in st.session_state:          # silinen test kalmasin
+        st.session_state["sunum_secim"] = [
+            t for t in st.session_state["sunum_secim"] if t in adlar]
+    else:
+        st.session_state["sunum_secim"] = list(adlar)
+    k = st.columns([4, 1.6])
+    secili = k[0].multiselect("Sunuma girecek testler (sıra korunur)",
+                              list(adlar), format_func=adlar.get,
+                              key="sunum_secim")
+    dil = k[1].radio("Slayt başlıkları", ["en", "tr"], horizontal=True,
+                     key="sunum_dili",
+                     format_func={"en": "English", "tr": "Türkçe"}.get)
+    if not secili:
+        return
+    bilgiler = dict(bitenler)
+    eksik = [adlar[t] for t in secili if not bilgiler[t].get("insight")]
+    if eksik:
+        st.warning("Insight girilmemiş, slaytta 'Read' kutusu boş kalacak: "
+                   + ", ".join(eksik))
+    dosya, hata = _sunum_dosyasi([bilgiler[t] for t in secili], dil)
+    if hata:
+        st.error(hata)
+        return
+    st.download_button(
+        f"⬇️ Sunumu indir ({len(secili)} slayt)", dosya, type="primary",
+        file_name=f"test_sonuclari_{datetime.date.today():%Y%m%d}.pptx",
+        mime=PPTX_TURU, key="sunum_indir")
+
+
 def render_aktif_testler_page():
-    """Ekibin su anda devam eden testlerini herkesin gordugu pano."""
+    """Ekibin devam eden ve biten testleri; sonuc girisi ve sunum."""
     ust = st.columns([6, 1])
     with ust[0]:
         st.title("🟢 Aktif testler")
-        st.caption("Şu anda sahada devam eden testler. Buraya girilen test "
-                   "herkesin ekranında görünür; test bitince 'Testi bitir' ile "
-                   "manuel olarak kapatılır. Test verisini yüklemek için "
-                   "Ortak dosyalar bölümünü kullanabilirsin.")
+        st.caption("Ekibin devam eden ve biten testleri. Buraya girilen test "
+                   "herkesin ekranında görünür, asistan da okur. Sayısal "
+                   "sonucu ve insight'ı test sürerken de bittikten sonra da "
+                   "girebilirsin; biten testleri sunum slaytı olarak "
+                   "indirebilirsin.")
     with ust[1]:
         if st.button("⬅️ Sohbete dön", use_container_width=True):
             st.session_state.pop("acilan_aktif_test", None)
@@ -1353,42 +1679,47 @@ def render_aktif_testler_page():
     aktifler = aktif_test_listesi("aktif")
     bitenler = aktif_test_listesi("bitti")
 
-    with st.expander("➕ Yeni aktif test ekle", expanded=not aktifler):
-        sayac = st.session_state.get("yeni_test_sayac", 0)
-        yeni = _aktif_test_formu(f"yeni_aktif_test_{sayac}",
-                                 buton="💾 Kaydet ve aktif testlere ekle")
-        if yeni:
-            tid = aktif_test_ekle(yeni)
-            st.session_state["acilan_aktif_test"] = tid
-            st.session_state["yeni_test_sayac"] = sayac + 1   # form bosalsin
-            st.rerun()
+    _yeni_test_bolumu("aktif", acik=not aktifler and not bitenler)
 
     st.markdown(f"### Devam eden testler ({len(aktifler)})")
     if not aktifler:
-        st.info("Şu anda aktif test yok. Yukarıdaki **Yeni aktif test ekle** "
+        st.info("Şu anda aktif test yok. Yukarıdaki **Yeni test ekle** "
                 "bölümünden ekleyebilirsin.")
     for tid, bilgi in aktifler:
-        _aktif_test_karti(tid, bilgi)
+        _test_karti(tid, bilgi)
 
+    st.markdown("---")
+    st.markdown(f"### ✅ Biten testler ({len(bitenler)})")
     if bitenler:
-        st.markdown("---")
-        with st.expander(f"✅ Biten testler ({len(bitenler)})"):
-            for tid, bilgi in bitenler:
-                st.markdown(f"**{bilgi.get('ad', '(isimsiz test)')}** — "
-                            f"bitiş: {bilgi.get('kapanis', '-')}")
-                if bilgi.get("sonuc_notu"):
-                    st.markdown(f"Sonuç: {bilgi['sonuc_notu']}")
-                st.caption(f"Hipotez: {bilgi.get('hipotez', '-')}")
-                satir = st.columns([1.4, 1.4, 5])
-                if satir[0].button("↩️ Tekrar aktif et", key=f"ac_{tid}",
-                                   use_container_width=True):
-                    aktif_test_ac(tid)
-                    st.rerun()
-                if satir[1].button("🗑️ Sil", key=f"bsil_{tid}",
-                                   use_container_width=True):
-                    aktif_test_sil(tid)
-                    st.rerun()
-                st.markdown("---")
+        st.caption("Sonucu sonradan girmek için testi aç → **✏️ Sonuç / "
+                   "bilgileri düzenle**.")
+    for tid, bilgi in bitenler:
+        _test_karti(tid, bilgi)
+
+    st.markdown("---")
+    _sunum_bolumu(bitenler)
+
+
+def render_ekip_sekmesi():
+    """Havuz sayfasindaki 'Ekibin testleri' sekmesi."""
+    st.markdown("Ekibin uygulamaya girdiği testler (devam eden + biten). "
+                "Bulutta (Supabase) saklanır, herkes aynı listeyi görür.")
+    _yeni_test_bolumu("havuz")
+    df = et.havuz_tablosu(load_aktif_testler())
+    if df.empty:
+        st.info("Henüz ekip testi yok. Yukarıdan ilk testi ekleyebilirsin.")
+        return
+    if st.button("🟢 Düzenle / sonuç gir / sunuma aktar →", key="ekip_git"):
+        st.session_state.view = "aktif"
+        st.rerun()
+    render_havuz_sekmesi(
+        "ekip", df.drop(columns=["_tid"]), kume_adi="Ekibin testleri",
+        aciklama="", kaynak="Ekip girişleri (Aktif testler sayfası)",
+        kolonlar=["Test_ID", "Test_Name", "Status", "Brand", "Platform",
+                  "Country", "Test_Type", "Primary_Metric", "CR_Control",
+                  "CR_Treatment", "Lift_Percent", "P_Value", "Confidence",
+                  "Sample_Size", "Result", "Launch_Date", "End_Date",
+                  "Added_By"])
 
 
 # --- Modelden yanit alma (yeniden deneme + yedek model) -------------------
