@@ -39,7 +39,7 @@ Her dosya kendi **sekmesinde** durur:
 | Sekme | Dosya | İçerik |
 |---|---|---|
 | 🛁 Banyo kategorisi (35) | `Bathroom_Category_Test_Learn_MEGA.xlsx` | Vitra, Artema, İntema, Grohe, Hansgrohe, Duravit, Kohler e-ticaret testleri (PDP, Checkout, Email, Cart, Category) |
-| 📚 Master veritabanı (58) | `Test_Learn_Database_MASTER_58_Tests_COMPLETE.csv` | Yukarıdakiler + Meta/Google platform testleri + **15 gerçek Eczacıbaşı Meta kampanyası (REAL###)**; **10 kaybeden (LOSS) test** dahil |
+| 📚 Veri havuzu (97) | `Test_Learn_Database_MASTER_58_Tests_COMPLETE.csv` + `Rakip_TestLearn_Guncelleme_Ag-Kas2026.csv` | Yukarıdakiler + Meta/Google platform testleri + **15 gerçek Eczacıbaşı Meta kampanyası (REAL###)**; **10 kaybeden (LOSS) test** dahil + **39 rakip/pazar vakası (T059–T097, 🔵 REFERANS)** |
 | ✨ Zenginleştirilmiş (43) | `Test_Learn_Database_ENRICHED_43_Tests.csv` | Yönetici özeti, stratejik tavsiye, beklenen getiri, uygulama zorluğu, benzer testler |
 
 **Bu dosyalar iç içe geçmiştir:** Banyo 35 ⊂ Zenginleştirilmiş 43 ⊂ Master 58.

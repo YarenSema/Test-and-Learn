@@ -30,6 +30,8 @@ Ayrica DIS KAYNAKLI bir rakip/pazar taramasi var:
         kategori-komsu ve platform vakalari (Ağu–Kas 2026). Kolonlari
         Turkce; yuklerken RAKIP_KOLONLARI ile ortak semaya cevrilir ve
         Result = "REFERANS" atanir (kontrollu VitrA testi degiller).
+        Kendi sekmesi yok; "Veri havuzu" (eski adi Master) sekmesinin
+        altina eklenir (VERI_KUMELERI["master"]["ekler"]).
         Sonraki taramalar da ayni kolon yapisiyla bu dosyaya eklenebilir.
 
 Bu yuzden:
@@ -63,15 +65,21 @@ VERI_KUMELERI = {
                     "(PDP, Checkout, Email, Cart, Category).",
     },
     "master": {
-        "sekme": "📚 Master veritabanı",
+        "sekme": "📚 Veri havuzu",
         "dosya": os.path.join(DATA_DIR,
                               "Test_Learn_Database_MASTER_58_Tests_COMPLETE.csv"),
         "sayfa": None,
+        # Bu sekmeye eklenen diger dosyalar (yuklerken alta eklenir)
+        "ekler": ["rakip"],
         "aciklama": "En geniş havuz: banyo testleri + Meta/Google platform "
                     "testleri + **15 gerçek Eczacıbaşı Meta kampanyası "
-                    "(REAL###)**. Kaybeden (LOSS) testler de burada — "
+                    "(REAL###)** + **Ağu–Kas 2026 rakip/pazar taraması "
+                    "(T059–T097)**. Kaybeden (LOSS) testler de burada — "
                     "neyin işe yaramadığı en az kazanan testler kadar "
-                    "değerli.",
+                    "değerli. 🔵 REFERANS işaretli kayıtlar rakip, "
+                    "kategori-komşu ve platform vakalarıdır; VitrA'nın "
+                    "kendi testi değil, kanıt seviyesine bakarak hipotez "
+                    "kaynağı olarak kullan.",
     },
     "enriched": {
         "sekme": "✨ Zenginleştirilmiş",
@@ -92,23 +100,16 @@ VERI_KUMELERI = {
                     "Bu testler banyo sekmesinde ve asistanın hafızasında "
                     "da yer alır.",
     },
+    # Kendi sekmesi yok: "Veri havuzu" (master) sekmesinin altina eklenir.
     "rakip": {
         "sekme": "🔭 Rakip & pazar (Ağu–Kas 2026)",
         "dosya": os.path.join(DATA_DIR,
                               "Rakip_TestLearn_Guncelleme_Ag-Kas2026.csv"),
         "sayfa": None,
-        "aciklama": "Rakip (Hansgrohe, GROHE, Kohler, Geberit, V&B, Moen, "
-                    "TOTO, Duravit…), kategori-komşu (Arçelik, Vivense, "
-                    "IKEA…) ve platform vakaları. Bunlar **VitrA'nın kendi "
-                    "testleri değil**; çoğu ajans/vendor beyanı ya da nitel "
-                    "kampanya bilgisi. Kanıt seviyesine bakarak hipotez "
-                    "kaynağı olarak kullan.",
-        "tablo": ["Test_ID", "Source_Type", "Brand", "Country",
-                  "Launch_Date", "Platform", "Test_Type", "Test_Name",
-                  "Lift_Summary", "Evidence_Level", "VitrA_Applicability"],
+        "aciklama": "",
     },
 }
-SIRA = ["banyo", "master", "enriched", "worst", "rakip"]
+SIRA = ["banyo", "master", "enriched", "worst"]   # ekranda sekme sirasi
 
 # Rakip/pazar taramasi dosyasinin Turkce kolonlarini havuzun ortak
 # semasina esler. Lift_Percent bilerek doldurulmuyor: dosyadaki lift'ler
@@ -184,7 +185,9 @@ TABLO_KOLONLARI = ["Test_ID", "Brand", "Country", "Product_Category",
                    "Test_Type", "Campaign_Objective", "Primary_Metric",
                    "CR_Control", "CR_Treatment", "Lift_Percent", "P_Value",
                    "Confidence", "Sample_Size", "Result", "Launch_Date",
-                   "Data_Source"]
+                   "Data_Source",
+                   # rakip/pazar kayitlarinda dolu (digerlerinde yoksa atlanir)
+                   "Source_Type", "Lift_Summary", "Evidence_Level"]
 
 
 # --- Okuma ----------------------------------------------------------------
@@ -289,7 +292,25 @@ def load_dataset(anahtar):
     df = _lift_yonunu_duzelt(df)
     if anahtar == "banyo":
         df = _kaybedenleri_ekle(df)
+    for ek_anahtar in tanim.get("ekler", []):
+        df = _alta_ekle(df, load_dataset(ek_anahtar))
     return df
+
+
+def _alta_ekle(df, ek):
+    """ek tablodaki (Test_ID'si df'te olmayan) satirlari df'in altina ekler."""
+    if ek is None or "Test_ID" not in df.columns or "Test_ID" not in ek.columns:
+        return df
+    yeni = ek[~ek["Test_ID"].isin(df["Test_ID"])]
+    return pd.concat([df, yeni], ignore_index=True) if len(yeni) else df
+
+
+def kaynak_dosyalari(anahtar):
+    """Bir sekmenin okudugu tum dosyalar (ana dosya + alta eklenenler)."""
+    tanim = VERI_KUMELERI.get(anahtar) or {}
+    yollar = [tanim.get("dosya")] + [VERI_KUMELERI[e]["dosya"]
+                                     for e in tanim.get("ekler", [])]
+    return [y for y in yollar if y and os.path.exists(y)]
 
 
 def mevcut_kumeler():
@@ -338,7 +359,9 @@ def birlesik_havuz():
     eklenir. Hafizaya (SYSTEM_PROMPT) bu tablo gider.
     """
     kumeler = [(a, load_dataset(a))
-               for a in ("master", "enriched", "banyo", "worst", "rakip")]
+               for a in ("master", "enriched", "banyo", "worst")]
+    # Not: rakip/pazar taramasi master'in icine eklendigi icin ayrica
+    # okunmuyor.
     kumeler = [(a, d) for a, d in kumeler if d is not None]
     if not kumeler:
         return None
@@ -580,8 +603,8 @@ def kb_text(detay=False, max_test=None):
     if df is None:
         return None
 
-    kaynaklar = [os.path.basename(VERI_KUMELERI[a]["dosya"])
-                 for a in mevcut_kumeler()]
+    kaynaklar = [os.path.basename(yol) for a in mevcut_kumeler()
+                 for yol in kaynak_dosyalari(a)]
     kapsam = [f"Toplam {len(df)} tekil test"]
     for etiket, kolon in (("Marka", "Brand"), ("Ülke", "Country"),
                           ("Test tipi", "Test_Type")):

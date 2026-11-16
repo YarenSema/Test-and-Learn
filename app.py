@@ -1057,7 +1057,8 @@ def render_havuz_sekmesi(anahtar, df, kume_adi, aciklama, kaynak=None,
     """Bir veri kumesinin sekmesi: filtre, ozet, grafik, tablo, detaylar."""
     if aciklama:
         st.markdown(aciklama)
-    kaynak = kaynak or f"`{th.VERI_KUMELERI[anahtar]['dosya']}`"
+    kaynak = kaynak or " + ".join(f"`{yol}`"
+                                  for yol in th.kaynak_dosyalari(anahtar))
     st.caption(f"Kaynak: {kaynak} · "
                f"{len(df)} test × {len(df.columns)} kolon")
 
@@ -1192,7 +1193,6 @@ def render_havuz_page():
                 anahtar, th.load_dataset(anahtar),
                 kume_adi=th.VERI_KUMELERI[anahtar]["sekme"],
                 aciklama=th.VERI_KUMELERI[anahtar]["aciklama"],
-                kolonlar=th.VERI_KUMELERI[anahtar].get("tablo"),
             )
 
 
