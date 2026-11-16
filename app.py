@@ -55,10 +55,34 @@ from dotenv import dotenv_values, load_dotenv
 from google import genai
 from google.genai import types
 from metrics import compute_metrics, metrics_to_text
+import importlib
 import test_havuzu as th
 import depo
 import internet
 import ekip_testleri as et
+
+
+def _tazele(modul):
+    """
+    Streamlit Cloud kod guncellenince yalnizca app.py'yi yeniden calistirir;
+    import edilmis yardimci dosyalar (internet.py, test_havuzu.py) yeniden
+    baslatmaya kadar ESKI halleriyle bellekte kalir. Yeni app.py eski
+    internet.py'yi cagirinca AttributeError olusuyordu (plan_istemi yok).
+    Dosya degistiyse modulu yeniden yukler.
+    (depo/ekip_testleri bilerek yok: bellekte bekleyen kayit tutabilirler.)
+    """
+    try:
+        mtime = os.path.getmtime(modul.__file__)
+        if getattr(modul, "_dosya_mtime", None) != mtime:
+            importlib.reload(modul)
+            modul._dosya_mtime = mtime
+    except Exception:
+        pass
+    return modul
+
+
+internet = _tazele(internet)
+th = _tazele(th)
 
 load_dotenv()
 
