@@ -148,6 +148,68 @@ def sorgulari_hazirla(soru):
     return list(dict.fromkeys(sorgular)), haber
 
 
+# --- Gemini ile arama planlama ---------------------------------------------
+# Kelime ayiklamak icgoru sorularinda ise yaramiyor: "Rakiplerimiz bu ay ne
+# yapiyor?" -> "Rakiplerimiz yapiyor" aramasi dizi/futbol sonucu getiriyor.
+# Bu yuzden sorgulari model yazar; bu metin o istemdir. Model cevap
+# veremezse uygulama yukaridaki kelime yontemine geri doner.
+SIRKET_BAGLAMI = (
+    "Kullanıcı Eczacıbaşı Yapı Ürünleri'nin (markalar: VitrA, Artema, "
+    "Intema, VitrA Karo) dijital pazarlama ekibinde. Sektör: banyo, "
+    "vitrifiye/seramik sağlıklı yapı ürünleri, armatür/batarya, karo, banyo "
+    "mobilyası. Kanallar: D2C e-ticaret sitesi, Hepsiburada, Trendyol, "
+    "bayi ve showroom. Reklam platformları: Meta, Google (Search, PMax, "
+    "Demand Gen, AI Max, YouTube), TikTok. Global rakipler: Hansgrohe, "
+    "GROHE, Kohler, Geberit, Duravit, Villeroy & Boch, Ideal Standard, "
+    "Roca, TOTO, Moen. Türkiye rakipleri: Kale (Kalebodur), Creavit, "
+    "Seramiksan, Turkuaz Seramik, Ece Banyo, Bien.")
+
+PLAN_ISTEMI = """Sen bir pazarlama araştırma asistanının ARAMA PLANLAYICISISIN.
+{baglam}
+Bugünün tarihi: {bugun}.
+
+Görev: Kullanıcının sorusuna güncel, zengin arka plan bilgisi getirecek 3-5 web arama sorgusu yaz.
+Kurallar:
+- Sorgular arama motoruna yazılacak 2-6 kelimelik anahtar kelime öbekleri olsun, cümle değil.
+- "rakiplerimiz", "sektörümüz", "markamız" gibi ifadeleri somut marka / sektör / platform adlarına çevir.
+- Şirket içi kelimeleri ("verilerimiz", "testlerimiz", "havuz", "içgörü", "kampanyalarımız") sorguya KOYMA; bunların konusunu (ör. Meta reklam kreatif stratejisi) ara.
+- Kendi markalarımızın (VitrA, Artema, Intema) resmi sitesini veya pazaryeri mağaza sayfasını getirecek sorgular yazma; kullanıcı onları zaten biliyor. Marka adını ancak haber, basın ya da rakip karşılaştırması aranıyorsa kullan. Odak: sektör haberleri, rakip hamleleri, platform güncellemeleri, benchmark ve vaka çalışmaları.
+- En az bir Türkçe ve en az bir İngilizce sorgu yaz (platform güncellemeleri ve global rakipler İngilizcede daha zengin).
+- Güncellik gereken konularda ay/yıl ekle (ör. "Kasım 2026").
+- Soru yalnızca şirket içi bir kaydı istiyorsa (ör. "REAL003'ü özetle", "aktif testleri listele", "bu dosyayı tabloya çevir") ve dış bilgi değer katmıyorsa ara=false ver. İçgörü, strateji, öneri, trend, rakip, benchmark, sektör sorularında ara=true ver.
+{onceki}Kullanıcının sorusu: {soru}
+
+Yalnızca JSON döndür: {{"ara": true, "sorgular": ["...", "..."]}}"""
+
+
+def plan_istemi(soru, onceki_soru=""):
+    """Gemini'ye gonderilecek arama planlama istemi."""
+    return PLAN_ISTEMI.format(
+        baglam=SIRKET_BAGLAMI,
+        bugun=datetime.now().strftime("%d.%m.%Y"),
+        onceki=(f"Önceki soru (bağlam için): {onceki_soru[:300]}\n"
+                if onceki_soru else ""),
+        soru=(soru or "")[:1000])
+
+
+def plani_coz(metin):
+    """Model yanitindan (ara_mi, [sorgular]) cikarir; okunamazsa None."""
+    import json
+    eslesme = re.search(r"\{.*\}", metin or "", re.S)
+    if not eslesme:
+        return None
+    try:
+        veri = json.loads(eslesme.group(0))
+    except Exception:
+        return None
+    sorgular = [" ".join(str(s).split())[:120]
+                for s in (veri.get("sorgular") or []) if str(s).strip()]
+    ara_mi = bool(veri.get("ara", bool(sorgular)))
+    if ara_mi and not sorgular:
+        return None
+    return ara_mi, sorgular[:5]
+
+
 # --- Kaynaklar -------------------------------------------------------------
 def _getir(url, zaman_asimi):
     istek = urllib.request.Request(url, headers=_UA)
@@ -251,13 +313,23 @@ def _puan(sonuc, kokler, pazarlama):
     return puan
 
 
-def _birlestir(gruplar, kelimeler, haber, adet, pazarlama=False):
+def _ana_sayfa_mi(url):
+    """meta.com, facebook.com/ gibi site ana sayfalari bilgi tasimaz."""
+    yol = urllib.parse.urlparse(url).path.strip("/")
+    return yol == "" or yol.lower() in {"tr", "en", "tr-tr", "en-us",
+                                        "index.html", "home"}
+
+
+def _birlestir(gruplar, kelimeler, haber, adet, pazarlama=False,
+               planli=False):
     gorulen, adaylar = set(), []
     simdi = datetime.now(timezone.utc)
     kokler = list(dict.fromkeys(_kok(k) for k in kelimeler))
     for oncelik, grup in enumerate(gruplar):
         for s in grup:
             if not s["url"].lower().startswith(("http://", "https://")):
+                continue
+            if s["tur"] == "web" and _ana_sayfa_mi(s["url"]):
                 continue
             anahtar = _sade(re.sub(r"\W+", "", s["baslik"]))[:60]
             if anahtar in gorulen or s["url"] in gorulen:
@@ -270,11 +342,12 @@ def _birlestir(gruplar, kelimeler, haber, adet, pazarlama=False):
 
     if not adaylar:
         return []
-    # Esik: en az 2 eslesme (tek kelimelik soruda 1). Yeterli sonuc
-    # kalmazsa esik gevsetilir ama hic eslesmeyen sonuc asla verilmez.
+    # Esik: en az 2 eslesme (tek kelimelik soruda 1). Kelime yonteminde
+    # yeterli sonuc kalmazsa esik gevsetilir; planli sorgularda gevsetilmez
+    # (az ama dolu sonuc, cok ama bos sonuctan iyidir — sayfalar okunuyor).
     esik = 2 if len(kokler) + pazarlama >= 2 else 1
     secilen = [a for a in adaylar if a[0] >= esik]
-    if len(secilen) < 3:
+    if len(secilen) < 3 and not (planli and secilen):
         secilen = [a for a in adaylar if a[0] >= 1]
 
     # Guncel haber isteniyorsa: once haberler, puan, sonra yeniden eskiye.
@@ -299,13 +372,24 @@ def _birlestir(gruplar, kelimeler, haber, adet, pazarlama=False):
     return sonuclar[:adet]
 
 
-def ara(soru, adet=SONUC_SAYISI, zaman_asimi=ZAMAN_ASIMI):
+def ara(soru, adet=SONUC_SAYISI, zaman_asimi=ZAMAN_ASIMI, sorgular=None):
     """
-    Sorudan anahtar kelime cikarip tum kaynaklarda paralel arar.
+    Tum kaynaklarda paralel arar.
+    sorgular verilirse (orn. Gemini'nin planladigi sorgular) onlar kullanilir;
+    verilmezse sorudan anahtar kelime cikarilir (yedek yontem).
     [{baslik, url, ozet, kaynak, tarih, tur}] doner; sorun olursa bos liste.
     Bos sonuc onbellege alinmaz (tekrar denemede yeniden aransin).
     """
-    sorgular, haber = sorgulari_hazirla(soru)
+    if sorgular:
+        sorgular = list(dict.fromkeys(
+            " ".join(str(s).split()) for s in sorgular if str(s).strip()))[:5]
+        haber = bool(_HABER_DESENI.search(_sade(soru)))
+        kelimeler = _anahtar_kelimeler(" ".join(sorgular))
+        planli = True
+    else:
+        sorgular, haber = sorgulari_hazirla(soru)
+        kelimeler = _anahtar_kelimeler(soru)
+        planli = False
     if not sorgular:
         return []
 
@@ -321,8 +405,11 @@ def ara(soru, adet=SONUC_SAYISI, zaman_asimi=ZAMAN_ASIMI):
     for i, sorgu in enumerate(sorgular):
         isler.append(_havuz.submit(_google_haber, sorgu, sure, gun))
         isler.append(_havuz.submit(_bing_haber, sorgu, sure))
-        if i == 0:                         # web aramasi yalnizca cekirdekte
+        # Planli sorgular zaten iyi; hepsinde web de aranir. Yedek yontemde
+        # web aramasi yalnizca cekirdek sorguda yapilir.
+        if planli or i == 0:
             isler.append(_havuz.submit(_bing_web, sorgu, sure))
+        if i == 0:
             isler.append(_havuz.submit(_ddgs, sorgu, sure))
 
     bitti, _ = wait(isler, timeout=zaman_asimi)
@@ -334,13 +421,92 @@ def ara(soru, adet=SONUC_SAYISI, zaman_asimi=ZAMAN_ASIMI):
             except Exception:
                 continue                   # bu kaynak sonuc vermedi
 
-    pazarlama = bool(_PAZARLAMA_DESENI.search(_sade(soru)))
-    sonuclar = _birlestir(gruplar, _anahtar_kelimeler(soru), haber, adet,
-                          pazarlama)
+    pazarlama = bool(_PAZARLAMA_DESENI.search(
+        _sade(soru + " " + " ".join(sorgular))))
+    sonuclar = _birlestir(gruplar, kelimeler, haber, adet, pazarlama,
+                          planli)
     if sonuclar:
         with _kilit:
             _onbellek[anahtar] = (time.time(), sonuclar)
     return sonuclar
+
+
+# --- Sayfa okuma (derinlik) ----------------------------------------------
+# Arama sonuclari yalnizca baslik + 1-2 cumle verir; asistanin "arka plani
+# dolu" yanit verebilmesi icin en iyi sayfalarin ICINDEN soruyla ilgili
+# paragraflar alinir.
+OKUNACAK_SAYFA = 5
+SAYFA_KARAKTER = 1800      # sayfa basina modele giden icerik
+SAYFA_ZAMAN_ASIMI = 6.0
+# Icerigi okunamayan / giris isteyen / yonlendirme yapan siteler
+_OKUNMAZ = ("news.google.com", "youtube.com", "instagram.com",
+            "facebook.com", "x.com", "twitter.com", "linkedin.com",
+            "tiktok.com", "books.google.", "pinterest.")
+
+
+def _sayfa_paragraflari(url, zaman_asimi):
+    istek = urllib.request.Request(url, headers=_UA)
+    with urllib.request.urlopen(istek, timeout=zaman_asimi) as yanit:
+        tur = yanit.headers.get_content_type() or ""
+        if "html" not in tur:
+            return []                      # PDF, resim vb. atlanir
+        kodlama = yanit.headers.get_content_charset() or "utf-8"
+        ham = yanit.read(2_000_000)
+    metin = ham.decode(kodlama, errors="replace")
+    metin = re.sub(r"(?is)<(script|style|noscript|svg|nav|footer|header|"
+                   r"aside|form|button)\b[^>]*>.*?</\1>", " ", metin)
+    parcalar = re.findall(r"(?is)<(p|li|h2|h3|blockquote)\b[^>]*>(.*?)</\1>",
+                          metin)
+    paragraflar = []
+    for _, icerik in parcalar:
+        p = _html_temizle(icerik)
+        if len(p) >= 60 and p not in paragraflar:
+            paragraflar.append(p)
+    return paragraflar
+
+
+def _ilgili_icerik(paragraflar, kokler):
+    """Soruyla en cok eslesen paragraflari, sayfadaki sirasiyla secer."""
+    puanli = []
+    for sira, p in enumerate(paragraflar):
+        sade = " " + _sade(p) + " "
+        puan = sum(1 for k in kokler
+                   if re.search(r"[^a-z0-9]" + re.escape(k), sade))
+        puanli.append((puan, sira, p))
+    # Eslesme yoksa sayfanin girisi (ilk paragraflar) kullanilir
+    secim = sorted(puanli, key=lambda x: (-x[0], x[1]))
+    secilen, toplam = [], 0
+    for puan, sira, p in secim:
+        if toplam >= SAYFA_KARAKTER:
+            break
+        secilen.append((sira, p[:700]))
+        toplam += min(len(p), 700)
+    return " … ".join(p for _, p in sorted(secilen))[:SAYFA_KARAKTER]
+
+
+def sayfalari_oku(sonuclar, anahtar_metin, adet=OKUNACAK_SAYFA,
+                  zaman_asimi=SAYFA_ZAMAN_ASIMI):
+    """
+    En ustteki okunabilir sonuclarin sayfalarini paralel indirir ve her
+    sonuca 'icerik' alani ekler. Okunan sayfa sayisini doner.
+    """
+    kokler = list(dict.fromkeys(
+        _kok(k) for k in _anahtar_kelimeler(anahtar_metin)))
+    adaylar = [s for s in sonuclar if not s.get("icerik")
+               and not any(d in s["url"] for d in _OKUNMAZ)][:adet]
+    if not adaylar:
+        return sum(1 for s in sonuclar if s.get("icerik"))
+    isler = {_havuz.submit(_sayfa_paragraflari, s["url"], zaman_asimi - 0.5): s
+             for s in adaylar}
+    bitti, _ = wait(isler, timeout=zaman_asimi)
+    for is_ in bitti:
+        try:
+            paragraflar = is_.result()
+        except Exception:
+            continue
+        if paragraflar:
+            isler[is_]["icerik"] = _ilgili_icerik(paragraflar, kokler)
+    return sum(1 for s in sonuclar if s.get("icerik"))
 
 
 # --- Modele ve kullaniciya sunma -----------------------------------------
@@ -358,7 +524,9 @@ def baglam_metni(sonuclar):
                                       "haber" if s.get("tur") == "haber"
                                       else "web") if p)
         satirlar.append(f"[W{i}] {s['baslik']} ({ust})\nAdres: {s['url']}"
-                        + (f"\n{s['ozet']}" if s.get("ozet") else ""))
+                        + (f"\n{s['ozet']}" if s.get("ozet") else "")
+                        + (f"\nSayfa içeriğinden: {s['icerik']}"
+                           if s.get("icerik") else ""))
     return "\n\n".join(satirlar)
 
 

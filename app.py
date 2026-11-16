@@ -48,6 +48,7 @@ import queue
 import random
 import datetime
 import threading
+from concurrent.futures import ThreadPoolExecutor
 import pandas as pd
 import streamlit as st
 from dotenv import dotenv_values, load_dotenv
@@ -850,11 +851,79 @@ def arama_sorgusu(chat):
     return soru.replace("\n", " ")[:200]
 
 
-def internet_sonuclari(chat):
+PLAN_ZAMAN_ASIMI = 8               # sn: arama planlama cagrisi icin
+_plan_havuzu = ThreadPoolExecutor(max_workers=4, thread_name_prefix="plan")
+
+
+def arama_plani(soru, onceki_soru=""):
+    """
+    Gemini'ye soruya uygun arama sorgularini yazdirir.
+    (ara_mi, [sorgular]) doner; model yanit veremezse None (o zaman kelime
+    ayiklayan yedek yonteme donulur). Hizli lite modeller denenir.
+    """
+    try:
+        client = get_client(API_KEY)
+        modeller = model_sirasi(client)[:2]
+    except Exception:
+        return None
+    istem = internet.plan_istemi(soru, onceki_soru)
+    for model_adi in modeller:
+        is_ = _plan_havuzu.submit(
+            client.models.generate_content, model=model_adi, contents=istem,
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                max_output_tokens=400, temperature=0.2))
+        try:
+            plan = internet.plani_coz(is_.result(timeout=PLAN_ZAMAN_ASIMI).text)
+        except Exception:
+            continue                       # yogun / kota / sure: sonrakini dene
+        if plan:
+            return plan
+    return None
+
+
+def internet_sonuclari(chat, durum=None):
+    """
+    1) Gemini arama sorgularini planlar (olmazsa kelime yontemi),
+    2) RSS/web kaynaklarinda paralel aranir,
+    3) en iyi sayfalarin icinden ilgili paragraflar okunur.
+    """
     if not st.session_state.get("internet_acik", True):
         return []
-    sorgu = arama_sorgusu(chat)
-    return _internette_ara(sorgu) if sorgu else []
+    sorular = [m["content"].split("\n\n", 1)[-1].strip()
+               for m in chat["messages"] if m["role"] == "user"]
+    if not sorular:
+        return []
+    soru = sorular[-1]
+    if len(th._kelimeler(soru) - _SELAMLASMA) < 2:
+        return []                          # selamlasma / cok kisa
+
+    if durum:
+        durum.caption("🌐 Arama planlanıyor...")
+    plan = arama_plani(soru, sorular[-2] if len(sorular) > 1 else "")
+    if plan is None:                       # model yok: eski yontem
+        sorgu = arama_sorgusu(chat)
+        if not sorgu:
+            return []
+        anahtar_metin = sorgu
+        if durum:
+            durum.caption("🌐 İnternette arıyor...")
+        sonuclar = _internette_ara(sorgu)
+    else:
+        ara_mi, sorgular = plan
+        if not ara_mi:
+            return []
+        anahtar_metin = " ".join(sorgular)
+        if durum:
+            durum.caption("🌐 İnternette arıyor: " + " · ".join(sorgular))
+        sonuclar = internet.ara(soru, sorgular=sorgular)
+
+    if sonuclar:
+        if durum:
+            durum.caption(f"🌐 {len(sonuclar)} kaynak bulundu, sayfalar "
+                          "okunuyor...")
+        internet.sayfalari_oku(sonuclar, anahtar_metin)
+    return sonuclar
 
 
 # --- Dosya sayfalari -------------------------------------------------------
@@ -2319,15 +2388,15 @@ def render_chat():
                     else:
                         yazi.empty()
 
+                kaynaklar = internet_sonuclari(chat, durum)
                 if st.session_state.get("internet_acik", True):
-                    durum.caption("🌐 İnternette arıyor...")
-                kaynaklar = internet_sonuclari(chat)
-                if st.session_state.get("internet_acik", True):
+                    okunan = sum(1 for k in kaynaklar if k.get("icerik"))
                     durum.caption(
                         f"🌐 {len(kaynaklar)} internet kaynağı bulundu, "
-                        "yanıt hazırlanıyor..." if kaynaklar else
-                        "🌐 İnternette bu soruya uygun sonuç çıkmadı, "
-                        "iç verilerle yanıtlanıyor...")
+                        f"{okunan} sayfa okundu — yanıt hazırlanıyor..."
+                        if kaynaklar else
+                        "🌐 İnternet bu soru için gerekli görülmedi ya da "
+                        "uygun sonuç çıkmadı; iç verilerle yanıtlanıyor...")
                 answer, hata_tip, ham_hata = yanit_uret(
                     chat, API_KEY, ilerleme=ilerleme, yazici=yazici,
                     internet_kaynak=kaynaklar)
