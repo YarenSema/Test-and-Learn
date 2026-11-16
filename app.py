@@ -685,13 +685,17 @@ with st.sidebar:
     if havuz_df is not None:
         marka_sayisi = (havuz_df["Brand"].nunique()
                         if "Brand" in havuz_df.columns else 0)
-        kayip = 0
+        kayip = referans = 0
         if "Result" in havuz_df.columns:
-            kayip = int((havuz_df["Result"].astype(str).str.upper()
-                         == "LOSS").sum())
+            sonuclar = havuz_df["Result"].astype(str).str.upper()
+            kayip = int((sonuclar == "LOSS").sum())
+            referans = int((sonuclar == "REFERANS").sum())
+        dahil = [m for m in (f"{kayip} kaybeden test" if kayip else "",
+                             f"{referans} rakip/pazar vakası"
+                             if referans else "") if m]
         ozet = (f"Test havuzu: {len(havuz_df)} tekil test / "
                 f"{marka_sayisi} marka / {len(havuz_kumeleri)} dosya"
-                + (f" ({kayip} kaybeden test dahil)" if kayip else ""))
+                + (f" ({', '.join(dahil)} dahil)" if dahil else ""))
         if hafiza == "kapali":
             st.caption(ozet + " — ⚡ Hızlı modda sohbete girmez")
         else:
@@ -1005,9 +1009,13 @@ def render_test_detay(r):
         st.markdown(f"**Kontrol:** `{_alan(r, 'Control_Version') or '-'}`  \n"
                     f"**Varyant:** `{_alan(r, 'Treatment_Version') or '-'}`")
 
-    for baslik, kolon in (("Kampanya amacı", "Campaign_Objective"),
+    for baslik, kolon in (("Kaynak tipi", "Source_Type"),
+                          ("Raporlanan etki", "Lift_Summary"),
+                          ("Kanıt seviyesi", "Evidence_Level"),
+                          ("Kampanya amacı", "Campaign_Objective"),
                           ("Amaç", "Objective"),
                           ("Hipotez", "Hypothesis"),
+                          ("Kurgu", "Test_Setup"),
                           ("Yan metrikler", "Secondary_Metrics")):
         if _alan(r, kolon):
             st.markdown(f"**{baslik}:** {_alan(r, kolon)}")
@@ -1019,7 +1027,8 @@ def render_test_detay(r):
                           ("📌 Stratejik tavsiye", "Strategic_Recommendation"),
                           ("📋 Uygulama planı", "Implementation_Playbook"),
                           ("⚠️ Dikkat edilecekler", "Important_Cautions"),
-                          ("💰 Beklenen getiri", "Expected_ROI")):
+                          ("💰 Beklenen getiri", "Expected_ROI"),
+                          ("🎯 VitrA'ya uygulanabilirlik", "VitrA_Applicability")):
         if _alan(r, kolon):
             st.markdown(f"**{baslik}**")
             st.text(_alan(r, kolon))
@@ -1030,11 +1039,17 @@ def render_test_detay(r):
                           ("Durum", "Status"), ("Platform", "Platform"),
                           ("Başlangıç", "Launch_Date"), ("Bitiş", "End_Date"),
                           ("Ekleyen", "Added_By"),
+                          ("Pencere içi (Ağu–Kas 2026)", "In_Window"),
                           ("Veri kaynağı", "Data_Source")):
         if _alan(r, kolon):
             alt.append(f"{baslik}: {_alan(r, kolon)}")
     if alt:
         st.caption(" · ".join(alt))
+    if _alan(r, "Source_URL"):
+        linkler = [u.strip() for u in _alan(r, "Source_URL").split(" ; ")
+                   if u.strip()]
+        st.caption("Kaynak: " + " · ".join(f"[{i}]({u})"
+                                           for i, u in enumerate(linkler, 1)))
 
 
 def render_havuz_sekmesi(anahtar, df, kume_adi, aciklama, kaynak=None,
@@ -1127,6 +1142,7 @@ def render_havuz_sekmesi(anahtar, df, kume_adi, aciklama, kaynak=None,
         lift = pd.to_numeric(r.get("Lift_Percent"), errors="coerce")
         sonuc = str(r.get("Result", "")).upper()
         isaret = ("🔴" if sonuc == "LOSS" else
+                  "🔵" if sonuc == "REFERANS" else
                   "🟡" if r.get("Status") == "Aktif" else
                   "⚪" if sonuc == "INCONCLUSIVE" else "🟢")
         etiket = (f"{isaret} {r.get('Test_ID', '?')} · {r.get('Brand', '-')} · "
@@ -1176,6 +1192,7 @@ def render_havuz_page():
                 anahtar, th.load_dataset(anahtar),
                 kume_adi=th.VERI_KUMELERI[anahtar]["sekme"],
                 aciklama=th.VERI_KUMELERI[anahtar]["aciklama"],
+                kolonlar=th.VERI_KUMELERI[anahtar].get("tablo"),
             )
 
 

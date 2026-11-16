@@ -24,6 +24,14 @@ Bunlarin disinda AYRI duran bir dosya daha var:
         Bu yuzden hem kendi sekmesinde, hem banyo sekmesinde, hem de
         birlesik havuzda (asistanin hafizasinda) yer alir.
 
+Ayrica DIS KAYNAKLI bir rakip/pazar taramasi var:
+
+  - data/Rakip_TestLearn_Guncelleme_Ag-Kas2026.csv -> T059–T097: rakip,
+        kategori-komsu ve platform vakalari (Ağu–Kas 2026). Kolonlari
+        Turkce; yuklerken RAKIP_KOLONLARI ile ortak semaya cevrilir ve
+        Result = "REFERANS" atanir (kontrollu VitrA testi degiller).
+        Sonraki taramalar da ayni kolon yapisiyla bu dosyaya eklenebilir.
+
 Bu yuzden:
   * EKRANDA her dosya kendi sekmesinde ayri ayri gosterilir (kullanici hangi
     dosyada ne var gormek ister).
@@ -84,8 +92,65 @@ VERI_KUMELERI = {
                     "Bu testler banyo sekmesinde ve asistanın hafızasında "
                     "da yer alır.",
     },
+    "rakip": {
+        "sekme": "🔭 Rakip & pazar (Ağu–Kas 2026)",
+        "dosya": os.path.join(DATA_DIR,
+                              "Rakip_TestLearn_Guncelleme_Ag-Kas2026.csv"),
+        "sayfa": None,
+        "aciklama": "Rakip (Hansgrohe, GROHE, Kohler, Geberit, V&B, Moen, "
+                    "TOTO, Duravit…), kategori-komşu (Arçelik, Vivense, "
+                    "IKEA…) ve platform vakaları. Bunlar **VitrA'nın kendi "
+                    "testleri değil**; çoğu ajans/vendor beyanı ya da nitel "
+                    "kampanya bilgisi. Kanıt seviyesine bakarak hipotez "
+                    "kaynağı olarak kullan.",
+        "tablo": ["Test_ID", "Source_Type", "Brand", "Country",
+                  "Launch_Date", "Platform", "Test_Type", "Test_Name",
+                  "Lift_Summary", "Evidence_Level", "VitrA_Applicability"],
+    },
 }
-SIRA = ["banyo", "master", "enriched", "worst"]
+SIRA = ["banyo", "master", "enriched", "worst", "rakip"]
+
+# Rakip/pazar taramasi dosyasinin Turkce kolonlarini havuzun ortak
+# semasina esler. Lift_Percent bilerek doldurulmuyor: dosyadaki lift'ler
+# metin ("+13% organik", "2,2x ATC") ve kontrollu deney sonucu degil;
+# sayiya cevirip ortalamaya katmak yaniltici olur.
+RAKIP_KOLONLARI = {
+    "Kaynak_Tipi": "Source_Type",
+    "Marka": "Brand",
+    "Bolge": "Country",
+    "Yayin_Tarihi": "Launch_Date",
+    "Pencere_Ici_Ag-Kas2026": "In_Window",
+    "Kanal": "Platform",
+    "Test_Tipi": "Test_Type",
+    "Ne_Test_Edildi": "Test_Name",
+    "Kurgu": "Test_Setup",
+    "Sonuc_Metrikleri": "Primary_Metric",
+    "Lift_Ozet": "Lift_Summary",
+    "Kanit_Seviyesi": "Evidence_Level",
+    "Learning": "Key_Learnings",
+    "Executive Summary": "Executive_Summary",
+    "Strategic Recommendation": "Strategic_Recommendation",
+    "Implementation Difficulty": "Implementation_Difficulty",
+    "Expected ROI": "Expected_ROI",
+    "Similar Tests": "Similar_Tests",
+    "Important Cautions": "Important_Cautions",
+    "Implementation Playbook": "Implementation_Playbook",
+    "VitrA_Uygulanabilirlik": "VitrA_Applicability",
+    "Kaynak_URL": "Source_URL",
+}
+RAKIP_KAYNAK = ("Rakip/pazar taraması Ağu–Kas 2026 "
+                "(Rakip_TestLearn_Guncelleme_Ag-Kas2026.csv) — dış kaynak, "
+                "VitrA'nın kendi testi değil")
+
+
+def _rakip_semasina_cevir(df):
+    """Rakip dosyasini ortak semaya cevirir; bos isaretlerini temizler."""
+    df = df.rename(columns=RAKIP_KOLONLARI)
+    # "—" dosyada "veri yok" anlaminda kullanilmis
+    df = df.replace({"—": pd.NA, "-": pd.NA})
+    df["Result"] = "REFERANS"
+    df["Data_Source"] = RAKIP_KAYNAK
+    return df
 
 # Kaybeden test dosyasinda Data_Source kolonu yok; asistanin kaynagi
 # dogru soyleyebilmesi icin yuklerken ekliyoruz.
@@ -105,6 +170,9 @@ FILTRE_ADAYLARI = {
     "Test tipi": "Test_Type",
     "Kampanya amacı": "Campaign_Objective",
     "Sonuç": "Result",
+    # Yalnizca rakip/pazar taramasinda bulunan kolonlar
+    "Kaynak tipi": "Source_Type",
+    "VitrA uygulanabilirlik": "VitrA_Applicability",
     # Yalnizca ekibin girdigi testlerde bulunan kolonlar
     "Durum": "Status",
     "Platform": "Platform",
@@ -214,6 +282,8 @@ def load_dataset(anahtar):
         return None
 
     df = df.copy()          # _oku onbellekli; onbellegi bozmayalim
+    if anahtar == "rakip":
+        df = _rakip_semasina_cevir(df)
     if anahtar == "worst" and "Data_Source" not in df.columns:
         df["Data_Source"] = WORST_KAYNAK
     df = _lift_yonunu_duzelt(df)
@@ -268,7 +338,7 @@ def birlesik_havuz():
     eklenir. Hafizaya (SYSTEM_PROMPT) bu tablo gider.
     """
     kumeler = [(a, load_dataset(a))
-               for a in ("master", "enriched", "banyo", "worst")]
+               for a in ("master", "enriched", "banyo", "worst", "rakip")]
     kumeler = [(a, d) for a, d in kumeler if d is not None]
     if not kumeler:
         return None
@@ -343,8 +413,19 @@ def _satir_metni(r, detay=False):
     if sure is not None:
         olcum.append(f"süre {int(sure)} gün")
 
+    lift_ozet = _deger(r, "lift_summary", "")
+    if lift_ozet:
+        olcum.append(f"raporlanan etki {lift_ozet}")
+    kanit = _deger(r, "evidence_level", "")
+    if kanit:
+        olcum.append(f"kanıt seviyesi: {kanit}")
+
     sonuc = _deger(r, "result", "")
-    if sonuc.upper() == "LOSS":
+    if sonuc.upper() == "REFERANS":
+        olcum.append("REFERANS VAKA (rakip/pazar/platform kaynağı — VitrA'nın "
+                     "kendi kontrollü testi değil; kanıt seviyesine göre "
+                     "ağırlık ver)")
+    elif sonuc.upper() == "LOSS":
         olcum.append("sonuç LOSS (KAYBEDEN TEST — bu da bir öğrenim, "
                      "aynı hatayı önermemek için kullan)")
         if lift is not None and lift > 0:
@@ -362,9 +443,13 @@ def _satir_metni(r, detay=False):
         f"{_deger(r, 'country')} · {_deger(r, 'product_category')} · "
         f"{_deger(r, 'test_type')} testi] {_deger(r, 'test_name')}",
     ]
-    for etiket, kolon in (("Kampanya amacı", "campaign_objective"),
+    for etiket, kolon in (("Kaynak tipi", "source_type"),
+                          ("Kanal", "platform"),
+                          ("Yayın tarihi", "launch_date"),
+                          ("Kampanya amacı", "campaign_objective"),
                           ("Amaç", "objective"),
-                          ("Hipotez", "hypothesis")):
+                          ("Hipotez", "hypothesis"),
+                          ("Kurgu", "test_setup")):
         deger = _deger(r, kolon, "")
         if deger:
             parca.append(f"{etiket}: {deger}")
@@ -394,7 +479,8 @@ def _satir_metni(r, detay=False):
     for etiket, kolon in (("Öğrenim", "key_learnings"),
                           ("İş etkisi", "downstream_impact"),
                           ("Stratejik tavsiye", "strategic_recommendation"),
-                          ("Dikkat edilecekler", "important_cautions")):
+                          ("Dikkat edilecekler", "important_cautions"),
+                          ("VitrA'ya uygulanabilirlik", "vitra_applicability")):
         deger = _deger(r, kolon, "")
         if deger:
             parca.append(f"{etiket}: {deger}")
@@ -417,6 +503,9 @@ def _satir_metni(r, detay=False):
                 parca.append(f"{etiket}: {deger}")
 
     parca.append(f"Veri kaynağı: {_deger(r, 'data_source')}")
+    url = _deger(r, "source_url", "")
+    if url:
+        parca.append(f"Kaynak link: {url}")
     return "\n".join(parca)
 
 
@@ -509,7 +598,13 @@ def kb_text(detay=False, max_test=None):
         "bir kısmı (REAL### kodlular) GERÇEK Eczacıbaşı Meta kampanya "
         "verisidir — her deneyin 'Veri kaynağı' satırına bak ve öneri "
         "verirken bunu belirt. Sonucu LOSS olan testler kaybeden testlerdir; "
-        "onları 'şunu yapmayın / şu koşulda işe yaramadı' diye kullan.",
+        "onları 'şunu yapmayın / şu koşulda işe yaramadı' diye kullan. "
+        "Sonucu REFERANS olan T0## kodlu kayıtlar Ağu–Kas 2026 rakip/pazar "
+        "taramasıdır (Hansgrohe, GROHE, Kohler, Moen, Arçelik, Vivense, "
+        "Google/Meta platform vakaları vb.): kontrollü VitrA testi değil, "
+        "çoğu ajans/vendor beyanı. Bunları 'rakipte/pazarda görülen sinyal "
+        "→ VitrA'da test edilecek hipotez' olarak sun, kanıt seviyesini ve "
+        "kaynak linkini belirt; VitrA'nın kendi sonucuymuş gibi gösterme.",
     ]
     parcalar += _ozet_metni(df)
 
